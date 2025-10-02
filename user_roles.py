@@ -6,11 +6,10 @@ This module handles determining user roles and providing role-based access contr
 
 from typing import Optional, Dict, Any
 from feature_flags import UserRole, FeatureFlags
-from models import Attendee
+from jamanager.models import Attendee
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from access_config import jam_manager_sessions
-import uuid
 
 class UserRoleManager:
     """Manages user roles and permissions"""
@@ -37,13 +36,11 @@ class UserRoleManager:
         # If we have an attendee_id, check if they're registered
         if attendee_id and db and jam_id:
             try:
-                attendee_uuid = uuid.UUID(attendee_id)
-                jam_uuid = uuid.UUID(jam_id)
                 
                 result = await db.execute(
                     select(Attendee).where(
-                        Attendee.id == attendee_uuid,
-                        Attendee.jam_id == jam_uuid
+                        Attendee.id == attendee_id,
+                        Attendee.jam_id == jam_id
                     )
                 )
                 attendee = result.scalar_one_or_none()
@@ -90,7 +87,8 @@ class UserRoleManager:
         """Get dictionary of available actions for a role"""
         return {
             "can_vote": FeatureFlags.is_feature_enabled("vote_anonymous", role) or 
-                       FeatureFlags.is_feature_enabled("vote_registered", role),
+                       FeatureFlags.is_feature_enabled("vote_registered", role) or
+                       FeatureFlags.is_feature_enabled("vote_jam_manager", role),
             "can_register_to_perform": FeatureFlags.is_feature_enabled("register_to_perform", role),
             "can_suggest_songs": FeatureFlags.is_feature_enabled("suggest_songs", role),
             "can_view_performers": FeatureFlags.is_feature_enabled("view_performers", role),

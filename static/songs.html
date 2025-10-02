@@ -158,7 +158,203 @@
             opacity: 0.8;
             margin-bottom: 30px;
         }
-        
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        .song-details-info {
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .detail-row label {
+            font-weight: 600;
+            color: #4a5568;
+            min-width: 120px;
+            margin-right: 15px;
+        }
+
+        .detail-row span {
+            color: #2d3748;
+            flex: 1;
+        }
+
+        .detail-row textarea {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Chord Sheet Lookup Styles */
+        .chord-sheet-lookup {
+            margin-top: 10px;
+        }
+
+        .chord-sheet-lookup .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chord-sheet-lookup .btn:hover {
+            background: #5a67d8;
+        }
+
+        .chord-sheet-lookup .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .chord-sheet-results {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .chord-sheet-message {
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .chord-sheet-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chord-sheet-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #4a5568;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .chord-sheet-link:hover {
+            background: #f7fafc;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .chord-sheet-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .chord-sheet-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .chord-sheet-rating {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .chord-sheet-external {
+            color: #667eea;
+            font-size: 12px;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
         
         .loading {
             text-align: center;
@@ -191,6 +387,45 @@
             <h2>No Songs Found</h2>
             <p>There are no songs in the library at the moment.</p>
             <a href="/" class="btn btn-primary">Go Home</a>
+        </div>
+    </div>
+
+    <!-- Song Details Modal -->
+    <div id="songDetailsModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="songDetailsTitle">Song Details</h2>
+            <div id="songDetailsError" class="error hidden"></div>
+            <div id="songDetailsSuccess" class="success hidden"></div>
+            
+            <div class="song-details-info">
+                <div class="detail-row">
+                    <label>Title:</label>
+                    <span id="songDetailsSongTitle">-</span>
+                </div>
+                <div class="detail-row">
+                    <label>Artist:</label>
+                    <span id="songDetailsSongArtist">-</span>
+                </div>
+            </div>
+            
+            <!-- Chord Sheet Lookup Section -->
+            <div class="form-group">
+                <label>🎸 Chord Sheet Lookup:</label>
+                <div class="chord-sheet-lookup">
+                    <button type="button" id="songDetailsFindChordSheetBtn" class="btn btn-outline" onclick="findSongDetailsChordSheet()">
+                        <span id="songDetailsChordSheetBtnText">Find Chord Sheet</span>
+                        <span id="songDetailsChordSheetSpinner" class="spinner hidden">⏳</span>
+                    </button>
+                    <div id="songDetailsChordSheetResults" class="chord-sheet-results hidden">
+                        <div id="songDetailsChordSheetMessage" class="chord-sheet-message"></div>
+                        <div id="songDetailsChordSheetLinks" class="chord-sheet-links"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="hideSongDetailsModal()">Close</button>
+            </div>
         </div>
     </div>
 
@@ -277,8 +512,6 @@
                 card.innerHTML = `
                     <h3>${song.title}</h3>
                     <div class="artist">👤 ${song.artist}</div>
-                    ${song.key ? `<div class="key">🎹 Key: ${song.key}</div>` : ''}
-                    ${song.description ? `<div class="description">${song.description}</div>` : ''}
                     <div class="actions">
                         <button class="btn btn-primary" data-song-id="${song.id}" data-action="add-to-jam">Add to Jam</button>
                         <button class="btn btn-secondary" data-song-id="${song.id}" data-action="view-details">View Details</button>
@@ -301,19 +534,130 @@
             }
 
             viewDetails(songId) {
-                // This would show more details about the song
-                alert('View Details functionality would be implemented here');
+                const song = this.songs.find(s => s.id === songId);
+                if (!song) {
+                    this.showError('Song not found');
+                    return;
+                }
+
+                // Populate the modal with song details
+                document.getElementById('songDetailsTitle').textContent = `Song Details: ${song.title}`;
+                document.getElementById('songDetailsSongTitle').textContent = song.title;
+                document.getElementById('songDetailsSongArtist').textContent = song.artist;
+
+                // Hide any previous chord sheet results
+                document.getElementById('songDetailsChordSheetResults').classList.add('hidden');
+
+                // Show the modal
+                document.getElementById('songDetailsModal').classList.remove('hidden');
             }
 
             showError(message) {
                 const loading = document.getElementById('loading');
                 loading.innerHTML = `<div style="color: #ff6b6b;">${message}</div>`;
             }
+
+            // Chord Sheet Lookup for Song Details
+            async findSongDetailsChordSheet() {
+                const title = document.getElementById('songDetailsSongTitle').textContent;
+                const artist = document.getElementById('songDetailsSongArtist').textContent;
+
+                if (!title || !artist || title === '-' || artist === '-') {
+                    this.showSongDetailsChordSheetMessage('Please select a song first', 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('songDetailsFindChordSheetBtn');
+                const btnText = document.getElementById('songDetailsChordSheetBtnText');
+                const spinner = document.getElementById('songDetailsChordSheetSpinner');
+                const results = document.getElementById('songDetailsChordSheetResults');
+                const message = document.getElementById('songDetailsChordSheetMessage');
+                const links = document.getElementById('songDetailsChordSheetLinks');
+
+                // Show loading state
+                btn.disabled = true;
+                btnText.textContent = 'Searching...';
+                spinner.classList.remove('hidden');
+                results.classList.remove('hidden');
+                message.textContent = 'Searching Ultimate Guitar for chord sheets...';
+                links.innerHTML = '';
+
+                try {
+                    const response = await fetch('/api/search-chord-sheets', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            song_name: title,
+                            artist_name: artist
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.chord_sheets && data.chord_sheets.length > 0) {
+                            message.textContent = `Found ${data.chord_sheets.length} chord sheet(s) for "${title}" by ${artist}`;
+                            
+                            // Sort by votes (highest to lowest) and show top 3 results
+                            const sortedResults = data.chord_sheets.sort((a, b) => b.votes - a.votes);
+                            const topResults = sortedResults.slice(0, 3);
+                            topResults.forEach((sheet, index) => {
+                                const linkDiv = document.createElement('div');
+                                linkDiv.className = 'chord-sheet-link';
+                                linkDiv.innerHTML = `
+                                    <div class="chord-sheet-info">
+                                        <div class="chord-sheet-title">${sheet.title}</div>
+                                        <div class="chord-sheet-rating">⭐ ${sheet.rating.toFixed(2)} (${sheet.votes} votes)</div>
+                                    </div>
+                                    <div class="chord-sheet-external">🔗</div>
+                                `;
+                                linkDiv.onclick = () => window.open(sheet.url, '_blank');
+                                links.appendChild(linkDiv);
+                            });
+                        } else {
+                            message.textContent = `No chord sheets found for "${title}" by ${artist}`;
+                        }
+                    } else {
+                        const error = await response.json();
+                        message.textContent = `Error: ${error.detail || 'Failed to search for chord sheets'}`;
+                    }
+                } catch (error) {
+                    message.textContent = `Network error: ${error.message}`;
+                } finally {
+                    // Reset button state
+                    btn.disabled = false;
+                    btnText.textContent = 'Find Chord Sheet';
+                    spinner.classList.add('hidden');
+                }
+            }
+
+            showSongDetailsChordSheetMessage(text, type = 'info') {
+                const message = document.getElementById('songDetailsChordSheetMessage');
+                const results = document.getElementById('songDetailsChordSheetResults');
+                
+                message.textContent = text;
+                message.className = `chord-sheet-message ${type}`;
+                results.classList.remove('hidden');
+            }
+        }
+
+        // Global functions for modal interactions
+        function hideSongDetailsModal() {
+            document.getElementById('songDetailsModal').classList.add('hidden');
+        }
+
+        function findSongDetailsChordSheet() {
+            // Get the current SongsPage instance and call its method
+            if (window.songsPage) {
+                window.songsPage.findSongDetailsChordSheet();
+            }
         }
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
-            new SongsPage();
+            window.songsPage = new SongsPage();
         });
     </script>
 </body>

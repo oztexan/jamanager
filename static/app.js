@@ -1,5 +1,5 @@
-// Jamanger Application - Main JavaScript
-class JamangerApp {
+// Jamanager Application - Main JavaScript
+class JamanagerApp {
     constructor() {
         this.currentJam = null;
         this.ws = null;
@@ -203,16 +203,11 @@ class JamangerApp {
     async createSong() {
         const title = document.getElementById('songTitle').value.trim();
         const artist = document.getElementById('songArtist').value.trim();
-        const type = document.getElementById('songType').value;
-        const chordChart = document.getElementById('songChords').value.trim();
-        const tagsInput = document.getElementById('songTags').value.trim();
 
         if (!title || !artist) {
             this.showError('createSongError', 'Title and artist are required');
             return;
         }
-
-        const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
 
         try {
             const response = await fetch('/api/songs', {
@@ -222,10 +217,7 @@ class JamangerApp {
                 },
                 body: JSON.stringify({
                     title: title,
-                    artist: artist,
-                    type: type,
-                    chord_chart: chordChart,
-                    tags: tags
+                    artist: artist
                 })
             });
 
@@ -242,6 +234,91 @@ class JamangerApp {
         } catch (error) {
             this.showError('createSongError', 'Network error: ' + error.message);
         }
+    }
+
+    // Chord Sheet Lookup
+    async findChordSheet() {
+        const title = document.getElementById('songTitle').value.trim();
+        const artist = document.getElementById('songArtist').value.trim();
+
+        if (!title || !artist) {
+            this.showChordSheetMessage('Please enter both song title and artist name', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('findChordSheetBtn');
+        const btnText = document.getElementById('chordSheetBtnText');
+        const spinner = document.getElementById('chordSheetSpinner');
+        const results = document.getElementById('chordSheetResults');
+        const message = document.getElementById('chordSheetMessage');
+        const links = document.getElementById('chordSheetLinks');
+
+        // Show loading state
+        btn.disabled = true;
+        btnText.textContent = 'Searching...';
+        spinner.classList.remove('hidden');
+        results.classList.remove('hidden');
+        message.textContent = 'Searching Ultimate Guitar for chord sheets...';
+        links.innerHTML = '';
+
+        try {
+            const response = await fetch('/api/search-chord-sheets', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    song_name: title,
+                    artist_name: artist
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.chord_sheets && data.chord_sheets.length > 0) {
+                    message.textContent = `Found ${data.chord_sheets.length} chord sheet(s) for "${title}" by ${artist}`;
+                    
+                    // Sort by votes (highest to lowest) and show top 3 results
+                    const sortedResults = data.chord_sheets.sort((a, b) => b.votes - a.votes);
+                    const topResults = sortedResults.slice(0, 3);
+                    topResults.forEach((sheet, index) => {
+                        const linkDiv = document.createElement('div');
+                        linkDiv.className = 'chord-sheet-link';
+                        linkDiv.innerHTML = `
+                            <div class="chord-sheet-info">
+                                <div class="chord-sheet-title">${sheet.title}</div>
+                                <div class="chord-sheet-rating">⭐ ${sheet.rating.toFixed(2)} (${sheet.votes} votes)</div>
+                            </div>
+                            <div class="chord-sheet-external">🔗</div>
+                        `;
+                        linkDiv.onclick = () => window.open(sheet.url, '_blank');
+                        links.appendChild(linkDiv);
+                    });
+                } else {
+                    message.textContent = `No chord sheets found for "${title}" by ${artist}`;
+                }
+            } else {
+                const error = await response.json();
+                message.textContent = `Error: ${error.detail || 'Failed to search for chord sheets'}`;
+            }
+        } catch (error) {
+            message.textContent = `Network error: ${error.message}`;
+        } finally {
+            // Reset button state
+            btn.disabled = false;
+            btnText.textContent = 'Find Chord Sheet';
+            spinner.classList.add('hidden');
+        }
+    }
+
+    showChordSheetMessage(text, type = 'info') {
+        const message = document.getElementById('chordSheetMessage');
+        const results = document.getElementById('chordSheetResults');
+        
+        message.textContent = text;
+        message.className = `chord-sheet-message ${type}`;
+        results.classList.remove('hidden');
     }
 
     // Song Library
@@ -620,6 +697,10 @@ function createSong() {
     app.createSong();
 }
 
+function findChordSheet() {
+    app.findChordSheet();
+}
+
 function showSongLibrary() {
     app.showSongLibrary();
 }
@@ -637,7 +718,7 @@ function loadRecentJams() {
 }
 
 // Initialize the app first
-const app = new JamangerApp();
+const app = new JamanagerApp();
 
 // Access Code Dialog Functions
 function toggleAccessDialog() {

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Automated Test Runner for Jamanger Application
+Automated Test Runner for Jamanager Application
 This script can be run by an automated testing agent to validate core functionality.
 """
 
@@ -11,7 +11,7 @@ import sys
 from datetime import datetime, date
 from typing import Dict, List, Optional
 
-class JamangerTestRunner:
+class JamanagerTestRunner:
     def __init__(self, base_url: str = "http://localhost:8000"):
         self.base_url = base_url
         self.session = requests.Session()
@@ -53,7 +53,7 @@ class JamangerTestRunner:
             response = self.session.get(f"{self.base_url}/")
             if response.status_code == 200:
                 # Check for key elements in HTML
-                if "Welcome to Jamanger!" in response.text and "Jams Happening Today" in response.text:
+                if "Welcome to Jamanager!" in response.text and "Jams Happening Today" in response.text:
                     self.log_test("HOME_PAGE", "PASS", "Home page loads with required elements")
                     return True
                 else:
@@ -100,10 +100,7 @@ class JamangerTestRunner:
         """Test song creation and return song ID"""
         song_data = {
             "title": f"Test Song {int(time.time())}",
-            "artist": "Test Artist",
-            "key": "C",
-            "tempo": 120,
-            "tags": ["test", "automated"]
+            "artist": "Test Artist"
         }
         
         try:
@@ -199,7 +196,7 @@ class JamangerTestRunner:
     
     def run_core_tests(self) -> Dict[str, bool]:
         """Run core functionality tests"""
-        print("🚀 Starting Jamanger Automated Tests...")
+        print("🚀 Starting Jamanager Automated Tests...")
         print("=" * 50)
         
         results = {}
@@ -253,7 +250,7 @@ class JamangerTestRunner:
         failed_tests = total_tests - passed_tests
         
         report = f"""
-# Jamanger Test Report
+# Jamanager Test Report
 Generated: {datetime.now().isoformat()}
 
 ## Summary
@@ -275,11 +272,11 @@ def main():
     """Main test execution"""
     base_url = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000"
     
-    print(f"Testing Jamanger at: {base_url}")
+    print(f"Testing Jamanager at: {base_url}")
     print("Make sure the server is running before executing tests.")
     print()
     
-    runner = JamangerTestRunner(base_url)
+    runner = JamanagerTestRunner(base_url)
     results = runner.run_core_tests()
     
     print("\n" + "=" * 50)

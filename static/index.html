@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jamanger - FastAPI</title>
+    <title>Jamanager - FastAPI</title>
     <style>
         * {
             margin: 0;
@@ -403,6 +403,103 @@
             margin-top: 20px;
         }
 
+        /* Chord Sheet Lookup Styles */
+        .chord-sheet-lookup {
+            margin-top: 10px;
+        }
+
+        .chord-sheet-lookup .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chord-sheet-lookup .btn:hover {
+            background: #5a67d8;
+        }
+
+        .chord-sheet-lookup .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .chord-sheet-results {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .chord-sheet-message {
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .chord-sheet-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chord-sheet-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #4a5568;
+            transition: all 0.2s ease;
+        }
+
+        .chord-sheet-link:hover {
+            background: #f7fafc;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .chord-sheet-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .chord-sheet-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .chord-sheet-rating {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .chord-sheet-external {
+            color: #667eea;
+            font-size: 12px;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .error {
             background: #fed7d7;
             color: #c53030;
@@ -469,7 +566,7 @@
         <div class="header">
             <div class="header-content">
                 <div class="header-left">
-                    <h1>🎵 Jamanger</h1>
+                    <h1>🎵 Jamanager</h1>
                     <p>Real-time song voting and jam management</p>
                 </div>
                 <div class="header-right">
@@ -483,7 +580,7 @@
         <!-- Anonymous User Message -->
         <div id="anonymousMessage" class="anonymous-message">
             <div class="message-content">
-                <h2>🎵 Welcome to Jamanger!</h2>
+                <h2>🎵 Welcome to Jamanager!</h2>
                 <p>You're currently viewing as an anonymous user. You can join existing jam sessions to vote on songs.</p>
             </div>
         </div>
@@ -511,13 +608,13 @@
             <a href="#" class="nav-card jam-manager-feature" onclick="showCreateSongModal()" style="display: none;">
                 <span class="icon">🎵</span>
                 <h3>Add Song</h3>
-                <p>Add new songs to the library with chord charts and metadata</p>
+                <p>Add new songs to the library with metadata</p>
             </a>
 
             <a href="#" class="nav-card jam-manager-feature" onclick="showSongLibrary()" style="display: none;">
                 <span class="icon">📚</span>
                 <h3>Song Library</h3>
-                <p>Browse and manage your song collection, edit chord charts and tags</p>
+                <p>Browse and manage your song collection</p>
             </a>
 
             <a href="#" class="nav-card jam-manager-feature" onclick="showJamManagement()" style="display: none;">
@@ -613,25 +710,19 @@
                 <label for="songArtist">Artist:</label>
                 <input type="text" id="songArtist" placeholder="e.g., Guns N' Roses">
             </div>
+            <!-- Chord Sheet Lookup Section -->
             <div class="form-group">
-                <label for="songType">Genre:</label>
-                <select id="songType">
-                    <option value="rock">Rock</option>
-                    <option value="pop">Pop</option>
-                    <option value="country">Country</option>
-                    <option value="jazz">Jazz</option>
-                    <option value="blues">Blues</option>
-                    <option value="folk">Folk</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="songChords">Chord Chart:</label>
-                <textarea id="songChords" placeholder="e.g., D C G D"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="songTags">Tags (comma-separated):</label>
-                <input type="text" id="songTags" placeholder="e.g., classic, guitar, popular">
+                <label>🎸 Chord Sheet Lookup:</label>
+                <div class="chord-sheet-lookup">
+                    <button type="button" id="findChordSheetBtn" class="btn btn-outline" onclick="findChordSheet()">
+                        <span id="chordSheetBtnText">Find Chord Sheet</span>
+                        <span id="chordSheetSpinner" class="spinner hidden">⏳</span>
+                    </button>
+                    <div id="chordSheetResults" class="chord-sheet-results hidden">
+                        <div id="chordSheetMessage" class="chord-sheet-message"></div>
+                        <div id="chordSheetLinks" class="chord-sheet-links"></div>
+                    </div>
+                </div>
             </div>
             <div class="modal-buttons">
                 <button class="btn btn-secondary" onclick="hideCreateSongModal()">Cancel</button>

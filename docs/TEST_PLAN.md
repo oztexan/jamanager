@@ -1,13 +1,14 @@
-# Jamanger - Comprehensive Test Plan
+# Jamanager - Comprehensive Test Plan
 
 ## Overview
-This test plan covers all functionality of the Jamanger application, including anonymous user features, jam manager features, real-time updates, and system integration.
+This test plan covers all functionality of the Jamanager application, including anonymous user features, jam manager features, real-time updates, and system integration.
 
 ## Test Environment Setup
 - **Backend**: FastAPI server running on `http://localhost:8000`
-- **Database**: PostgreSQL with test data
+- **Database**: SQLite with test data (file-based, no external setup required)
 - **Browser**: Chrome/Firefox/Safari (test on multiple browsers)
 - **Test Data**: Ensure test jams exist with various dates (today, past, future)
+- **Access Code**: `jam2024` for jam manager privileges
 
 ---
 
@@ -16,7 +17,7 @@ This test plan covers all functionality of the Jamanger application, including a
 ### 1.1 Home Page Access
 - [ ] **1.1.1** Navigate to `http://localhost:8000`
 - [ ] **1.1.2** Verify page loads without errors
-- [ ] **1.1.3** Verify "Welcome to Jamanger!" message is displayed
+- [ ] **1.1.3** Verify "Welcome to Jamanager!" message is displayed
 - [ ] **1.1.4** Verify lock button (🔒) is visible in top-right corner
 - [ ] **1.1.5** Verify jam manager features are hidden by default
 
@@ -42,8 +43,8 @@ This test plan covers all functionality of the Jamanger application, including a
 - [ ] **1.3.10** Verify "Perform" buttons are NOT visible (anonymous user)
 - [ ] **1.3.11** Verify "Play Song" button is NOT visible (anonymous user)
 
-### 1.4 Anonymous Voting
-- [ ] **1.4.1** Click heart button on a song
+### 1.4 Universal Voting (All User Types)
+- [ ] **1.4.1** Click heart button on a song (anonymous user)
 - [ ] **1.4.2** Verify heart changes to filled state
 - [ ] **1.4.3** Verify vote count increases
 - [ ] **1.4.4** Click heart button again
@@ -51,6 +52,9 @@ This test plan covers all functionality of the Jamanger application, including a
 - [ ] **1.4.6** Verify vote count decreases
 - [ ] **1.4.7** Verify song reordering based on vote count
 - [ ] **1.4.8** Refresh page and verify vote persists (session-based)
+- [ ] **1.4.9** Test voting as registered attendee
+- [ ] **1.4.10** Test voting as jam manager
+- [ ] **1.4.11** Verify all user types can vote
 
 ### 1.5 WebSocket Real-time Updates
 - [ ] **1.5.1** Open jam page in two browser windows
@@ -68,7 +72,7 @@ This test plan covers all functionality of the Jamanger application, including a
 - [ ] **2.1.2** Verify access code dialog appears
 - [ ] **2.1.3** Enter incorrect access code
 - [ ] **2.1.4** Verify error message is displayed
-- [ ] **2.1.5** Enter correct access code (jam2024)
+- [ ] **2.1.5** Enter correct access code (`jam2024`)
 - [ ] **2.1.6** Verify success message is displayed
 - [ ] **2.1.7** Verify lock button changes to unlocked (🔓)
 - [ ] **2.1.8** Verify jam manager features become visible
@@ -116,12 +120,12 @@ This test plan covers all functionality of the Jamanger application, including a
 - [ ] **2.5.2** Verify add song modal appears
 - [ ] **2.5.3** Fill in song title
 - [ ] **2.5.4** Fill in artist name
-- [ ] **2.5.5** Fill in song key
-- [ ] **2.5.6** Fill in tempo
-- [ ] **2.5.7** Fill in tags
-- [ ] **2.5.8** Click "Add Song" button
-- [ ] **2.5.9** Verify success message
-- [ ] **2.5.10** Verify song appears in song library
+- [ ] **2.5.5** Test Ultimate Guitar chord sheet lookup
+- [ ] **2.5.6** Select chord sheet from search results
+- [ ] **2.5.7** Click "Add Song" button
+- [ ] **2.5.8** Verify success message
+- [ ] **2.5.9** Verify song appears in song library
+- [ ] **2.5.10** Verify chord sheet URL is saved
 
 ### 2.6 Jam Management
 - [ ] **2.6.1** Click "Manage Jams" card
@@ -165,6 +169,15 @@ This test plan covers all functionality of the Jamanger application, including a
 - [ ] **3.4.5** Verify song appears in jam song list
 - [ ] **3.4.6** Verify song appears in correct vote order
 
+### 3.5 Chord Sheet Integration
+- [ ] **3.5.1** Click guitar button on a song
+- [ ] **3.5.2** Verify chord sheet lookup modal appears
+- [ ] **3.5.3** Search for chord sheets
+- [ ] **3.5.4** Select a chord sheet from results
+- [ ] **3.5.5** Verify chord sheet URL is saved
+- [ ] **3.5.6** Verify visual indicator shows chord sheet is linked
+- [ ] **3.5.7** Click on song to open chord sheet in new window
+
 ---
 
 ## 4. FEATURE FLAGS SYSTEM
@@ -173,7 +186,8 @@ This test plan covers all functionality of the Jamanger application, including a
 - [ ] **4.1.1** Verify anonymous users see only voting features
 - [ ] **4.1.2** Verify registered attendees see performance registration
 - [ ] **4.1.3** Verify jam managers see all features
-- [ ] **4.1.4** Test feature flag changes in real-time
+- [ ] **4.1.4** Verify all user types can vote (universal voting)
+- [ ] **4.1.5** Test feature flag changes in real-time
 
 ### 4.2 Permission Checking
 - [ ] **4.2.1** Verify API endpoints respect user permissions
@@ -356,4 +370,4 @@ Screenshots: [IF FAILED]
 
 ---
 
-*This test plan should be executed before any production deployment to ensure the Jamanger application meets all requirements and provides a reliable user experience.*
+*This test plan should be executed before any production deployment to ensure the Jamanager application meets all requirements and provides a reliable user experience.*

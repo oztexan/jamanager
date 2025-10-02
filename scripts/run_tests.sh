@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Jamanger Automated Test Runner
-# This script runs automated tests for the Jamanger application
+# Jamanager Automated Test Runner
+# This script runs automated tests for the Jamanager application
 
-echo "🎵 Jamanger Automated Test Runner"
+echo "🎵 Jamanager Automated Test Runner"
 echo "================================="
 
 # Check if server is running

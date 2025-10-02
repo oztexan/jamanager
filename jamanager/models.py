@@ -1,9 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey, JSON, Date, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from database import Base
-import uuid
+from .database import Base
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
@@ -12,30 +10,28 @@ from pydantic import BaseModel, Field
 class Song(Base):
     __tablename__ = "songs"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(__import__('secrets').token_hex(16)))
     title = Column(String(255), nullable=False)
     artist = Column(String(255), nullable=False)
-    type = Column(String(50), nullable=False, default="rock")
-    chord_chart = Column(Text, nullable=True)
-    tags = Column(JSONB, nullable=True, default=list)  # Store as JSON array
+    chord_sheet_url = Column(String(500), nullable=True)  # URL to Ultimate Guitar chord sheet
     vote_count = Column(Integer, default=0)
     times_played = Column(Integer, default=0)
     last_played = Column(DateTime, nullable=True)
-    play_history = Column(JSONB, nullable=True, default=list)  # Store as JSON array
+    play_history = Column(JSON, nullable=True, default=list)  # Store as JSON array
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 class Jam(Base):
     __tablename__ = "jams"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(__import__('secrets').token_hex(16)))
     name = Column(String(255), nullable=False)
     slug = Column(String(255), nullable=False, unique=True)
     description = Column(Text, nullable=True)
-    venue_id = Column(UUID(as_uuid=True), ForeignKey("venues.id"), nullable=False)
+    venue_id = Column(String, ForeignKey("venues.id"), nullable=False)
     jam_date = Column(Date, nullable=False)
     background_image = Column(String(500), nullable=True)  # Path to uploaded image
-    current_song_id = Column(UUID(as_uuid=True), ForeignKey("songs.id"), nullable=True)
+    current_song_id = Column(String, ForeignKey("songs.id"), nullable=True)
     status = Column(String(50), default="waiting")  # waiting, playing, paused, ended
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
@@ -48,10 +44,10 @@ class Jam(Base):
 class JamSong(Base):
     __tablename__ = "jam_songs"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    jam_id = Column(UUID(as_uuid=True), ForeignKey("jams.id"), nullable=False)
-    song_id = Column(UUID(as_uuid=True), ForeignKey("songs.id"), nullable=False)
-    captains = Column(JSONB, nullable=True, default=list)  # Store captain IDs as JSON array
+    id = Column(String, primary_key=True, default=lambda: str(__import__('secrets').token_hex(16)))
+    jam_id = Column(String, ForeignKey("jams.id"), nullable=False)
+    song_id = Column(String, ForeignKey("songs.id"), nullable=False)
+    captains = Column(JSON, nullable=True, default=list)  # Store captain IDs as JSON array
     played = Column(Boolean, default=False)
     played_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=func.now())
@@ -64,8 +60,8 @@ class JamSong(Base):
 class Attendee(Base):
     __tablename__ = "attendees"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    jam_id = Column(UUID(as_uuid=True), ForeignKey("jams.id"), nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(__import__('secrets').token_hex(16)))
+    jam_id = Column(String, ForeignKey("jams.id"), nullable=False)
     name = Column(String(255), nullable=False)
     session_id = Column(String(255), nullable=True)  # For tracking browser sessions
     registered_at = Column(DateTime, default=func.now())
@@ -82,10 +78,10 @@ class Attendee(Base):
 class Vote(Base):
     __tablename__ = "votes"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    jam_id = Column(UUID(as_uuid=True), ForeignKey("jams.id"), nullable=False)
-    song_id = Column(UUID(as_uuid=True), ForeignKey("songs.id"), nullable=False)
-    attendee_id = Column(UUID(as_uuid=True), ForeignKey("attendees.id"), nullable=True)
+    id = Column(String, primary_key=True, default=lambda: str(__import__('secrets').token_hex(16)))
+    jam_id = Column(String, ForeignKey("jams.id"), nullable=False)
+    song_id = Column(String, ForeignKey("songs.id"), nullable=False)
+    attendee_id = Column(String, ForeignKey("attendees.id"), nullable=True)
     session_id = Column(String(255), nullable=True)  # For anonymous voting
     voted_at = Column(DateTime, default=func.now())
     
@@ -103,10 +99,10 @@ class Vote(Base):
 class PerformanceRegistration(Base):
     __tablename__ = "performance_registrations"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    jam_id = Column(UUID(as_uuid=True), ForeignKey("jams.id"), nullable=False)
-    song_id = Column(UUID(as_uuid=True), ForeignKey("songs.id"), nullable=False)
-    attendee_id = Column(UUID(as_uuid=True), ForeignKey("attendees.id"), nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(__import__('secrets').token_hex(16)))
+    jam_id = Column(String, ForeignKey("jams.id"), nullable=False)
+    song_id = Column(String, ForeignKey("songs.id"), nullable=False)
+    attendee_id = Column(String, ForeignKey("attendees.id"), nullable=False)
     instrument = Column(String(100), nullable=True)  # Optional instrument specification
     registered_at = Column(DateTime, default=func.now())
     
@@ -123,7 +119,7 @@ class PerformanceRegistration(Base):
 class Venue(Base):
     __tablename__ = "venues"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(__import__('secrets').token_hex(16)))
     name = Column(String(255), nullable=False, unique=True)
     address = Column(String(500), nullable=True)
     description = Column(Text, nullable=True)
@@ -137,9 +133,7 @@ class Venue(Base):
 class SongBase(BaseModel):
     title: str
     artist: str
-    type: str = "rock"
-    chord_chart: Optional[str] = None
-    tags: Optional[List[str]] = []
+    chord_sheet_url: Optional[str] = None
     vote_count: Optional[int] = 0
     times_played: Optional[int] = 0
     last_played: Optional[datetime] = None
@@ -151,10 +145,9 @@ class SongCreate(SongBase):
 class SongUpdate(SongBase):
     title: Optional[str] = None
     artist: Optional[str] = None
-    type: Optional[str] = None
 
 class SongInDB(SongBase):
-    id: uuid.UUID
+    id: str
     created_at: datetime
     updated_at: datetime
     
@@ -167,15 +160,15 @@ class JamSongBase(BaseModel):
     played_at: Optional[datetime] = None
 
 class JamSongCreate(JamSongBase):
-    song_id: uuid.UUID
+    song_id: str
 
 class JamSongUpdate(JamSongBase):
     pass
 
 class JamSongInDB(JamSongBase):
-    id: uuid.UUID
-    jam_id: uuid.UUID
-    song_id: uuid.UUID
+    id: str
+    jam_id: str
+    song_id: str
     song: SongInDB
     created_at: datetime
     updated_at: datetime
@@ -187,10 +180,10 @@ class JamBase(BaseModel):
     name: str
     slug: str
     description: Optional[str] = None
-    venue_id: uuid.UUID  # Made mandatory
+    venue_id: str  # Made mandatory
     jam_date: datetime  # Made mandatory
     background_image: Optional[str] = None
-    current_song_id: Optional[uuid.UUID] = None
+    current_song_id: Optional[str] = None
     status: Optional[str] = "waiting"
 
 class JamCreate(JamBase):
@@ -200,11 +193,11 @@ class JamUpdate(JamBase):
     name: Optional[str] = None
     slug: Optional[str] = None
     description: Optional[str] = None
-    current_song_id: Optional[uuid.UUID] = None
+    current_song_id: Optional[str] = None
     status: Optional[str] = None
 
 class JamInDB(JamBase):
-    id: uuid.UUID
+    id: str
     songs: Optional[List[JamSongInDB]] = []
     current_song: Optional[SongInDB] = None
     created_at: datetime
@@ -228,7 +221,7 @@ class VenueUpdate(VenueBase):
     description: Optional[str] = None
 
 class VenueInDB(VenueBase):
-    id: uuid.UUID
+    id: str
     created_at: datetime
     updated_at: datetime
     
@@ -237,7 +230,7 @@ class VenueInDB(VenueBase):
 
 # Recreate JamInDB with venue field after VenueInDB is defined
 class JamInDBWithVenue(JamBase):
-    id: uuid.UUID
+    id: str
     venue: Optional[VenueInDB] = None
     songs: Optional[List[JamSongInDB]] = []
     current_song: Optional[SongInDB] = None

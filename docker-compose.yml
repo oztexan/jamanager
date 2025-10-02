@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: jamanger
+      POSTGRES_DB: jamanager
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: jamanger123
+      POSTGRES_PASSWORD: jamanager123
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -22,7 +22,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://postgres:jamanger123@db:5432/jamanger
+      DATABASE_URL: postgresql://postgres:jamanager123@db:5432/jamanager
       ACCESS_CODE: admin123
     depends_on:
       db:
@@ -31,7 +31,7 @@ services:
       - ./static/uploads:/app/static/uploads
     command: >
       sh -c "python init_db.py && 
-             uvicorn jamanger.main:app --host 0.0.0.0 --port 8000"
+             uvicorn jamanager.main:app --host 0.0.0.0 --port 8000"
 
 volumes:
   postgres_data:

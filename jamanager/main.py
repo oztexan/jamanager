@@ -12,7 +12,6 @@ import qrcode
 import io
 from datetime import date
 from dotenv import load_dotenv
-import uuid
 from feature_flags import UserRole, FeatureFlags
 from user_roles import UserRoleManager, get_current_user_role
 from auth_middleware import (
@@ -30,11 +29,11 @@ from image_utils import ImageUploader
 load_dotenv()
 
 # Import our modules
-from database import get_database, init_database
-from models import Song, Jam, JamSong, Attendee, Vote, PerformanceRegistration, Venue, SongInDB, JamInDB, SongUpdate, VenueInDB, VenueCreate, VenueUpdate, JamInDBWithVenue
+from jamanager.database import get_database, init_database
+from jamanager.models import Song, Jam, JamSong, Attendee, Vote, PerformanceRegistration, Venue, SongInDB, JamInDB, SongCreate, SongUpdate, VenueInDB, VenueCreate, VenueUpdate, JamInDBWithVenue
 from connection_manager import ConnectionManager
 
-app = FastAPI(title="Jamanger API", version="1.0.0")
+app = FastAPI(title="Jamanager API", version="1.0.0")
 
 # CORS middleware
 app.add_middleware(
@@ -47,6 +46,10 @@ app.add_middleware(
 
 # Include feature flag API router
 app.include_router(feature_flag_router)
+
+# Include chord sheet API router
+from chord_sheet_api import router as chord_sheet_router
+app.include_router(chord_sheet_router)
 
 # Connection manager for WebSocket connections
 connection_manager = ConnectionManager()
@@ -66,6 +69,11 @@ async def startup_event():
 async def read_index():
     """Serve the main HTML file"""
     return FileResponse("static/index.html")
+
+@app.get("/test-chords")
+async def test_chords_page():
+    """Test page for chord sheet functionality."""
+    return FileResponse("test_chord_frontend.html")
 
 @app.get("/jam/{slug}")
 async def jam_page(slug: str):
@@ -179,29 +187,27 @@ async def update_jam_song(
     """Update a song within a jam"""
     try:
         # Convert string IDs to UUID
-        jam_uuid = uuid.UUID(jam_id)
-        song_uuid = uuid.UUID(song_id)
         
         # Update the song
         update_data = updated_song.model_dump(exclude_unset=True)
         if update_data:
             await db.execute(
                 update(Song)
-                .where(Song.id == song_uuid)
+                .where(Song.id == song_id)
                 .values(**update_data)
             )
         
         # Update the jam's updated_at timestamp
         await db.execute(
             update(Jam)
-            .where(Jam.id == jam_uuid)
+            .where(Jam.id == jam_id)
             .values(updated_at=func.now())
         )
         
         await db.commit()
         
         # Get the updated song
-        result = await db.execute(select(Song).where(Song.id == song_uuid))
+        result = await db.execute(select(Song).where(Song.id == song_id))
         updated_song_obj = result.scalar_one()
         
         # Broadcast the update to WebSocket clients
@@ -209,15 +215,70 @@ async def update_jam_song(
             jam_id, 
             "song-edited", 
             {
-                "songId": str(song_uuid), 
+                "songId": str(song_id), 
                 "updatedSong": SongInDB.model_validate(updated_song_obj).model_dump()
             }
         )
         
         return {"message": "Song updated and broadcasted", "song": updated_song_obj}
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
+@app.put("/api/jams/{jam_id}/songs/{song_id}/chord-sheet")
+async def update_song_chord_sheet(
+    jam_id: str,
+    song_id: str,
+    chord_sheet_data: dict,
+    db: AsyncSession = Depends(get_database)
+):
+    """Update the chord sheet URL for a song in a jam"""
+    try:
+        chord_sheet_url = chord_sheet_data.get("chord_sheet_url")
+        
+        if not chord_sheet_url:
+            raise HTTPException(status_code=400, detail="Chord sheet URL is required")
+        
+        # Check if song exists in this jam
+        jam_song_result = await db.execute(
+            select(JamSong).where(JamSong.jam_id == jam_id, JamSong.song_id == song_id)
+        )
+        jam_song = jam_song_result.scalar_one_or_none()
+        if not jam_song:
+            raise HTTPException(status_code=404, detail="Song not found in this jam")
+        
+        # Update the song's chord sheet URL
+        await db.execute(
+            update(Song)
+            .where(Song.id == song_id)
+            .values(chord_sheet_url=chord_sheet_url)
+        )
+        
+        await db.commit()
+        
+        # Get the updated song
+        result = await db.execute(select(Song).where(Song.id == song_id))
+        updated_song = result.scalar_one()
+        
+        # Broadcast the update to WebSocket clients
+        await connection_manager.broadcast_to_jam(
+            jam_id,
+            "chord-sheet-updated",
+            {
+                "songId": str(song_id),
+                "chordSheetUrl": chord_sheet_url,
+                "songTitle": updated_song.title,
+                "songArtist": updated_song.artist
+            }
+        )
+        
+        return {
+            "message": "Chord sheet URL updated successfully",
+            "songId": str(song_id),
+            "chordSheetUrl": chord_sheet_url
+        }
+        
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -231,18 +292,15 @@ async def vote_for_song(
 ):
     """Vote for a song in a jam"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
-        song_uuid = uuid.UUID(song_id)
         attendee_id = vote_data.get("attendee_id")
         
         if not attendee_id:
             raise HTTPException(status_code=400, detail="Attendee ID is required")
         
-        attendee_uuid = uuid.UUID(attendee_id)
         
         # Check if attendee exists and belongs to this jam
         attendee_result = await db.execute(
-            select(Attendee).where(Attendee.id == attendee_uuid, Attendee.jam_id == jam_uuid)
+            select(Attendee).where(Attendee.id == attendee_id, Attendee.jam_id == jam_id)
         )
         attendee = attendee_result.scalar_one_or_none()
         if not attendee:
@@ -251,9 +309,9 @@ async def vote_for_song(
         # Check if attendee has already voted for this song
         existing_vote_result = await db.execute(
             select(Vote).where(
-                Vote.jam_id == jam_uuid,
-                Vote.song_id == song_uuid,
-                Vote.attendee_id == attendee_uuid
+                Vote.jam_id == jam_id,
+                Vote.song_id == song_id,
+                Vote.attendee_id == attendee_id
             )
         )
         existing_vote = existing_vote_result.scalar_one_or_none()
@@ -262,9 +320,9 @@ async def vote_for_song(
         
         # Create vote
         vote = Vote(
-            jam_id=jam_uuid,
-            song_id=song_uuid,
-            attendee_id=attendee_uuid
+            jam_id=jam_id,
+            song_id=song_id,
+            attendee_id=attendee_id
         )
         
         db.add(vote)
@@ -272,14 +330,14 @@ async def vote_for_song(
         # Update song vote count
         await db.execute(
             update(Song)
-            .where(Song.id == song_uuid)
+            .where(Song.id == song_id)
             .values(vote_count=Song.vote_count + 1)
         )
         
         await db.commit()
         
         # Get updated song
-        result = await db.execute(select(Song).where(Song.id == song_uuid))
+        result = await db.execute(select(Song).where(Song.id == song_id))
         updated_song = result.scalar_one()
         
         # Broadcast vote update
@@ -287,7 +345,7 @@ async def vote_for_song(
             jam_id,
             "song-voted",
             {
-                "songId": str(song_uuid),
+                "songId": str(song_id),
                 "voteCount": updated_song.vote_count,
                 "attendeeName": attendee.name
             }
@@ -295,8 +353,6 @@ async def vote_for_song(
         
         return {"message": "Vote recorded", "voteCount": updated_song.vote_count}
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -312,20 +368,18 @@ async def mark_song_played(
 ):
     """Mark a song as played in a jam"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
-        song_uuid = uuid.UUID(song_id)
         
         # Update jam song as played
         await db.execute(
             update(JamSong)
-            .where(JamSong.jam_id == jam_uuid, JamSong.song_id == song_uuid)
+            .where(JamSong.jam_id == jam_id, JamSong.song_id == song_id)
             .values(played=True, played_at=func.now())
         )
         
         # Update song play count
         await db.execute(
             update(Song)
-            .where(Song.id == song_uuid)
+            .where(Song.id == song_id)
             .values(
                 times_played=Song.times_played + 1,
                 last_played=func.now()
@@ -338,13 +392,11 @@ async def mark_song_played(
         await connection_manager.broadcast_to_jam(
             jam_id,
             "song-played",
-            {"songId": str(song_uuid)}
+            {"songId": str(song_id)}
         )
         
         return {"message": "Song marked as played"}
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -480,54 +532,6 @@ async def get_all_jams(db: AsyncSession = Depends(get_database)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
-@app.post("/api/songs")
-async def create_song(
-    song_data: dict,
-    db: AsyncSession = Depends(get_database)
-):
-    """Create a new song"""
-    try:
-        title = song_data.get("title")
-        artist = song_data.get("artist")
-        song_type = song_data.get("type", "other")
-        chord_chart = song_data.get("chord_chart", "")
-        tags = song_data.get("tags", [])
-        
-        if not title or not artist:
-            raise HTTPException(status_code=400, detail="Title and artist are required")
-        
-        # Create new song
-        new_song = Song(
-            title=title,
-            artist=artist,
-            type=song_type,
-            chord_chart=chord_chart,
-            tags=tags,
-            vote_count=0,
-            times_played=0,
-            play_history=[]
-        )
-        
-        db.add(new_song)
-        await db.commit()
-        await db.refresh(new_song)
-        
-        return {
-            "id": str(new_song.id),
-            "title": new_song.title,
-            "artist": new_song.artist,
-            "type": new_song.type,
-            "chord_chart": new_song.chord_chart,
-            "tags": new_song.tags,
-            "vote_count": new_song.vote_count,
-            "times_played": new_song.times_played,
-            "created_at": new_song.created_at,
-            "updated_at": new_song.updated_at
-        }
-        
-    except Exception as e:
-        await db.rollback()
-        raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @app.post("/api/jams/{jam_id}/songs")
 async def add_song_to_jam(
@@ -537,29 +541,26 @@ async def add_song_to_jam(
 ):
     """Add a song to a jam"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
         song_id = song_data.get("song_id")
         
         if not song_id:
             raise HTTPException(status_code=400, detail="Song ID is required")
         
-        song_uuid = uuid.UUID(song_id)
-        
         # Check if jam exists
-        jam_result = await db.execute(select(Jam).where(Jam.id == jam_uuid))
+        jam_result = await db.execute(select(Jam).where(Jam.id == jam_id))
         jam = jam_result.scalar_one_or_none()
         if not jam:
             raise HTTPException(status_code=404, detail="Jam not found")
         
         # Check if song exists
-        song_result = await db.execute(select(Song).where(Song.id == song_uuid))
+        song_result = await db.execute(select(Song).where(Song.id == song_id))
         song = song_result.scalar_one_or_none()
         if not song:
             raise HTTPException(status_code=404, detail="Song not found")
         
         # Check if song is already in jam
         existing_result = await db.execute(
-            select(JamSong).where(JamSong.jam_id == jam_uuid, JamSong.song_id == song_uuid)
+            select(JamSong).where(JamSong.jam_id == jam_id, JamSong.song_id == song_id)
         )
         existing = existing_result.scalar_one_or_none()
         if existing:
@@ -567,8 +568,8 @@ async def add_song_to_jam(
         
         # Add song to jam
         jam_song = JamSong(
-            jam_id=jam_uuid,
-            song_id=song_uuid,
+            jam_id=jam_id,
+            song_id=song_id,
             captains=[],
             played=False
         )
@@ -578,8 +579,6 @@ async def add_song_to_jam(
         
         return {"message": "Song added to jam successfully"}
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -592,7 +591,6 @@ async def register_attendee(
 ):
     """Register an attendee for a jam"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
         name = attendee_data.get("name", "").strip()
         session_id = attendee_data.get("session_id", "")
         
@@ -600,14 +598,14 @@ async def register_attendee(
             raise HTTPException(status_code=400, detail="Name is required")
         
         # Check if jam exists
-        jam_result = await db.execute(select(Jam).where(Jam.id == jam_uuid))
+        jam_result = await db.execute(select(Jam).where(Jam.id == jam_id))
         jam = jam_result.scalar_one_or_none()
         if not jam:
             raise HTTPException(status_code=404, detail="Jam not found")
         
         # Check if name is already taken in this jam
         existing_result = await db.execute(
-            select(Attendee).where(Attendee.jam_id == jam_uuid, Attendee.name == name)
+            select(Attendee).where(Attendee.jam_id == jam_id, Attendee.name == name)
         )
         existing = existing_result.scalar_one_or_none()
         if existing:
@@ -615,7 +613,7 @@ async def register_attendee(
         
         # Create attendee
         attendee = Attendee(
-            jam_id=jam_uuid,
+            jam_id=jam_id,
             name=name,
             session_id=session_id
         )
@@ -634,8 +632,6 @@ async def register_attendee(
     except HTTPException:
         # Re-raise HTTPExceptions (like "Name already taken")
         raise
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         await db.rollback()
         # Check if it's a unique constraint violation
@@ -650,10 +646,9 @@ async def get_attendees(
 ):
     """Get all attendees for a jam"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
         
         result = await db.execute(
-            select(Attendee).where(Attendee.jam_id == jam_uuid).order_by(Attendee.registered_at)
+            select(Attendee).where(Attendee.jam_id == jam_id).order_by(Attendee.registered_at)
         )
         attendees = result.scalars().all()
         
@@ -666,8 +661,6 @@ async def get_attendees(
             for attendee in attendees
         ]
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -675,10 +668,9 @@ async def get_attendees(
 async def get_jam_qr_code(jam_id: str, db: AsyncSession = Depends(get_database)):
     """Generate QR code for jam access"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
         
         # Get jam details
-        result = await db.execute(select(Jam).where(Jam.id == jam_uuid))
+        result = await db.execute(select(Jam).where(Jam.id == jam_id))
         jam = result.scalar_one_or_none()
         if not jam:
             raise HTTPException(status_code=404, detail="Jam not found")
@@ -707,8 +699,6 @@ async def get_jam_qr_code(jam_id: str, db: AsyncSession = Depends(get_database))
         
         return Response(content=img_buffer.getvalue(), media_type="image/png")
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating QR code: {e}")
 
@@ -724,19 +714,16 @@ async def register_to_perform(
 ):
     """Register an attendee to perform on a song"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
-        song_uuid = uuid.UUID(song_id)
         attendee_id = registration_data.get("attendee_id")
         instrument = registration_data.get("instrument", "")
         
         if not attendee_id:
             raise HTTPException(status_code=400, detail="Attendee ID is required")
         
-        attendee_uuid = uuid.UUID(attendee_id)
         
         # Check if attendee exists and belongs to this jam
         attendee_result = await db.execute(
-            select(Attendee).where(Attendee.id == attendee_uuid, Attendee.jam_id == jam_uuid)
+            select(Attendee).where(Attendee.id == attendee_id, Attendee.jam_id == jam_id)
         )
         attendee = attendee_result.scalar_one_or_none()
         if not attendee:
@@ -744,7 +731,7 @@ async def register_to_perform(
         
         # Check if song exists in this jam
         jam_song_result = await db.execute(
-            select(JamSong).where(JamSong.jam_id == jam_uuid, JamSong.song_id == song_uuid)
+            select(JamSong).where(JamSong.jam_id == jam_id, JamSong.song_id == song_id)
         )
         jam_song = jam_song_result.scalar_one_or_none()
         if not jam_song:
@@ -753,9 +740,9 @@ async def register_to_perform(
         # Check if attendee is already registered to perform this song
         existing_registration_result = await db.execute(
             select(PerformanceRegistration).where(
-                PerformanceRegistration.jam_id == jam_uuid,
-                PerformanceRegistration.song_id == song_uuid,
-                PerformanceRegistration.attendee_id == attendee_uuid
+                PerformanceRegistration.jam_id == jam_id,
+                PerformanceRegistration.song_id == song_id,
+                PerformanceRegistration.attendee_id == attendee_id
             )
         )
         existing_registration = existing_registration_result.scalar_one_or_none()
@@ -764,9 +751,9 @@ async def register_to_perform(
         
         # Create performance registration
         registration = PerformanceRegistration(
-            jam_id=jam_uuid,
-            song_id=song_uuid,
-            attendee_id=attendee_uuid,
+            jam_id=jam_id,
+            song_id=song_id,
+            attendee_id=attendee_id,
             instrument=instrument
         )
         
@@ -778,7 +765,7 @@ async def register_to_perform(
             jam_id,
             "performance-registered",
             {
-                "songId": str(song_uuid),
+                "songId": str(song_id),
                 "attendeeName": attendee.name,
                 "instrument": instrument
             }
@@ -786,8 +773,6 @@ async def register_to_perform(
         
         return {"message": "Successfully registered to perform", "attendeeName": attendee.name}
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -803,19 +788,16 @@ async def unregister_from_perform(
 ):
     """Unregister an attendee from performing on a song"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
-        song_uuid = uuid.UUID(song_id)
         
         # Get attendee ID from headers
         attendee_id = request.headers.get('X-Attendee-ID')
         if not attendee_id:
             raise HTTPException(status_code=400, detail="Attendee ID is required")
         
-        attendee_uuid = uuid.UUID(attendee_id)
         
         # Check if attendee exists and belongs to this jam
         attendee_result = await db.execute(
-            select(Attendee).where(Attendee.id == attendee_uuid, Attendee.jam_id == jam_uuid)
+            select(Attendee).where(Attendee.id == attendee_id, Attendee.jam_id == jam_id)
         )
         attendee = attendee_result.scalar_one_or_none()
         if not attendee:
@@ -823,7 +805,7 @@ async def unregister_from_perform(
         
         # Check if song exists in this jam
         jam_song_result = await db.execute(
-            select(JamSong).where(JamSong.jam_id == jam_uuid, JamSong.song_id == song_uuid)
+            select(JamSong).where(JamSong.jam_id == jam_id, JamSong.song_id == song_id)
         )
         jam_song = jam_song_result.scalar_one_or_none()
         if not jam_song:
@@ -832,9 +814,9 @@ async def unregister_from_perform(
         # Check if attendee is already registered to perform
         existing_registration_result = await db.execute(
             select(PerformanceRegistration).where(
-                PerformanceRegistration.jam_id == jam_uuid,
-                PerformanceRegistration.song_id == song_uuid,
-                PerformanceRegistration.attendee_id == attendee_uuid
+                PerformanceRegistration.jam_id == jam_id,
+                PerformanceRegistration.song_id == song_id,
+                PerformanceRegistration.attendee_id == attendee_id
             )
         )
         existing_registration = existing_registration_result.scalar_one_or_none()
@@ -850,15 +832,13 @@ async def unregister_from_perform(
             jam_id,
             "performance-unregistered",
             {
-                "songId": str(song_uuid),
+                "songId": str(song_id),
                 "attendeeName": attendee.name
             }
         )
         
         return {"message": "Successfully unregistered from performing", "attendeeName": attendee.name}
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -871,15 +851,13 @@ async def get_song_performers(
 ):
     """Get all performers registered for a song"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
-        song_uuid = uuid.UUID(song_id)
         
         result = await db.execute(
             select(PerformanceRegistration, Attendee)
             .join(Attendee, PerformanceRegistration.attendee_id == Attendee.id)
             .where(
-                PerformanceRegistration.jam_id == jam_uuid,
-                PerformanceRegistration.song_id == song_uuid
+                PerformanceRegistration.jam_id == jam_id,
+                PerformanceRegistration.song_id == song_id
             )
             .order_by(PerformanceRegistration.registered_at)
         )
@@ -896,8 +874,6 @@ async def get_song_performers(
             for perf, attendee in performers
         ]
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -913,13 +889,11 @@ async def toggle_heart_vote(
 ):
     """Toggle heart vote for a song (no registration required)"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
-        song_uuid = uuid.UUID(song_id)
         session_id = vote_data.get("session_id", "anonymous")
         
         # Check if song exists in this jam
         jam_song_result = await db.execute(
-            select(JamSong).where(JamSong.jam_id == jam_uuid, JamSong.song_id == song_uuid)
+            select(JamSong).where(JamSong.jam_id == jam_id, JamSong.song_id == song_id)
         )
         jam_song = jam_song_result.scalar_one_or_none()
         if not jam_song:
@@ -928,8 +902,8 @@ async def toggle_heart_vote(
         # Check if this session already voted for this song
         existing_vote_result = await db.execute(
             select(Vote).where(
-                Vote.jam_id == jam_uuid,
-                Vote.song_id == song_uuid,
+                Vote.jam_id == jam_id,
+                Vote.song_id == song_id,
                 Vote.session_id == session_id
             )
         )
@@ -941,15 +915,15 @@ async def toggle_heart_vote(
             # Update song vote count
             await db.execute(
                 update(Song)
-                .where(Song.id == song_uuid)
+                .where(Song.id == song_id)
                 .values(vote_count=Song.vote_count - 1)
             )
             action = "removed"
         else:
             # Add the vote (heart)
             new_vote = Vote(
-                jam_id=jam_uuid,
-                song_id=song_uuid,
+                jam_id=jam_id,
+                song_id=song_id,
                 attendee_id=None,  # Anonymous vote
                 session_id=session_id,
                 voted_at=func.now()
@@ -958,7 +932,7 @@ async def toggle_heart_vote(
             # Update song vote count
             await db.execute(
                 update(Song)
-                .where(Song.id == song_uuid)
+                .where(Song.id == song_id)
                 .values(vote_count=Song.vote_count + 1)
             )
             action = "added"
@@ -966,7 +940,7 @@ async def toggle_heart_vote(
         await db.commit()
         
         # Get updated song with vote count
-        song_result = await db.execute(select(Song).where(Song.id == song_uuid))
+        song_result = await db.execute(select(Song).where(Song.id == song_id))
         updated_song = song_result.scalar_one()
         vote_count = updated_song.vote_count
         
@@ -975,7 +949,7 @@ async def toggle_heart_vote(
             jam_id,
             "heart-toggled",
             {
-                "songId": str(song_uuid),
+                "songId": str(song_id),
                 "voteCount": vote_count,
                 "action": action,
                 "sessionId": session_id
@@ -988,8 +962,6 @@ async def toggle_heart_vote(
             "action": action
         }
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -1003,13 +975,11 @@ async def get_vote_status(
 ):
     """Check if current session has voted for a song"""
     try:
-        jam_uuid = uuid.UUID(jam_id)
-        song_uuid = uuid.UUID(song_id)
         session_id = request.headers.get('X-Session-ID', 'anonymous')
         
         # Check if song exists in this jam
         jam_song_result = await db.execute(
-            select(JamSong).where(JamSong.jam_id == jam_uuid, JamSong.song_id == song_uuid)
+            select(JamSong).where(JamSong.jam_id == jam_id, JamSong.song_id == song_id)
         )
         jam_song = jam_song_result.scalar_one_or_none()
         if not jam_song:
@@ -1018,8 +988,8 @@ async def get_vote_status(
         # Check if this session has voted for this song
         vote_result = await db.execute(
             select(Vote).where(
-                Vote.jam_id == jam_uuid,
-                Vote.song_id == song_uuid,
+                Vote.jam_id == jam_id,
+                Vote.song_id == song_id,
                 Vote.session_id == session_id
             )
         )
@@ -1030,8 +1000,6 @@ async def get_vote_status(
             "sessionId": session_id
         }
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -1234,6 +1202,76 @@ async def delete_venue(
     await db.delete(venue)
     await db.commit()
     return {"message": "Venue deleted successfully"}
+
+# Song Management API Endpoints
+@app.post("/api/songs", response_model=SongInDB)
+async def create_song(
+    song_data: SongCreate,
+    db: AsyncSession = Depends(get_database)
+):
+    """Create a new song"""
+    song = Song(**song_data.dict())
+    db.add(song)
+    await db.commit()
+    await db.refresh(song)
+    return song
+
+@app.get("/api/songs")
+async def get_all_songs(db: AsyncSession = Depends(get_database)):
+    """Get all songs"""
+    result = await db.execute(select(Song).order_by(Song.title))
+    songs = result.scalars().all()
+    return songs
+
+@app.get("/api/songs/{song_id}", response_model=SongInDB)
+async def get_song(song_id: str, db: AsyncSession = Depends(get_database)):
+    """Get a specific song by ID"""
+    try:
+        result = await db.execute(select(Song).where(Song.id == song_id))
+        song = result.scalar_one_or_none()
+        if not song:
+            raise HTTPException(status_code=404, detail="Song not found")
+        return song
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid song ID format")
+
+@app.put("/api/songs/{song_id}", response_model=SongInDB)
+async def update_song(
+    song_id: str,
+    song_data: SongUpdate,
+    db: AsyncSession = Depends(get_database)
+):
+    """Update a song"""
+    try:
+        result = await db.execute(select(Song).where(Song.id == song_id))
+        song = result.scalar_one_or_none()
+        if not song:
+            raise HTTPException(status_code=404, detail="Song not found")
+        
+        # Update song fields
+        for field, value in song_data.dict(exclude_unset=True).items():
+            setattr(song, field, value)
+        
+        await db.commit()
+        await db.refresh(song)
+        return song
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid song ID format")
+
+@app.delete("/api/songs/{song_id}")
+async def delete_song(song_id: str, db: AsyncSession = Depends(get_database)):
+    """Delete a song"""
+    try:
+        result = await db.execute(select(Song).where(Song.id == song_id))
+        song = result.scalar_one_or_none()
+        if not song:
+            raise HTTPException(status_code=404, detail="Song not found")
+        
+        await db.delete(song)
+        await db.commit()
+        return {"message": "Song deleted successfully"}
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid song ID format")
 
 if __name__ == "__main__":
     import uvicorn

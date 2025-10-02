@@ -14,7 +14,7 @@ from feature_flag_config import (
     set_role_feature_flag, set_global_feature_flag, get_feature_flag_value
 )
 from user_roles import get_current_user_role
-from database import get_database
+from jamanager.database import get_database
 
 router = APIRouter(prefix="/api/feature-flags", tags=["feature-flags"])
 

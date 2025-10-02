@@ -1,5 +1,5 @@
 """
-Feature Flags System for Jamanger Application
+Feature Flags System for Jamanager Application
 
 This module defines feature flags that control what functionality is available
 to different user types in the application.
@@ -39,6 +39,12 @@ class FeatureFlags:
             name="vote_registered", 
             description="Allow registered attendees to vote on songs",
             enabled_for={UserRole.REGISTERED_ATTENDEE},
+            default_enabled=True
+        ),
+        "vote_jam_manager": FeatureFlag(
+            name="vote_jam_manager",
+            description="Allow jam managers to vote on songs",
+            enabled_for={UserRole.JAM_MANAGER},
             default_enabled=True
         ),
         
@@ -164,9 +170,10 @@ class FeatureFlags:
 
 # Convenience functions for common checks
 def can_vote(user_role: UserRole) -> bool:
-    """Check if user can vote (either anonymous or registered)"""
+    """Check if user can vote (anonymous, registered, or jam manager)"""
     return (FeatureFlags.is_feature_enabled("vote_anonymous", user_role) or 
-            FeatureFlags.is_feature_enabled("vote_registered", user_role))
+            FeatureFlags.is_feature_enabled("vote_registered", user_role) or
+            FeatureFlags.is_feature_enabled("vote_jam_manager", user_role))
 
 def can_register_to_perform(user_role: UserRole) -> bool:
     """Check if user can register to perform"""

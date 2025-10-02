@@ -1,51 +1,60 @@
 #!/usr/bin/env python3
 """
-Database initialization script for Jamanger FastAPI app
+Database initialization script for Jamanager FastAPI app
 Run this to create tables and add sample data
 """
 
 import asyncio
-import uuid
 from datetime import datetime
-from database import init_database, AsyncSessionLocal
-from models import Song, Jam, JamSong, Attendee, Vote, PerformanceRegistration
+from jamanager.database import init_database, AsyncSessionLocal
+from jamanager.models import Song, Jam, JamSong, Attendee, Vote, PerformanceRegistration, Venue
 
 async def create_sample_data():
     """Create sample data for testing"""
     async with AsyncSessionLocal() as session:
+        # Create sample venues
+        venues_data = [
+            {
+                "name": "The Blue Note",
+                "address": "123 Music Street, Sydney NSW 2000",
+                "description": "Intimate jazz and blues venue"
+            },
+            {
+                "name": "Rock Arena",
+                "address": "456 Rock Boulevard, Sydney NSW 2000", 
+                "description": "Large venue for rock concerts"
+            }
+        ]
+        
+        venues = []
+        for venue_data in venues_data:
+            venue = Venue(**venue_data)
+            session.add(venue)
+            venues.append(venue)
+        
+        await session.flush()  # Get the IDs
+        
         # Create sample songs
         songs_data = [
             {
                 "title": "Sweet Child O' Mine",
                 "artist": "Guns N' Roses",
-                "type": "rock",
-                "chord_chart": "D C G D",
-                "tags": ["classic", "guitar", "popular"],
-                "vote_count": 15
+                "vote_count": 0
             },
             {
                 "title": "Hotel California",
                 "artist": "Eagles",
-                "type": "rock",
-                "chord_chart": "Am E G D F C Dm E",
-                "tags": ["classic", "acoustic", "popular"],
-                "vote_count": 12
+                "vote_count": 0
             },
             {
                 "title": "Wonderwall",
                 "artist": "Oasis",
-                "type": "rock",
-                "chord_chart": "Em G D C Em G D C",
-                "tags": ["90s", "acoustic", "popular"],
-                "vote_count": 8
+                "vote_count": 0
             },
             {
                 "title": "Black",
                 "artist": "Pearl Jam",
-                "type": "grunge",
-                "chord_chart": "Am F C G",
-                "tags": ["grunge", "emotional", "popular"],
-                "vote_count": 10
+                "vote_count": 0
             }
         ]
         
@@ -62,6 +71,8 @@ async def create_sample_data():
             name="Friday Night Jam",
             slug="friday-night-jam",
             description="Our weekly jam session",
+            venue_id=venues[0].id,  # Use the first venue
+            jam_date=datetime.now(),
             status="waiting"
         )
         session.add(jam)
@@ -79,12 +90,13 @@ async def create_sample_data():
         
         await session.commit()
         print("✅ Sample data created successfully!")
-        print(f"Created jam: {jam.name} (slug: {jam.slug})")
+        print(f"Created {len(venues)} venues")
+        print(f"Created jam: {jam.name} (slug: {jam.slug}) at {venues[0].name}")
         print(f"Created {len(songs)} songs")
 
 async def main():
     """Main initialization function"""
-    print("🚀 Initializing Jamanger database...")
+    print("🚀 Initializing Jamanager database...")
     
     # Create tables
     await init_database()

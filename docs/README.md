@@ -10,6 +10,7 @@ A modern, real-time jam session management application built with FastAPI and va
 - **Anonymous Participation**: Join and vote without registration
 - **Responsive Design**: Works on desktop and mobile devices
 - **QR Code Access**: Easy sharing via QR codes for jam sessions
+- **Ultimate Guitar Integration**: Automatic chord sheet lookup for songs
 
 ### For Registered Attendees (Musos)
 - **Performance Registration**: Register to perform on specific songs
@@ -22,12 +23,13 @@ A modern, real-time jam session management application built with FastAPI and va
 - **Access Control**: Secure access via access codes
 - **Real-time Monitoring**: Monitor jam activity and song queues
 - **Breadcrumb Navigation**: Easy navigation between management areas
+- **Full Voting Rights**: Can vote on songs like any other user
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.11+
-- PostgreSQL (running in Podman or locally)
+- SQLite (file-based database - no external setup required)
 - `pyenv` (recommended for Python version management)
 
 ### Installation
@@ -35,7 +37,7 @@ A modern, real-time jam session management application built with FastAPI and va
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd jamanger
+   cd jamanager
    ```
 
 2. **Set up Python environment**
@@ -50,35 +52,26 @@ A modern, real-time jam session management application built with FastAPI and va
    pip install -r requirements.txt
    ```
 
-4. **Set up PostgreSQL**
+4. **Initialize the database**
    ```bash
-   # Using Podman (recommended)
-   podman run --name postgres-jamanger -e POSTGRES_PASSWORD=jamanger123 -e POSTGRES_DB=jamanger -p 5432:5432 -d postgres:15
-   
-   # Or using the setup script
-   ./setup_postgres.sh
+   python init_sqlite_db.py
    ```
 
-5. **Initialize the database**
+5. **Start the application**
    ```bash
-   python init_db.py
+   python start_fresh.py
    ```
 
-6. **Start the application**
-   ```bash
-   uvicorn main:app --reload --port 8000
-   ```
-
-7. **Access the application**
+6. **Access the application**
    - Open your browser to `http://localhost:8000`
-   - Use access code `admin123` to gain jam manager privileges
+   - Use access code `jam2024` to gain jam manager privileges
 
 ## 🏗️ Architecture
 
 ### Backend (FastAPI)
 - **FastAPI**: Modern, fast web framework for building APIs
 - **SQLAlchemy**: ORM for database operations
-- **PostgreSQL**: Primary database with JSONB support
+- **SQLite**: File-based database with JSON support
 - **WebSockets**: Real-time communication
 - **Pydantic**: Data validation and serialization
 
@@ -101,21 +94,20 @@ A modern, real-time jam session management application built with FastAPI and va
 ### Environment Variables
 Create a `.env` file with:
 ```env
-DATABASE_URL=postgresql://postgres:jamanger123@localhost:5432/jamanger
-ACCESS_CODE=admin123
-JAM_MANAGER_ACCESS_CODE=admin123
+DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
+JAM_MANAGER_ACCESS_CODE=jam2024
 ```
 
 ### Feature Flags
 The application uses a sophisticated feature flag system to control access:
 - **Anonymous Users**: Can vote and view jams
 - **Registered Attendees**: Can register to perform and manage their performances
-- **Jam Managers**: Full administrative access
+- **Jam Managers**: Full administrative access and voting rights
 
 ## 📱 Usage
 
 ### Creating a Jam Session
-1. Click the lock button (🔒) and enter the access code
+1. Click the lock button (🔒) and enter the access code `jam2024`
 2. Click "Create Jam" and fill in the details:
    - Jam name
    - Venue (select from managed venues)
@@ -127,6 +119,7 @@ The application uses a sophisticated feature flag system to control access:
 1. Scan the QR code or visit the jam URL directly
 2. Vote on songs by clicking the heart button
 3. Register to perform by clicking the microphone button (if logged in)
+4. Look up chord sheets using the guitar button
 
 ### Managing Venues
 1. Access the Jam Manager panel

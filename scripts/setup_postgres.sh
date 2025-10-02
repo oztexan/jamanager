@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Setup PostgreSQL with Podman for Jamanger FastAPI app
+# Setup PostgreSQL with Podman for Jamanager FastAPI app
 
 echo "🐘 Setting up PostgreSQL with Podman..."
 

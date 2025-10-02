@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chord Sheet Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .chord-sheet {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .chord-sheet h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .chord-sheet p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .chord-sheet a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .chord-sheet a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .loading {
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎸 Chord Sheet Search Test</h1>
+        <p>Test the Ultimate Guitar chord sheet search functionality.</p>
+        
+        <div class="form-group">
+            <label for="songName">Song Name:</label>
+            <input type="text" id="songName" placeholder="e.g., Wonderwall" value="Wonderwall">
+        </div>
+        
+        <div class="form-group">
+            <label for="artistName">Artist Name:</label>
+            <input type="text" id="artistName" placeholder="e.g., Oasis" value="Oasis">
+        </div>
+        
+        <button onclick="searchChordSheets()">Search Chord Sheets</button>
+        <button onclick="getBestChordSheet()">Get Best Chord Sheet</button>
+        <button onclick="testAPI()">Test API</button>
+        
+        <div id="results" class="results" style="display: none;">
+            <h3>Results:</h3>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        async function searchChordSheets() {
+            const songName = document.getElementById('songName').value;
+            const artistName = document.getElementById('artistName').value;
+            
+            if (!songName || !artistName) {
+                showError('Please enter both song name and artist name');
+                return;
+            }
+            
+            showLoading('Searching for chord sheets...');
+            
+            try {
+                const response = await fetch('/api/search-chord-sheets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        song_name: songName,
+                        artist_name: artistName
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayChordSheets(data.chord_sheets, data.message);
+                } else {
+                    showError(`Error: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                showError(`Network error: ${error.message}`);
+            }
+        }
+        
+        async function getBestChordSheet() {
+            const songName = document.getElementById('songName').value;
+            const artistName = document.getElementById('artistName').value;
+            
+            if (!songName || !artistName) {
+                showError('Please enter both song name and artist name');
+                return;
+            }
+            
+            showLoading('Getting best chord sheet...');
+            
+            try {
+                const response = await fetch('/api/get-best-chord-sheet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        song_name: songName,
+                        artist_name: artistName
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.chord_sheet_url) {
+                        displayBestChordSheet(data);
+                    } else {
+                        showError('No chord sheets found');
+                    }
+                } else {
+                    showError(`Error: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                showError(`Network error: ${error.message}`);
+            }
+        }
+        
+        async function testAPI() {
+            showLoading('Testing API...');
+            
+            try {
+                const response = await fetch('/api/test-chord-search');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayTestResults(data);
+                } else {
+                    showError(`API Test Error: ${data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                showError(`Network error: ${error.message}`);
+            }
+        }
+        
+        function displayChordSheets(chordSheets, message) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('resultsContent');
+            
+            resultsDiv.style.display = 'block';
+            contentDiv.innerHTML = `<p><strong>${message}</strong></p>`;
+            
+            if (chordSheets && chordSheets.length > 0) {
+                chordSheets.forEach((sheet, index) => {
+                    const sheetDiv = document.createElement('div');
+                    sheetDiv.className = 'chord-sheet';
+                    sheetDiv.innerHTML = `
+                        <h4>${sheet.title}</h4>
+                        <p><strong>Rating:</strong> ${sheet.rating}</p>
+                        <p><strong>Type:</strong> ${sheet.type}</p>
+                        <p><a href="${sheet.url}" target="_blank">View Chord Sheet →</a></p>
+                    `;
+                    contentDiv.appendChild(sheetDiv);
+                });
+            } else {
+                contentDiv.innerHTML += '<p>No chord sheets found.</p>';
+            }
+        }
+        
+        function displayBestChordSheet(data) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('resultsContent');
+            
+            resultsDiv.style.display = 'block';
+            contentDiv.innerHTML = `
+                <p><strong>${data.message}</strong></p>
+                <div class="chord-sheet">
+                    <h4>${data.song_name} by ${data.artist_name}</h4>
+                    <p><a href="${data.chord_sheet_url}" target="_blank">View Best Chord Sheet →</a></p>
+                </div>
+            `;
+        }
+        
+        function displayTestResults(data) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('resultsContent');
+            
+            resultsDiv.style.display = 'block';
+            contentDiv.innerHTML = `
+                <p><strong>API Test Results:</strong></p>
+                <p><strong>Status:</strong> ${data.status}</p>
+                <p><strong>Test Song:</strong> ${data.test_song}</p>
+                <p><strong>Test Artist:</strong> ${data.test_artist}</p>
+                <p><strong>Results Found:</strong> ${data.results_count}</p>
+                ${data.sample_results ? `
+                    <p><strong>Sample Results:</strong></p>
+                    ${data.sample_results.map(result => `
+                        <div class="chord-sheet">
+                            <h4>${result.title}</h4>
+                            <p><strong>Rating:</strong> ${result.rating}</p>
+                            <p><a href="${result.url}" target="_blank">View →</a></p>
+                        </div>
+                    `).join('')}
+                ` : ''}
+            `;
+        }
+        
+        function showLoading(message) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('resultsContent');
+            
+            resultsDiv.style.display = 'block';
+            contentDiv.innerHTML = `<p class="loading">${message}</p>`;
+        }
+        
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('resultsContent');
+            
+            resultsDiv.style.display = 'block';
+            contentDiv.innerHTML = `<div class="error">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

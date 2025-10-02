@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jam Session - Jamanger</title>
+    <title>Jam Session - Jamanager</title>
     <style>
         * {
             margin: 0;
@@ -210,6 +210,19 @@
             transition: all 0.3s ease;
         }
 
+        .song-item.has-chord-sheet {
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .song-item.has-chord-sheet:hover {
+            border-color: #667eea;
+            background: #f8faff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
         .song-item.performing {
             background: #dcfce7;
             border: 1px solid #22c55e;
@@ -233,6 +246,13 @@
             margin-bottom: 5px;
         }
 
+
+        .chord-sheet-indicator {
+            margin-left: 8px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
         .song-artist {
             color: #718096;
             font-size: 0.9rem;
@@ -247,6 +267,199 @@
         .song-actions {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        /* Mobile Card Layout */
+        @media (max-width: 768px) {
+            .song-item {
+                display: block;
+                padding: 16px;
+                margin-bottom: 12px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                background: white;
+            }
+
+            .song-header {
+                display: block;
+                margin-bottom: 12px;
+            }
+
+            .song-rank {
+                display: inline-block;
+                background: #667eea;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .song-info {
+                width: 100%;
+                margin-bottom: 12px;
+            }
+
+            .song-title {
+                font-size: 1.2rem;
+                font-weight: 700;
+                margin-bottom: 4px;
+                color: #2d3748;
+                line-height: 1.3;
+            }
+
+            .song-artist {
+                font-size: 1rem;
+                color: #718096;
+                margin-bottom: 8px;
+            }
+
+            .song-actions {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 8px;
+                margin-top: 12px;
+            }
+
+            .heart-btn, .perform-btn, .chord-sheet-btn {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 12px 8px;
+                border-radius: 8px;
+                border: 2px solid #e2e8f0;
+                background: white;
+                transition: all 0.2s ease;
+                min-height: 60px;
+            }
+
+            .heart-btn:hover, .perform-btn:hover, .chord-sheet-btn:hover {
+                border-color: #667eea;
+                background: #f8faff;
+            }
+
+            .heart-btn .heart-icon, 
+            .perform-btn .perform-icon, 
+            .chord-sheet-btn .chord-sheet-icon {
+                font-size: 1.5rem;
+                margin-bottom: 4px;
+            }
+
+            .vote-count {
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: #667eea;
+            }
+
+            .play-song-btn {
+                grid-column: 1 / -1;
+                margin-top: 8px;
+                padding: 14px;
+                font-size: 1rem;
+                font-weight: 600;
+            }
+
+            .song-performers {
+                margin-top: 12px;
+                padding: 10px;
+                background: #f7fafc;
+                border-radius: 8px;
+                border: 1px solid #e2e8f0;
+            }
+
+            .performer-tag {
+                font-size: 0.85rem;
+                padding: 4px 8px;
+                margin: 2px;
+                background: #e2e8f0;
+                border-radius: 12px;
+            }
+        }
+
+        /* Extra small screens - single column buttons */
+        @media (max-width: 480px) {
+            .song-actions {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+
+            .heart-btn, .perform-btn, .chord-sheet-btn {
+                flex-direction: row;
+                justify-content: center;
+                padding: 12px;
+                min-height: 50px;
+            }
+
+            .heart-btn .heart-icon, 
+            .perform-btn .perform-icon, 
+            .chord-sheet-btn .chord-sheet-icon {
+                margin-bottom: 0;
+                margin-right: 8px;
+                font-size: 1.3rem;
+            }
+
+            .song-title {
+                font-size: 1.3rem;
+            }
+
+            .song-artist {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Mobile page layout improvements */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .jam-header {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .jam-info {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .songs-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .songs-section h3 {
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+            }
+
+            .qr-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .qr-section h3 {
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+            }
+
+            .qr-code-container {
+                text-align: center;
+            }
+
+            .qr-code-container img {
+                max-width: 200px;
+                height: auto;
+            }
+
+            .jam-url {
+                font-size: 0.9rem;
+                word-break: break-all;
+                margin-top: 10px;
+            }
         }
 
         .btn {
@@ -354,6 +567,162 @@
             display: none !important;
         }
 
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .confirmation-message {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .confirmation-message p {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+
+        .song-details {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-top: 10px;
+        }
+
+        .song-details strong {
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        .song-details span {
+            color: #718096;
+            font-size: 0.95rem;
+        }
+
+        /* Jam Toolbar Styles */
+        .jam-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .jam-toolbar .jam-info {
+            flex: 1;
+            background: none;
+            padding: 0;
+            margin: 0;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        .jam-toolbar .jam-info h2 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+        }
+
+        .jam-toolbar .jam-info p {
+            margin: 0 0 8px 0;
+            color: #718096;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-icon {
+            margin-right: 6px;
+            font-size: 1rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+
+        /* Share Modal Styles */
+        .share-content {
+            text-align: center;
+        }
+
+        .share-content .qr-container {
+            margin: 20px 0;
+        }
+
+        .share-content .qr-container img {
+            max-width: 200px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .share-url-section {
+            margin-top: 20px;
+        }
+
+        .share-url-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .url-copy-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .url-copy-container input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            background: #f7fafc;
+        }
+
+        /* Mobile Responsive for Toolbar */
+        @media (max-width: 768px) {
+            .jam-toolbar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .toolbar-actions {
+                justify-content: center;
+            }
+
+            .jam-toolbar .jam-info {
+                text-align: center;
+            }
+        }
+
         .qr-section {
             margin-top: 20px;
             padding: 20px;
@@ -442,7 +811,7 @@
             margin: 2px;
         }
 
-        .heart-btn, .perform-btn {
+        .heart-btn, .perform-btn, .chord-sheet-btn {
             display: flex;
             align-items: center;
             gap: 5px;
@@ -465,7 +834,12 @@
             background: #fffaf0;
         }
 
-        .heart-icon, .perform-icon {
+        .chord-sheet-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .heart-icon, .perform-icon, .chord-sheet-icon {
             font-size: 1.2rem;
             color: #718096;
             transition: color 0.2s ease;
@@ -546,6 +920,158 @@
         .btn-warning:hover {
             background: #dd6b20;
         }
+
+        /* Chord Sheet Modal Styles */
+        .song-info-display {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .song-info-row {
+            display: flex;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .song-info-row label {
+            font-weight: 600;
+            color: #4a5568;
+            min-width: 60px;
+            margin-right: 10px;
+        }
+
+        .song-info-row span {
+            color: #2d3748;
+            flex: 1;
+        }
+
+        .chord-sheet-lookup-section {
+            margin-bottom: 20px;
+        }
+
+        .chord-sheet-results {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .chord-sheet-message {
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .chord-sheet-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chord-sheet-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #4a5568;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .chord-sheet-link:hover {
+            background: #f7fafc;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .chord-sheet-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .chord-sheet-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .chord-sheet-rating {
+            font-size: 12px;
+            color: #718096;
+        }
+
+     .chord-sheet-external {
+         color: #667eea;
+         font-size: 12px;
+     }
+
+     .chord-sheet-selected {
+         margin-top: 15px;
+         padding: 15px;
+         background: #f0f9ff;
+         border-radius: 8px;
+         border: 2px solid #0ea5e9;
+     }
+
+     .selected-chord-sheet {
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+         gap: 15px;
+     }
+
+     .selected-info {
+         flex: 1;
+     }
+
+     .selected-title {
+         font-weight: 600;
+         color: #0c4a6e;
+         margin-bottom: 5px;
+     }
+
+     .selected-url {
+         color: #0369a1;
+         font-size: 14px;
+         word-break: break-all;
+     }
+
+     .spinner {
+         animation: spin 1s linear infinite;
+     }
+
+     @keyframes spin {
+         from { transform: rotate(0deg); }
+         to { transform: rotate(360deg); }
+     }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -570,21 +1096,24 @@
         </div>
 
         <div id="jamContent" class="hidden">
-        <div class="jam-info">
-            <h2 id="jamName">Jam Name</h2>
-            <p id="jamDesc">Jam Description</p>
-            <span id="jamStatus" class="jam-status status-waiting">Waiting</span>
-            
-            <!-- QR Code Section -->
-            <div class="qr-section">
-                <h3>Share this jam</h3>
-                <div class="qr-container">
-                    <img id="qrCode" src="" alt="QR Code" style="display: none;">
-                    <div id="qrLoading">Generating QR code...</div>
+            <!-- Top Toolbar -->
+            <div class="jam-toolbar">
+                <div class="jam-info">
+                    <h2 id="jamName">Jam Name</h2>
+                    <p id="jamDesc">Jam Description</p>
+                    <span id="jamStatus" class="jam-status status-waiting">Waiting</span>
                 </div>
-                <p class="qr-url" id="jamUrl"></p>
+                <div class="toolbar-actions">
+                    <button class="btn btn-outline" onclick="showShareModal()">
+                        <span class="btn-icon">📤</span>
+                        Share
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddSongModal()">
+                        <span class="btn-icon">➕</span>
+                        Add Song
+                    </button>
+                </div>
             </div>
-        </div>
 
         <!-- Attendee Registration -->
         <div id="attendeeRegistration" class="attendee-registration">
@@ -609,22 +1138,6 @@
                     <!-- Songs will be loaded here -->
                 </ul>
             </div>
-
-            <div class="add-song-section">
-                <h3>Add Song to Jam</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="songSelect">Select Song:</label>
-                        <select id="songSelect">
-                            <option value="">Choose a song...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button class="btn btn-primary" onclick="addSongToJam()">Add to Jam</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -639,6 +1152,111 @@
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closePerformModal()">Cancel</button>
                 <button class="btn btn-warning" onclick="confirmPerformRegistration()">Register to Perform</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chord Sheet Modal -->
+    <div id="chordSheetModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3 id="chordSheetModalTitle">Find Chord Sheet</h3>
+            <div id="chordSheetModalError" class="error hidden"></div>
+            <div id="chordSheetModalSuccess" class="success hidden"></div>
+            
+            <div class="song-info-display">
+                <div class="song-info-row">
+                    <label>Song:</label>
+                    <span id="chordSheetSongTitle">-</span>
+                </div>
+                <div class="song-info-row">
+                    <label>Artist:</label>
+                    <span id="chordSheetSongArtist">-</span>
+                </div>
+            </div>
+            
+             <div class="chord-sheet-lookup-section">
+                 <button type="button" id="findChordSheetModalBtn" class="btn btn-primary" onclick="findChordSheetForSong()">
+                     <span id="chordSheetModalBtnText">Find Chord Sheet</span>
+                     <span id="chordSheetModalSpinner" class="spinner hidden">⏳</span>
+                 </button>
+                 <div id="chordSheetModalResults" class="chord-sheet-results hidden">
+                     <div id="chordSheetModalMessage" class="chord-sheet-message"></div>
+                     <div id="chordSheetModalLinks" class="chord-sheet-links"></div>
+                 </div>
+                 <div id="chordSheetModalSelected" class="chord-sheet-selected hidden">
+                     <div class="selected-chord-sheet">
+                         <div class="selected-info">
+                             <div class="selected-title">Selected Chord Sheet:</div>
+                             <div class="selected-url" id="selectedChordSheetUrl"></div>
+                         </div>
+                         <button type="button" id="saveChordSheetBtn" class="btn btn-success" onclick="saveChordSheetForSong()">
+                             <span id="saveChordSheetBtnText">Save Chord Sheet</span>
+                             <span id="saveChordSheetSpinner" class="spinner hidden">⏳</span>
+                         </button>
+                     </div>
+                 </div>
+             </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeChordSheetModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unregister Confirmation Modal -->
+    <div id="unregisterConfirmModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3>Confirm Unregister</h3>
+            <div class="confirmation-message">
+                <p>Do you really want to not perform on this song?</p>
+                <div class="song-details">
+                    <strong id="unregisterSongTitle">-</strong><br>
+                    <span id="unregisterSongArtist">-</span>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeUnregisterConfirmModal()">No, Keep Performing</button>
+                <button class="btn btn-danger" onclick="confirmUnregisterFromPerform()">Yes, Unregister</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3>Share this Jam</h3>
+            <div class="share-content">
+                <div class="qr-container">
+                    <img id="shareQrCode" src="" alt="QR Code" style="display: none;">
+                    <div id="shareQrLoading">Generating QR code...</div>
+                </div>
+                <div class="share-url-section">
+                    <label>Jam URL:</label>
+                    <div class="url-copy-container">
+                        <input type="text" id="shareJamUrl" readonly>
+                        <button class="btn btn-outline btn-sm" onclick="copyJamUrl()">Copy</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeShareModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Song Modal -->
+    <div id="addSongModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3>Add Song to Jam</h3>
+            <div class="form-group">
+                <label for="modalSongSelect">Select Song:</label>
+                <select id="modalSongSelect">
+                    <option value="">Choose a song...</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeAddSongModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="addSongToJamFromModal()">Add to Jam</button>
             </div>
         </div>
     </div>

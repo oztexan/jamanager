@@ -5,7 +5,6 @@ This module handles image uploads and processing for jam backgrounds.
 """
 
 import os
-import uuid
 import shutil
 from typing import Optional, Tuple
 from fastapi import UploadFile, HTTPException
@@ -35,7 +34,8 @@ class ImageUploader:
         
         # Generate unique filename
         file_extension = os.path.splitext(file.filename)[1] if file.filename else '.jpg'
-        unique_filename = f"jam_{jam_id}_{uuid.uuid4().hex[:8]}{file_extension}"
+        import secrets
+        unique_filename = f"jam_{jam_id}_{secrets.token_hex(4)}{file_extension}"
         
         # Create full path
         upload_path = JamConfig.get_upload_path()

@@ -1,49 +1,43 @@
-.PHONY: help install dev test clean docker-build docker-up docker-down
+# Jamanager Database Management
+
+.PHONY: help db-start db-stop db-init db-reset db-status
 
 help: ## Show this help message
-	@echo 'Usage: make [target]'
-	@echo ''
-	@echo 'Targets:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo "Available commands:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install dependencies
-	pip install -r requirements.txt
+db-start: ## Start PostgreSQL container
+	podman run -d \
+		--name jamanager-postgres \
+		-e POSTGRES_PASSWORD=jamanager123 \
+		-p 5432:5432 \
+		postgres:15
+	@echo "✅ PostgreSQL container started"
 
-dev: ## Start development server
-	uvicorn jamanger.main:app --reload --port 8000
+db-stop: ## Stop and remove PostgreSQL container
+	podman stop jamanager-postgres || true
+	podman rm jamanager-postgres || true
+	@echo "✅ PostgreSQL container stopped and removed"
 
-test: ## Run tests
-	./scripts/run_tests.sh
+db-status: ## Check database container status
+	podman ps | grep jamanager-postgres || echo "❌ Database container not running"
 
-clean: ## Clean up temporary files
-	find . -type f -name "*.pyc" -delete
-	find . -type d -name "__pycache__" -delete
-	find . -type d -name "*.egg-info" -exec rm -rf {} +
-	rm -rf build/
-	rm -rf dist/
+db-init: ## Initialize database with schema and sample data
+	pyenv activate jv3.11.11 && python init_database.py
 
-docker-build: ## Build Docker image
-	docker build -t jamanger .
+db-reset: ## Reset database (drop and recreate)
+	pyenv activate jv3.11.11 && python reset_database.py
 
-docker-up: ## Start with Docker Compose
-	docker-compose up -d
+db-shell: ## Connect to database shell
+	podman exec -it jamanager-postgres psql -U postgres -d jamanager
 
-docker-down: ## Stop Docker Compose
-	docker-compose down
+dev-setup: ## Complete development setup
+	@echo "🚀 Setting up development environment..."
+	@make db-start
+	@sleep 3
+	@make db-init
+	@echo "✅ Development environment ready!"
 
-docker-logs: ## View Docker logs
-	docker-compose logs -f
-
-setup-db: ## Initialize database
-	python init_db.py
-
-reset-db: ## Reset database with test data
-	python reset_test_data.py
-
-format: ## Format code
-	black jamanger/ *.py
-	isort jamanger/ *.py
-
-lint: ## Lint code
-	flake8 jamanger/ *.py
-	mypy jamanger/ *.py
+clean: ## Clean up everything
+	@make db-stop
+	@echo "✅ Cleanup complete"

@@ -12,7 +12,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from feature_flags import UserRole, FeatureFlags
 from user_roles import UserRoleManager, get_current_user_role
-from database import get_database
+from jamanager.database import get_database
 import json
 
 # Security scheme for API authentication (if needed in future)

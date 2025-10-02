@@ -1,6 +1,6 @@
 # JaManager
 
-A modern, real-time jam session management application built with FastAPI and vanilla JavaScript.
+A modern, real-time jam session management application built with FastAPI and vanilla JavaScript. JaManager allows musicians to create jam sessions, manage song queues, vote on songs, and register to perform - all with real-time updates via WebSockets.
 
 ## 🚀 Quick Start
 
@@ -13,17 +13,14 @@ pyenv activate jv3.11.11
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up database (using Podman)
-podman run --name postgres-jamanger -e POSTGRES_PASSWORD=jamanger123 -e POSTGRES_DB=jamanger -p 5432:5432 -d postgres:15
-
-# Initialize database
-python init_db.py
+# Initialize database (SQLite - no external setup required)
+python init_sqlite_db.py
 
 # Start the application
-uvicorn main:app --reload --port 8000
+python start_fresh.py
 ```
 
-Visit `http://localhost:8000` and use access code `admin123` for jam manager privileges.
+Visit `http://localhost:8000` and use access code `jam2024` for jam manager privileges.
 
 ## 📚 Documentation
 
@@ -34,24 +31,39 @@ Visit `http://localhost:8000` and use access code `admin123` for jam manager pri
 
 ## 🎵 Features
 
-- **Real-time Voting**: Vote on songs with live updates
-- **Jam Management**: Create and manage jam sessions
-- **Venue Management**: Manage multiple venues
-- **Performance Registration**: Musicians can register to perform
-- **QR Code Access**: Easy sharing of jam sessions
-- **Role-based Access**: Anonymous, registered, and manager roles
+### For All Users
+- **Real-time Voting**: Vote on songs with live updates across all connected devices
+- **Song Queue Management**: Songs are automatically ordered by vote count (highest first)
+- **Anonymous Participation**: Join and vote without registration
+- **Responsive Design**: Works on desktop and mobile devices
+- **QR Code Access**: Easy sharing via QR codes for jam sessions
+- **Ultimate Guitar Integration**: Automatic chord sheet lookup for songs
+
+### For Registered Attendees (Musos)
+- **Performance Registration**: Register to perform on specific songs
+- **Attendee Persistence**: Stay logged in across browser sessions
+- **Performance Management**: Unregister from songs when needed
+
+### For Jam Managers
+- **Jam Creation**: Create jam sessions with custom names, venues, dates, and background images
+- **Venue Management**: Manage multiple venues for your jam sessions
+- **Access Control**: Secure access via access codes
+- **Real-time Monitoring**: Monitor jam activity and song queues
+- **Breadcrumb Navigation**: Easy navigation between management areas
+- **Full Voting Rights**: Can vote on songs like any other user
 
 ## 🏗️ Architecture
 
-- **Backend**: FastAPI with PostgreSQL and WebSockets
+- **Backend**: FastAPI with SQLite and WebSockets
 - **Frontend**: Vanilla JavaScript with responsive design
-- **Database**: PostgreSQL with JSONB support
+- **Database**: SQLite with JSON support (file-based, zero configuration)
 - **Real-time**: WebSocket connections for live updates
+- **IDs**: String-based IDs for better compatibility
 
 ## 📁 Project Structure
 
 ```
-jamanger/
+jamanager/
 ├── main.py              # FastAPI application
 ├── models.py            # Database models
 ├── requirements.txt     # Python dependencies
@@ -65,8 +77,8 @@ jamanger/
 
 Create a `.env` file:
 ```env
-DATABASE_URL=postgresql://postgres:jamanger123@localhost:5432/jamanger
-ACCESS_CODE=admin123
+DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
+JAM_MANAGER_ACCESS_CODE=jam2024
 ```
 
 ## 🧪 Testing

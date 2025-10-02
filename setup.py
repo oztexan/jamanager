@@ -7,14 +7,14 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 setup(
-    name="jamanger",
+    name="jamanager",
     version="1.0.0",
-    author="JaManager Team",
-    author_email="team@jamanger.com",
+    author="Jamanager Team",
+    author_email="team@jamanager.com",
     description="A modern jam session management application",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/jamanger",
+    url="https://github.com/yourusername/jamanager",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -29,11 +29,11 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "jamanger=run:main",
+            "jamanager=run:main",
         ],
     },
     include_package_data=True,
     package_data={
-        "jamanger": ["static/*", "static/**/*"],
+        "jamanager": ["static/*", "static/**/*"],
     },
 )

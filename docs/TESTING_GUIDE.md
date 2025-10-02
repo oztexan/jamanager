@@ -1,7 +1,7 @@
-# Jamanger Testing Guide
+# Jamanager Testing Guide
 
 ## Overview
-This guide provides comprehensive testing instructions for the Jamanger application, including both manual and automated testing approaches.
+This guide provides comprehensive testing instructions for the Jamanager application, including both manual and automated testing approaches.
 
 ## Test Plan Files
 
@@ -117,10 +117,10 @@ The `automated_test_runner.py` can be easily adapted for use by testing agents:
 
 ```python
 # Example agent integration
-from automated_test_runner import JamangerTestRunner
+from automated_test_runner import JamanagerTestRunner
 
 def run_agent_tests():
-    runner = JamangerTestRunner("http://your-server.com")
+    runner = JamanagerTestRunner("http://your-server.com")
     results = runner.run_core_tests()
     
     # Process results
@@ -160,7 +160,7 @@ import requests
 
 ### GitHub Actions Example
 ```yaml
-name: Jamanger Tests
+name: Jamanager Tests
 on: [push, pull_request]
 jobs:
   test:
@@ -194,8 +194,8 @@ python3 automated_test_runner.py --verbose
 
 # Test specific functionality
 python3 -c "
-from automated_test_runner import JamangerTestRunner
-runner = JamangerTestRunner()
+from automated_test_runner import JamanagerTestRunner
+runner = JamanagerTestRunner()
 runner.test_home_page()
 "
 ```
@@ -230,7 +230,7 @@ runner.test_home_page()
 
 ## Conclusion
 
-The Jamanger testing framework provides comprehensive coverage of all application features through both manual and automated approaches. Choose the appropriate testing method based on your needs:
+The Jamanager testing framework provides comprehensive coverage of all application features through both manual and automated approaches. Choose the appropriate testing method based on your needs:
 
 - **Development**: Use automated tests for quick validation
 - **Staging**: Use hybrid approach for thorough testing

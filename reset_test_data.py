@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Reset test data script for Jamanger
+Reset test data script for Jamanager
 This script deletes all existing jams and creates new test data with mandatory fields.
 """
 

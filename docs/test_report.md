@@ -1,5 +1,5 @@
 
-# Jamanger Test Report
+# Jamanager Test Report
 Generated: 2025-10-02T14:29:58.313222
 
 ## Summary
