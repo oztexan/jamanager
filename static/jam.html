@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jam Session - Jamanger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e; /* Default background color */
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+        }
+
+        .background-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(10px);
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Breadcrumb Navigation Styles */
+        .breadcrumb-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .breadcrumb-item {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: #5a67d8;
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .breadcrumb-separator {
+            color: #a0aec0;
+            margin: 0 8px;
+            font-weight: 400;
+        }
+
+        .breadcrumb-nav a {
+            text-decoration: none;
+        }
+
+        .breadcrumb-nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Notification System */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .notification {
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .notification.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .notification.info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .jam-info {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .jam-info h2 {
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+
+        .jam-info p {
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        .jam-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-waiting {
+            background: #fef5e7;
+            color: #d69e2e;
+        }
+
+        .status-active {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .songs-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .songs-section h3 {
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        .song-list {
+            list-style: none;
+        }
+
+        .song-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+        }
+
+        .song-item.performing {
+            background: #dcfce7;
+            border: 1px solid #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+        }
+
+        .song-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .song-info {
+            flex: 1;
+        }
+
+        .song-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .song-artist {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .song-votes {
+            margin: 0 15px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .song-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .add-song-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .add-song-section h3 {
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .qr-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .qr-section h3 {
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+
+        .qr-container {
+            margin: 15px 0;
+        }
+
+        .qr-container img {
+            max-width: 200px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .qr-url {
+            font-family: monospace;
+            background: #e2e8f0;
+            padding: 8px;
+            border-radius: 4px;
+            word-break: break-all;
+            font-size: 0.9rem;
+        }
+
+        .attendee-registration {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .attendee-registration h3 {
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+
+        .attendee-info {
+            background: #c6f6d5;
+            border: 1px solid #9ae6b4;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .attendee-info h3 {
+            color: #2f855a;
+            margin-bottom: 10px;
+        }
+
+        .attendee-info p {
+            color: #2f855a;
+        }
+
+        .song-performers {
+            margin: 0 0 15px 0;
+            padding: 12px 16px;
+            background: #f0f9ff;
+            border-radius: 6px;
+            min-height: 0;
+            transition: all 0.2s ease;
+            display: none; /* Hidden by default, shown only when performers exist */
+        }
+
+        .performers-list {
+            font-size: 0.9rem;
+            color: #0369a1;
+        }
+
+        .performer-tag {
+            display: inline-block;
+            background: #0ea5e9;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+
+        .heart-btn, .perform-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: none;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .heart-btn:hover {
+            border-color: #e53e3e;
+            background: #fef2f2;
+        }
+
+        .perform-btn:hover {
+            border-color: #f6ad55;
+            background: #fffaf0;
+        }
+
+        .heart-icon, .perform-icon {
+            font-size: 1.2rem;
+            color: #718096;
+            transition: color 0.2s ease;
+        }
+
+        .perform-icon.registered {
+            color: #f6ad55;
+        }
+
+        .vote-count {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .song-rank {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #dd6b20;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background layers -->
+    <div id="backgroundLayer" class="background-layer"></div>
+    <div class="background-overlay"></div>
+    
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+    
+    <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <div id="breadcrumb-container"></div>
+        
+        <div class="header">
+            <h1 id="jamTitle">Loading Jam...</h1>
+            <p id="jamDescription">Please wait...</p>
+        </div>
+
+        <div id="loadingMessage" class="loading">
+            <h2>Loading jam session...</h2>
+        </div>
+
+        <div id="jamContent" class="hidden">
+        <div class="jam-info">
+            <h2 id="jamName">Jam Name</h2>
+            <p id="jamDesc">Jam Description</p>
+            <span id="jamStatus" class="jam-status status-waiting">Waiting</span>
+            
+            <!-- QR Code Section -->
+            <div class="qr-section">
+                <h3>Share this jam</h3>
+                <div class="qr-container">
+                    <img id="qrCode" src="" alt="QR Code" style="display: none;">
+                    <div id="qrLoading">Generating QR code...</div>
+                </div>
+                <p class="qr-url" id="jamUrl"></p>
+            </div>
+        </div>
+
+        <!-- Attendee Registration -->
+        <div id="attendeeRegistration" class="attendee-registration">
+            <h3>Join as Attendee</h3>
+            <div class="form-group">
+                <label for="attendeeName">Your Name:</label>
+                <input type="text" id="attendeeName" placeholder="Enter your name">
+            </div>
+            <button class="btn btn-primary" onclick="registerAttendee()">Join Jam</button>
+        </div>
+
+        <!-- Attendee Info -->
+        <div id="attendeeInfo" class="attendee-info hidden">
+            <h3>Welcome, <span id="attendeeDisplayName"></span>!</h3>
+            <p>You're registered as an attendee. You can now vote on songs and register to perform.</p>
+            <button class="btn btn-secondary btn-sm" onclick="clearAttendee()">Change Name</button>
+        </div>
+
+            <div class="songs-section">
+                <h3>Song Queue</h3>
+                <ul id="songList" class="song-list">
+                    <!-- Songs will be loaded here -->
+                </ul>
+            </div>
+
+            <div class="add-song-section">
+                <h3>Add Song to Jam</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="songSelect">Select Song:</label>
+                        <select id="songSelect">
+                            <option value="">Choose a song...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" onclick="addSongToJam()">Add to Jam</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Registration Modal -->
+    <div id="performModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Register to Perform</h3>
+            <p>What instrument will you play? (optional)</p>
+            <div class="form-group">
+                <input type="text" id="instrumentInput" placeholder="e.g., Guitar, Vocals, Drums...">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closePerformModal()">Cancel</button>
+                <button class="btn btn-warning" onclick="confirmPerformRegistration()">Register to Perform</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/breadcrumbs.js"></script>
+    <script src="/static/feature-flags.js"></script>
+    <script src="/static/jam.js"></script>
+</body>
+</html>
