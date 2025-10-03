@@ -2,32 +2,76 @@
 
 A modern, real-time jam session management application built with FastAPI and vanilla JavaScript. JaManager allows musicians to create jam sessions, manage song queues, vote on songs, and register to perform - all with real-time updates via WebSockets.
 
-## 🚀 Quick Start
+## 🏗️ Project Structure
 
-```bash
-# Set up Python environment
-pyenv install 3.11.11
-pyenv virtualenv 3.11.11 jv3.11.11
-pyenv activate jv3.11.11
+This project follows modern best practices with clear separation between backend and frontend:
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Initialize database (SQLite - no external setup required)
-python init_sqlite_db.py
-
-# Start the application
-python start_fresh.py
+```
+jamanager/
+├── backend/                 # FastAPI backend application
+│   ├── app/                # Main application code
+│   │   ├── api/           # API endpoints and dependencies
+│   │   ├── core/          # Core application components
+│   │   ├── models/        # Database models and schemas
+│   │   ├── services/      # Business logic services
+│   │   ├── utils/         # Utility functions
+│   │   └── static/        # Static files (served by FastAPI)
+│   ├── tests/             # Backend tests
+│   ├── requirements.txt   # Python dependencies
+│   └── pyproject.toml     # Python project configuration
+├── frontend/               # Frontend application
+│   ├── src/               # Source code
+│   │   ├── components/    # Reusable UI components
+│   │   ├── pages/         # Page templates
+│   │   ├── services/      # API services
+│   │   ├── utils/         # Utility functions
+│   │   └── assets/        # Static assets (CSS, JS, images)
+│   ├── public/            # Public assets
+│   ├── package.json       # Node.js dependencies
+│   └── vite.config.js     # Vite build configuration
+├── docs/                  # Documentation
+├── scripts/               # Utility scripts
+├── config/                # Configuration files
+├── docker-compose.yml     # Docker Compose configuration
+└── Makefile              # Development commands
 ```
 
-Visit `http://localhost:8000` and use access code `jam2024` for jam manager privileges.
+## 🚀 Quick Start
 
-## 📚 Documentation
+### Prerequisites
+- Python 3.11+
+- Node.js 18+
+- pip
+- npm
 
-- [Requirements](docs/REQUIREMENTS.md) - Detailed feature specifications
-- [Test Plan](docs/TEST_PLAN.md) - Comprehensive testing guide
-- [Testing Guide](docs/TESTING_GUIDE.md) - How to test the application
-- [Session Summary](docs/SESSION_SUMMARY.md) - Development history
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd jamanager
+
+# Install all dependencies
+make install
+
+# Initialize the database
+make setup-db
+
+# Start development servers
+make dev
+```
+
+This will start:
+- Backend API: http://localhost:8000
+- Frontend: http://localhost:3000
+
+### Alternative: Docker
+
+```bash
+# Build and start with Docker Compose
+make docker-build
+make docker-up
+```
 
 ## 🎵 Features
 
@@ -52,44 +96,76 @@ Visit `http://localhost:8000` and use access code `jam2024` for jam manager priv
 - **Breadcrumb Navigation**: Easy navigation between management areas
 - **Full Voting Rights**: Can vote on songs like any other user
 
-## 🏗️ Architecture
+## 🛠️ Development
 
-- **Backend**: FastAPI with SQLite and WebSockets
-- **Frontend**: Vanilla JavaScript with responsive design
-- **Database**: SQLite with JSON support (file-based, zero configuration)
-- **Real-time**: WebSocket connections for live updates
-- **IDs**: String-based IDs for better compatibility
+### Available Commands
 
-## 📁 Project Structure
-
-```
-jamanager/
-├── main.py              # FastAPI application
-├── models.py            # Database models
-├── requirements.txt     # Python dependencies
-├── static/             # Frontend assets
-├── docs/               # Documentation
-├── scripts/            # Utility scripts
-└── tests/              # Test files
+```bash
+make help                 # Show all available commands
+make install              # Install all dependencies
+make dev                  # Start both backend and frontend
+make dev-backend          # Start only backend
+make dev-frontend         # Start only frontend
+make test                 # Run all tests
+make lint                 # Run linting
+make format               # Format code
+make build                # Build for production
+make clean                # Clean build artifacts
 ```
 
-## 🔧 Configuration
+### Backend Development
 
-Create a `.env` file:
-```env
-DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
-JAM_MANAGER_ACCESS_CODE=jam2024
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+### Frontend Development
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 ## 🧪 Testing
 
 ```bash
-# Run automated tests
-./scripts/run_tests.sh
+# Run all tests
+make test
 
-# Manual testing
-open test_websocket.html
+# Run backend tests only
+make test-backend
+
+# Run frontend tests only
+make test-frontend
 ```
+
+## 🔧 Configuration
+
+Create a `.env` file in the project root:
+
+```env
+DATABASE_URL=sqlite+aiosqlite:///./backend/data/jamanager.db
+JAM_MANAGER_ACCESS_CODE=jam2024
+```
+
+## 📚 Documentation
+
+- [Requirements](docs/REQUIREMENTS.md) - Detailed feature specifications
+- [Test Plan](docs/TEST_PLAN.md) - Comprehensive testing guide
+- [Testing Guide](docs/TESTING_GUIDE.md) - How to test the application
+- [Session Summary](docs/SESSION_SUMMARY.md) - Development history
+
+## 🏗️ Architecture
+
+- **Backend**: FastAPI with SQLite and WebSockets
+- **Frontend**: Vanilla JavaScript with Vite build system
+- **Database**: SQLite with JSON support (file-based, zero configuration)
+- **Real-time**: WebSocket connections for live updates
+- **Build System**: Vite for frontend, setuptools for backend
+- **Containerization**: Docker and Docker Compose support
 
 ## 📄 License
 

@@ -1,37 +1,29 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: jamanager
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: jamanager123
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  app:
-    build: .
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://postgres:jamanager123@db:5432/jamanager
-      ACCESS_CODE: admin123
-    depends_on:
-      db:
-        condition: service_healthy
+      - DATABASE_URL=sqlite+aiosqlite:///./data/jamanager.db
+      - JAM_MANAGER_ACCESS_CODE=jam2024
     volumes:
-      - ./static/uploads:/app/static/uploads
-    command: >
-      sh -c "python init_db.py && 
-             uvicorn jamanager.main:app --host 0.0.0.0 --port 8000"
+      - ./backend/data:/app/data
+      - ./backend/app/static:/app/app/static
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-volumes:
-  postgres_data:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    command: npm run dev
+    depends_on:
+      - backend

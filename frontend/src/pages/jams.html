@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jams - JaManager</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .jams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .jam-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .jam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .jam-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 1.4rem;
+        }
+        
+        .jam-card .venue {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        
+        .jam-card .date {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .jam-card .description {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .jam-card .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+        }
+        
+        .empty-state h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        
+        
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 All Jams</h1>
+            <p>Discover and join jam sessions</p>
+        </div>
+        
+        <div id="loading" class="loading">
+            Loading jams...
+        </div>
+        
+        <div id="jams-container" style="display: none;">
+            <div id="jams-grid" class="jams-grid"></div>
+        </div>
+        
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <h2>No Jams Found</h2>
+            <p>There are no jam sessions available at the moment.</p>
+            <a href="/" class="btn btn-primary">Go Home</a>
+        </div>
+    </div>
+
+    <script>
+        class JamsPage {
+            constructor() {
+                this.jams = [];
+                this.init();
+            }
+
+            async init() {
+                await this.loadJams();
+            }
+
+            async loadJams() {
+                try {
+                    const response = await fetch('/api/jams');
+                    if (response.ok) {
+                        this.jams = await response.json();
+                        this.displayJams();
+                    } else {
+                        this.showError('Failed to load jams');
+                    }
+                } catch (error) {
+                    console.error('Error loading jams:', error);
+                    this.showError('Network error loading jams');
+                }
+            }
+
+            displayJams() {
+                const loading = document.getElementById('loading');
+                const container = document.getElementById('jams-container');
+                const emptyState = document.getElementById('empty-state');
+                const jamsGrid = document.getElementById('jams-grid');
+
+                loading.style.display = 'none';
+
+                if (this.jams.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                container.style.display = 'block';
+                jamsGrid.innerHTML = '';
+
+                this.jams.forEach(jam => {
+                    const jamCard = this.createJamCard(jam);
+                    jamsGrid.appendChild(jamCard);
+                });
+            }
+
+            createJamCard(jam) {
+                const card = document.createElement('div');
+                card.className = 'jam-card';
+
+                const date = jam.jam_date ? new Date(jam.jam_date).toLocaleDateString('en-AU', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                }) : 'TBD';
+
+                card.innerHTML = `
+                    <h3>${jam.name}</h3>
+                    <div class="venue">📍 ${jam.venue_name || 'Location TBD'}</div>
+                    <div class="date">📅 ${date}</div>
+                    ${jam.description ? `<div class="description">${jam.description}</div>` : ''}
+                    <div class="actions">
+                        <a href="/jam/${jam.slug}" class="btn btn-primary">Join Jam</a>
+                        <a href="/jam/${jam.slug}" class="btn btn-secondary">View Details</a>
+                    </div>
+                `;
+
+                return card;
+            }
+
+            showError(message) {
+                const loading = document.getElementById('loading');
+                loading.innerHTML = `<div style="color: #ff6b6b;">${message}</div>`;
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            new JamsPage();
+        });
+    </script>
+</body>
+</html>

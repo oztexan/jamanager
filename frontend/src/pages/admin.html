@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jamanager - Feature Flag Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* Breadcrumb Navigation Styles */
+        .breadcrumb-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .breadcrumb-item {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: #5a67d8;
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .breadcrumb-separator {
+            color: #a0aec0;
+            margin: 0 8px;
+            font-weight: 400;
+        }
+
+        .breadcrumb-nav a {
+            text-decoration: none;
+        }
+
+        .breadcrumb-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .tab:hover {
+            background: #f7fafc;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .feature-flag-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .feature-flag-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .feature-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .feature-description {
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        .scope-section {
+            margin-bottom: 20px;
+        }
+
+        .scope-title {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .scope-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #38a169;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .config-list {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .config-item:last-child {
+            border-bottom: none;
+        }
+
+        .config-info {
+            flex: 1;
+        }
+
+        .config-scope {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .config-target {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .config-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-enabled {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-disabled {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <div id="breadcrumb-container"></div>
+        
+        <div class="header">
+            <h1>🎛️ Jamanager - Feature Flags</h1>
+            <p>Configure feature flags for different users, roles, and jams</p>
+        </div>
+
+        <div class="content">
+            <!-- Navigation Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div class="feature-flag-card" style="cursor: pointer; transition: all 0.3s ease;" onclick="window.location.href='/jam-manager/venues'">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2rem;">🏢</div>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: 600; color: #2d3748; margin-bottom: 5px;">Venue Management</div>
+                            <div style="color: #718096; font-size: 0.9rem;">Manage jam venues and locations</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-flag-card" style="cursor: pointer; transition: all 0.3s ease;" onclick="window.location.href='/jam-manager'">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2rem;">🎵</div>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: 600; color: #2d3748; margin-bottom: 5px;">Jam Management</div>
+                            <div style="color: #718096; font-size: 0.9rem;">Create and manage jam sessions</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-flag-card" style="cursor: pointer; transition: all 0.3s ease;" onclick="window.location.href='/jam-manager/feature-flags'">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2rem;">⚙️</div>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: 600; color: #2d3748; margin-bottom: 5px;">Feature Flags</div>
+                            <div style="color: #718096; font-size: 0.9rem;">Configure system features and permissions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('overview')">Overview</div>
+                <div class="tab" onclick="showTab('global')">Global</div>
+                <div class="tab" onclick="showTab('roles')">Roles</div>
+                <div class="tab" onclick="showTab('users')">Users</div>
+                <div class="tab" onclick="showTab('jams')">Jams</div>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <h2>Feature Flag Overview</h2>
+                <p>This interface allows you to manage feature flags at different scopes:</p>
+                <ul style="margin: 20px 0; padding-left: 20px;">
+                    <li><strong>Global:</strong> System-wide settings that affect all users</li>
+                    <li><strong>Roles:</strong> Default settings for user roles (Anonymous, Muso, Jam Manager)</li>
+                    <li><strong>Users:</strong> Per-user overrides for specific individuals</li>
+                    <li><strong>Jams:</strong> Per-jam settings that apply to specific jam sessions</li>
+                </ul>
+                <div id="overview-content" class="loading">Loading feature flags...</div>
+            </div>
+
+            <div id="global" class="tab-content">
+                <h2>Global Feature Flags</h2>
+                <p>These settings apply to all users system-wide.</p>
+                <div id="global-content" class="loading">Loading global flags...</div>
+            </div>
+
+            <div id="roles" class="tab-content">
+                <h2>Role-Based Feature Flags</h2>
+                <p>Configure default feature flags for each user role.</p>
+                <div id="roles-content" class="loading">Loading role flags...</div>
+            </div>
+
+            <div id="users" class="tab-content">
+                <h2>User-Specific Feature Flags</h2>
+                <p>Override feature flags for specific users.</p>
+                <div class="form-group">
+                    <label for="user-id">User ID:</label>
+                    <input type="text" id="user-id" placeholder="Enter user ID">
+                    <button class="btn btn-primary" onclick="loadUserFlags()">Load User Flags</button>
+                </div>
+                <div id="users-content" class="loading">Enter a user ID to load their flags</div>
+            </div>
+
+            <div id="jams" class="tab-content">
+                <h2>Jam-Specific Feature Flags</h2>
+                <p>Configure feature flags for specific jam sessions.</p>
+                <div class="form-group">
+                    <label for="jam-id">Jam ID:</label>
+                    <input type="text" id="jam-id" placeholder="Enter jam ID">
+                    <button class="btn btn-primary" onclick="loadJamFlags()">Load Jam Flags</button>
+                </div>
+                <div id="jams-content" class="loading">Enter a jam ID to load its flags</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allFeatureFlags = {};
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Load content for the tab
+            loadTabContent(tabName);
+        }
+
+        // Load content for specific tab
+        async function loadTabContent(tabName) {
+            switch(tabName) {
+                case 'overview':
+                    await loadOverview();
+                    break;
+                case 'global':
+                    await loadGlobalFlags();
+                    break;
+                case 'roles':
+                    await loadRoleFlags();
+                    break;
+                case 'users':
+                    // Content loaded when user ID is entered
+                    break;
+                case 'jams':
+                    // Content loaded when jam ID is entered
+                    break;
+            }
+        }
+
+        // Load all feature flags
+        async function loadAllFeatureFlags() {
+            try {
+                const response = await fetch('/api/feature-flags/');
+                allFeatureFlags = await response.json();
+            } catch (error) {
+                console.error('Error loading feature flags:', error);
+                showError('Failed to load feature flags');
+            }
+        }
+
+        // Load overview
+        async function loadOverview() {
+            const content = document.getElementById('overview-content');
+            content.innerHTML = '<div class="loading">Loading overview...</div>';
+            
+            await loadAllFeatureFlags();
+            
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+            
+            for (const [featureName, featureData] of Object.entries(allFeatureFlags)) {
+                const configs = featureData.configurations || [];
+                html += `
+                    <div class="feature-flag-card">
+                        <div class="feature-name">${featureName}</div>
+                        <div class="feature-description">${featureData.feature_info.description}</div>
+                        <div class="scope-title">Configurations (${configs.length})</div>
+                        <div class="config-list">
+                            ${configs.length === 0 ? '<div style="color: #718096; font-style: italic;">No custom configurations</div>' : ''}
+                            ${configs.map(config => `
+                                <div class="config-item">
+                                    <div class="config-info">
+                                        <div class="config-scope">${config.scope}</div>
+                                        <div class="config-target">${config.target_id || 'system'}</div>
+                                    </div>
+                                    <div class="config-status">
+                                        <span class="status-badge ${config.enabled ? 'status-enabled' : 'status-disabled'}">
+                                            ${config.enabled ? 'Enabled' : 'Disabled'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        // Load global flags
+        async function loadGlobalFlags() {
+            const content = document.getElementById('global-content');
+            content.innerHTML = '<div class="loading">Loading global flags...</div>';
+            
+            await loadAllFeatureFlags();
+            
+            let html = '';
+            for (const [featureName, featureData] of Object.entries(allFeatureFlags)) {
+                const globalConfig = featureData.configurations.find(c => c.scope === 'global');
+                const isEnabled = globalConfig ? globalConfig.enabled : false;
+                
+                html += `
+                    <div class="feature-flag-card">
+                        <div class="feature-flag-header">
+                            <div class="feature-name">${featureName}</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" ${isEnabled ? 'checked' : ''} 
+                                       onchange="updateGlobalFlag('${featureName}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="feature-description">${featureData.feature_info.description}</div>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = html;
+        }
+
+        // Load role flags
+        async function loadRoleFlags() {
+            const content = document.getElementById('roles-content');
+            content.innerHTML = '<div class="loading">Loading role flags...</div>';
+            
+            await loadAllFeatureFlags();
+            
+            const roles = ['anonymous', 'registered_attendee', 'jam_manager'];
+            let html = '';
+            
+            for (const role of roles) {
+                html += `<h3 style="margin: 30px 0 15px 0; color: #4a5568;">${role.replace('_', ' ').toUpperCase()}</h3>`;
+                
+                for (const [featureName, featureData] of Object.entries(allFeatureFlags)) {
+                    const roleConfig = featureData.configurations.find(c => c.scope === 'role' && c.target_id === role);
+                    const isEnabled = roleConfig ? roleConfig.enabled : featureData.feature_info.default_enabled_for.includes(role);
+                    
+                    html += `
+                        <div class="feature-flag-card">
+                            <div class="feature-flag-header">
+                                <div class="feature-name">${featureName}</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" ${isEnabled ? 'checked' : ''} 
+                                           onchange="updateRoleFlag('${featureName}', '${role}', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="feature-description">${featureData.feature_info.description}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            content.innerHTML = html;
+        }
+
+        // Update global flag
+        async function updateGlobalFlag(featureName, enabled) {
+            try {
+                const response = await fetch('/api/feature-flags/global', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        feature_name: featureName,
+                        enabled: enabled
+                    })
+                });
+                
+                if (response.ok) {
+                    showSuccess(`Global flag ${featureName} ${enabled ? 'enabled' : 'disabled'}`);
+                    await loadGlobalFlags(); // Refresh
+                } else {
+                    throw new Error('Failed to update flag');
+                }
+            } catch (error) {
+                console.error('Error updating global flag:', error);
+                showError('Failed to update global flag');
+            }
+        }
+
+        // Update role flag
+        async function updateRoleFlag(featureName, role, enabled) {
+            try {
+                const response = await fetch(`/api/feature-flags/role/${role}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        feature_name: featureName,
+                        enabled: enabled
+                    })
+                });
+                
+                if (response.ok) {
+                    showSuccess(`Role flag ${featureName} for ${role} ${enabled ? 'enabled' : 'disabled'}`);
+                    await loadRoleFlags(); // Refresh
+                } else {
+                    throw new Error('Failed to update flag');
+                }
+            } catch (error) {
+                console.error('Error updating role flag:', error);
+                showError('Failed to update role flag');
+            }
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const content = document.querySelector('.content');
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            content.insertBefore(successDiv, content.firstChild);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
+        }
+
+        // Show error message
+        function showError(message) {
+            const content = document.querySelector('.content');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            content.insertBefore(errorDiv, content.firstChild);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTabContent('overview');
+            // Initialize breadcrumbs for jam manager
+            if (window.breadcrumbManager) {
+                window.breadcrumbManager.setBreadcrumbs(BreadcrumbManager.getJamManagerBreadcrumbs());
+            }
+        });
+    </script>
+    <script src="/static/breadcrumbs.js"></script>
+</body>
+</html>

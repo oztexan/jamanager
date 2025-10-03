@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 """
-JaManager Application Entry Point
+JaManager Backend Application Entry Point
 
 This script starts the JaManager FastAPI application.
 """
-
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
 import uvicorn
 from app.main import app
