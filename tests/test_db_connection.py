@@ -13,7 +13,7 @@ load_dotenv()
 async def test_database():
     """Test SQLite database connection and schema"""
     
-    db_path = "backend/jamanager.db"
+    db_path = "jamanager.db"
     
     if not os.path.exists(db_path):
         print(f"❌ Database file not found: {db_path}")

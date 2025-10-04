@@ -8,14 +8,12 @@ This project follows modern best practices with a server-rendered architecture:
 
 ```
 jamanager/
-├── backend/                 # FastAPI backend application
-│   ├── app/                # Main application code
-│   │   ├── api/           # API endpoints and dependencies
-│   │   ├── core/          # Core application components
-│   │   ├── models/        # Database models and schemas
-│   │   ├── services/      # Business logic services
-│   │   ├── utils/         # Utility functions
-│   │   └── static/        # Static files (served by FastAPI)
+├── api/                    # FastAPI API endpoints and dependencies
+├── core/                   # Core application configuration
+├── models/                 # Database models and schemas
+├── services/               # Business logic services
+├── static/                 # Frontend assets (HTML, CSS, JS)
+├── utils/                  # Utility functions
 │   ├── tests/             # Backend tests
 │   ├── requirements.txt   # Python dependencies
 │   └── pyproject.toml     # Python project configuration
@@ -145,7 +143,7 @@ make test-backend
 Create a `.env` file in the project root:
 
 ```env
-DATABASE_URL=sqlite+aiosqlite:///./backend/data/jamanager.db
+DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
 JAM_MANAGER_ACCESS_CODE=jam2024
 ```
 

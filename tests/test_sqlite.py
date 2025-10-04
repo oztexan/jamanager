@@ -10,7 +10,7 @@ import os
 async def test_database():
     """Test the SQLite database connection and data"""
     
-    db_path = "backend/jamanager.db"
+    db_path = "jamanager.db"
     
     if not os.path.exists(db_path):
         print("❌ Database file not found")

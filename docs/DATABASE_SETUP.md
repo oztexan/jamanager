@@ -17,7 +17,7 @@ This document describes the SQLite database setup for Jamanager.
 pyenv activate jv3.11.11
 
 # Initialize SQLite database with schema and sample data
-python backend/app/utils/init_sqlite_db.py
+python init_dev_database.py
 ```
 
 ### 2. Reset Database (if needed)
@@ -66,14 +66,14 @@ All previous development migrations have been consolidated into this single sche
 Set these in your `.env` file:
 
 ```bash
-DATABASE_URL=sqlite+aiosqlite:///./backend/jamanager.db
+DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
 ```
 
 ## Development Workflow
 
 1. **Make schema changes**: Edit `schema.sql`
 2. **Test changes**: Run `python reset_database.py`
-3. **Update models**: Update SQLAlchemy models in `backend/app/models/database.py`
+3. **Update models**: Update SQLAlchemy models in `models/database.py`
 4. **Test application**: Start server and test functionality
 
 ## Production Considerations

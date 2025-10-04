@@ -21,7 +21,7 @@ def run_command(cmd, cwd=None):
 
 def check_database():
     """Check if the SQLite database exists and has data"""
-    db_path = "backend/jamanager.db"
+    db_path = "jamanager.db"
     if not os.path.exists(db_path):
         print("❌ Database file not found")
         return False
@@ -68,7 +68,7 @@ def main():
     
     # Set environment variables
     env = os.environ.copy()
-    env['DATABASE_URL'] = 'sqlite+aiosqlite:///./backend/jamanager.db'
+    env['DATABASE_URL'] = 'sqlite+aiosqlite:///./jamanager.db'
     
     print("🌐 Starting server...")
     print("📍 Server will be available at: http://localhost:8000")

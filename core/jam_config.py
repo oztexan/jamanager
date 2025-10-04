@@ -22,7 +22,7 @@ class JamConfig:
     FOREGROUND_TRANSPARENCY = float(os.getenv("JAM_FOREGROUND_TRANSPARENCY", "0.95"))  # 0.0 = fully transparent, 1.0 = fully opaque
     
     # Image upload settings
-    UPLOAD_DIR = os.getenv("JAM_UPLOAD_DIR", "backend/app/static/uploads")
+    UPLOAD_DIR = os.getenv("JAM_UPLOAD_DIR", "static/uploads")
     MAX_IMAGE_SIZE = int(os.getenv("JAM_MAX_IMAGE_SIZE", "5242880"))  # 5MB in bytes
     ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
     
