@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Jam Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .card { border: 1px solid #ccc; padding: 20px; margin: 10px 0; }
+        .hidden { display: none; }
+        #songsList { list-style: none; padding: 0; }
+        #songsList li { padding: 10px; border: 1px solid #eee; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Test Jam Page</h1>
+    
+    <!-- User Registration Section -->
+    <section id="userSection" class="card">
+        <!-- Anonymous User State -->
+        <div id="anonymousUser" class="user-state">
+            <h3>Join the Jam</h3>
+            <p>Enter your name to vote on songs and register to perform</p>
+            <div class="form-group">
+                <input type="text" id="userName" placeholder="Your name" class="form-control">
+                <button class="btn btn-primary" onclick="jamUI.registerUser()">Join Jam</button>
+            </div>
+        </div>
+
+        <!-- Registered User State -->
+        <div id="registeredUser" class="user-state hidden">
+            <h3>Welcome, <span id="userDisplayName"></span>!</h3>
+            <p>You can vote on songs and register to perform</p>
+            <div class="user-actions">
+                <button id="addSongBtn" class="btn btn-primary btn-sm hidden" onclick="jamUI.showAddSongModal()">
+                    <span class="btn-icon">➕</span>
+                    Add Song
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Songs Section -->
+    <section class="songs-section card">
+        <h3>Song Queue</h3>
+        <div id="songsList" class="songs-list">
+            <!-- Songs will be loaded here -->
+        </div>
+    </section>
+
+    <!-- Add Song Modal -->
+    <div id="addSongModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Add Song to Jam</h3>
+            <div class="form-group">
+                <label>Select Song:</label>
+                <select id="songSelect" class="form-control">
+                    <option value="">Choose a song...</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="jamUI.closeAddSongModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="jamUI.addSongToJam()">Add Song</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scripts -->
+    <script>
+        console.log('Test page loaded');
+        
+        // Test if we can access the API
+        async function testAPI() {
+            try {
+                console.log('Testing API...');
+                const response = await fetch('/api/jams/by-slug/friday-night-jam-main-stage-2025-10-04');
+                console.log('API response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('API data:', data);
+                    console.log('Songs count:', data.songs ? data.songs.length : 0);
+                    
+                    // Test displaying songs
+                    const songsList = document.getElementById('songsList');
+                    if (songsList && data.songs) {
+                        songsList.innerHTML = '';
+                        data.songs.forEach((jamSong, index) => {
+                            const song = jamSong.song;
+                            const li = document.createElement('li');
+                            li.innerHTML = `${index + 1}. ${song.title} - ${song.artist}`;
+                            songsList.appendChild(li);
+                        });
+                        console.log('Songs displayed in UI');
+                    }
+                } else {
+                    console.error('API error:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error('API test error:', error);
+            }
+        }
+        
+        // Run test when page loads
+        document.addEventListener('DOMContentLoaded', testAPI);
+    </script>
+</body>
+</html>

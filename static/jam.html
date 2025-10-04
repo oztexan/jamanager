@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jam Session - Jamanager</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/jam.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
+    <!-- Background Layer -->
+    <div id="backgroundLayer" class="background-layer"></div>
+    <div class="background-overlay"></div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header Section -->
+        <header class="jam-header card">
+            <div class="jam-info">
+                <h1 id="jamName">Loading Jam...</h1>
+                <p id="jamDescription" class="jam-description"></p>
+                <div class="jam-actions">
+                    <button id="shareBtn" class="btn btn-secondary" onclick="jamUI.showShareModal()">
+                        <span class="btn-icon">🔗</span>
+                        Share Jam
+                    </button>
+        </div>
+        </div>
+        </header>
+
+        <!-- User Registration Section -->
+        <section id="userSection" class="user-section card">
+            <!-- Anonymous User State -->
+            <div id="anonymousUser" class="user-state">
+                <h3>Join the Jam</h3>
+                <p>Enter your name to vote on songs and register to perform</p>
+                <div class="form-group">
+                    <input type="text" id="userName" placeholder="Your name" class="form-control">
+                    <button class="btn btn-primary" onclick="jamUI.registerUser()">Join Jam</button>
+                </div>
+            </div>
+
+            <!-- Registered User State -->
+            <div id="registeredUser" class="user-state hidden">
+                <h3>Welcome, <span id="userDisplayName"></span>!</h3>
+                <p>You can vote on songs and register to perform</p>
+                <div class="user-actions">
+                    <button id="addSongBtn" class="btn btn-primary btn-sm hidden" onclick="jamUI.showAddSongModal()">
+                        <span class="btn-icon">➕</span>
+                        Add Song
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Songs Section -->
+        <section class="songs-section card">
+            <div class="songs-header">
+                <h3>Song Queue</h3>
+                <div class="songs-controls">
+                    <!-- Sorting Controls -->
+                    <div class="sort-controls">
+                        <label for="sortCriteria">Sort by:</label>
+                        <select id="sortCriteria" class="form-control form-control-sm">
+                            <option value="name">Song Name</option>
+                            <option value="artist">Artist</option>
+                            <option value="votes">Vote Count</option>
+                            <option value="performance">Performance Order</option>
+                        </select>
+                        <button id="sortDirection" class="sort-toggle-btn" type="button" title="Toggle sort direction">
+                            <span class="sort-icon">↓</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Performance Filter (Muso Only) -->
+                    <div id="performanceFilter" class="filter-controls hidden">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showOnlyMyPerformances">
+                            <span class="checkmark"></span>
+                            Show only my performances
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div id="songsList" class="songs-list">
+                    <!-- Songs will be loaded here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Share This Jam</h3>
+            <div class="share-content">
+                <div class="share-url">
+                    <label>Jam URL:</label>
+                    <input type="text" id="shareUrl" readonly class="form-control">
+                    <button class="btn btn-secondary btn-sm" onclick="jamUI.copyUrl()">Copy URL</button>
+                </div>
+                <div class="share-qr">
+                    <label>QR Code:</label>
+                    <div id="qrCodeContainer">
+                        <div id="qrLoading">Generating QR code...</div>
+                        <img id="qrCode" class="hidden" alt="QR Code">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="jamUI.closeShareModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Song Modal -->
+    <div id="addSongModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Add Song to Jam</h3>
+            <div class="form-group">
+                <label>Select Song:</label>
+                <select id="songSelect" class="form-control">
+                    <option value="">Choose a song...</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="jamUI.closeAddSongModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="jamUI.addSongToJam()">Add Song</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Registration Modal -->
+    <div id="performModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Register to Perform</h3>
+            <div class="form-group">
+                <label>Instrument:</label>
+                <input type="text" id="instrumentInput" placeholder="e.g., Guitar, Piano, Vocals" class="form-control">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="jamUI.closePerformModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="jamUI.confirmPerformRegistration()">Register to Perform</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/notification-system.js?v=20251004"></script>
+    <script src="/static/js/jam-core.js?v=20251004"></script>
+    <script src="/static/js/jam-attendee.js?v=20251004e"></script>
+    <script src="/static/js/jam-songs.js?v=20251004m"></script>
+    <script src="/static/js/jam-websocket.js?v=20251004c"></script>
+    <script src="/static/js/jam-chord-sheets.js?v=20251004"></script>
+    <script src="/static/js/jam-main.js?v=20251004"></script>
+</body>
+</html>

@@ -26,7 +26,7 @@ This guide provides comprehensive testing instructions for the Jamanager applica
 
 ### Prerequisites
 1. **Server Running**: Ensure FastAPI server is running on `http://localhost:8000`
-2. **Database**: PostgreSQL database with test data
+2. **Database**: SQLite database with test data
 3. **Dependencies**: Python with `requests` library installed
 
 ### Running Automated Tests
@@ -183,7 +183,7 @@ jobs:
 
 ### Common Issues
 1. **Server not running**: Ensure FastAPI server is started
-2. **Database connection**: Check PostgreSQL is running
+2. **Database connection**: Check SQLite database file exists
 3. **Port conflicts**: Verify port 8000 is available
 4. **Dependencies**: Install required Python packages
 

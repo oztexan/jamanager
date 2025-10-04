@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Hearts</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/jam.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Debug Hearts Test</h1>
+        
+        <div class="songs-section card">
+            <h3>Song Queue</h3>
+            <div id="songsList" class="songs-list">
+                <!-- Songs will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test the heart rendering directly
+        function testHeartRendering() {
+            console.log('Testing heart rendering...');
+            const songListElement = document.getElementById('songsList');
+            
+            // Create a test song item with heart
+            const listItem = document.createElement('li');
+            listItem.className = 'song-item';
+            listItem.innerHTML = `
+                <div class="song-info">
+                    <h4>Test Song</h4>
+                    <p class="song-artist">Artist: Test Artist</p>
+                    <div class="song-meta">
+                        <div class="vote-count">
+                            <span>5</span>
+                            <div class="heart-toggle" 
+                                 data-action="vote" 
+                                 data-song-id="test123"
+                                 title="Vote for this song">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            songListElement.appendChild(listItem);
+            console.log('Test song added with heart');
+        }
+        
+        // Run test when page loads
+        document.addEventListener('DOMContentLoaded', testHeartRendering);
+    </script>
+</body>
+</html>

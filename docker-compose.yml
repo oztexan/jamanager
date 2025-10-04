@@ -3,27 +3,14 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite+aiosqlite:///./data/jamanager.db
+      - DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
       - JAM_MANAGER_ACCESS_CODE=jam2024
     volumes:
-      - ./backend/data:/app/data
-      - ./backend/app/static:/app/app/static
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-    command: npm run dev
-    depends_on:
-      - backend
+      - .:/app
+      - ./static:/app/static
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload

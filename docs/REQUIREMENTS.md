@@ -224,7 +224,7 @@ Jamanager is a real-time song voting and jam management system with two main use
 - ✅ **Votes Table**: Track individual votes (attendee + song + jam)
 - ✅ **Performance Registrations Table**: Track who's registered to perform on songs
 - ✅ **Venues Table**: Store venue information (name, address, description)
-- ✅ **SQLite Migration**: Converted from PostgreSQL to SQLite for easier setup
+- ✅ **SQLite Database**: Uses SQLite for zero-configuration setup
 - ✅ **String IDs**: Converted from UUID to string-based IDs for better compatibility
 
 ### API Endpoints ✅ **COMPLETED**

@@ -40,7 +40,7 @@ jamanager/
 
 ### Backend (FastAPI)
 - ✅ Complete REST API with all endpoints
-- ✅ PostgreSQL database with proper schema
+- ✅ SQLite database with proper schema
 - ✅ WebSocket support for real-time updates
 - ✅ Role-based access control
 - ✅ Image upload handling

@@ -5,7 +5,7 @@
 ## Major Accomplishments
 
 ### 1. Complete Database Migration ✅ **COMPLETED**
-- **Problem**: PostgreSQL connection issues and complex setup requirements
+- **Problem**: Database setup complexity and connection issues
 - **Solution**: Migrated to SQLite file-based database
 - **Changes**:
   - Updated `DATABASE_URL` to use `sqlite+aiosqlite:///./jamanager.db`
@@ -86,7 +86,7 @@
 ## Technical Debt Resolved
 
 ### Database Architecture
-- **Before**: PostgreSQL with complex setup and connection issues
+- **Before**: Complex database setup and connection issues
 - **After**: SQLite file-based database with zero configuration
 - **Benefit**: Simplified deployment, no external dependencies
 
@@ -126,7 +126,7 @@
 
 ## Key Achievements
 
-1. **Database Migration**: Eliminated PostgreSQL dependency and connection issues
+1. **Database Migration**: Eliminated complex database setup and connection issues
 2. **ID System Simplification**: Removed UUID complexity for better compatibility
 3. **Universal Voting**: All user types can now vote on songs
 4. **Chord Sheet Integration**: Automatic lookup and linking of Ultimate Guitar tabs

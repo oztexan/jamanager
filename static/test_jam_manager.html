@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Jam Manager</title>
+</head>
+<body>
+    <h1>Test Jam Manager Session</h1>
+    <button onclick="testJamManager()">Test Jam Manager Session</button>
+    <div id="result"></div>
+
+    <script>
+        async function testJamManager() {
+            try {
+                // First, get a jam manager session
+                const response = await fetch('/api/access-code/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({access_code: 'jam2024'})
+                });
+                
+                const data = await response.json();
+                console.log('Jam manager session:', data);
+                
+                if (data.success) {
+                    // Test permissions with the session
+                    const permResponse = await fetch('/api/user/permissions', {
+                        headers: {
+                            'X-Session-ID': data.session_id
+                        }
+                    });
+                    
+                    const permissions = await permResponse.json();
+                    console.log('Permissions:', permissions);
+                    
+                    document.getElementById('result').innerHTML = `
+                        <p>Session ID: ${data.session_id}</p>
+                        <p>User Role: ${permissions.user_role}</p>
+                        <p>Has Access: ${permissions.has_access}</p>
+                        <p>Can Manage Jam: ${permissions.permissions.can_manage_jam}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

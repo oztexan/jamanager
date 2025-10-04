@@ -6,7 +6,7 @@
 
 ## 🎯 Overview
 
-This document provides a comprehensive deployment plan for the JaManager application, a real-time jam session management system built with FastAPI and vanilla JavaScript. The application features WebSocket support, SQLite database, and a responsive frontend.
+This document provides a comprehensive deployment plan for the JaManager application, a real-time jam session management system built with FastAPI and vanilla JavaScript. The application features WebSocket support, SQLite database, and a server-rendered frontend.
 
 ## 📊 Current Application State
 

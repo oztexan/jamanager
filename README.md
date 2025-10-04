@@ -4,7 +4,7 @@ A modern, real-time jam session management application built with FastAPI and va
 
 ## 🏗️ Project Structure
 
-This project follows modern best practices with clear separation between backend and frontend:
+This project follows modern best practices with a server-rendered architecture:
 
 ```
 jamanager/
@@ -19,16 +19,6 @@ jamanager/
 │   ├── tests/             # Backend tests
 │   ├── requirements.txt   # Python dependencies
 │   └── pyproject.toml     # Python project configuration
-├── frontend/               # Frontend application
-│   ├── src/               # Source code
-│   │   ├── components/    # Reusable UI components
-│   │   ├── pages/         # Page templates
-│   │   ├── services/      # API services
-│   │   ├── utils/         # Utility functions
-│   │   └── assets/        # Static assets (CSS, JS, images)
-│   ├── public/            # Public assets
-│   ├── package.json       # Node.js dependencies
-│   └── vite.config.js     # Vite build configuration
 ├── docs/                  # Documentation
 ├── scripts/               # Utility scripts
 ├── config/                # Configuration files
@@ -40,9 +30,7 @@ jamanager/
 
 ### Prerequisites
 - Python 3.11+
-- Node.js 18+
 - pip
-- npm
 
 ### Installation
 
@@ -121,13 +109,6 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-### Frontend Development
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
 
 ## 🧪 Testing
 
@@ -138,8 +119,6 @@ make test
 # Run backend tests only
 make test-backend
 
-# Run frontend tests only
-make test-frontend
 ```
 
 ## 🔧 Configuration
@@ -161,10 +140,10 @@ JAM_MANAGER_ACCESS_CODE=jam2024
 ## 🏗️ Architecture
 
 - **Backend**: FastAPI with SQLite and WebSockets
-- **Frontend**: Vanilla JavaScript with Vite build system
+- **Frontend**: Server-rendered HTML with vanilla JavaScript modules
 - **Database**: SQLite with JSON support (file-based, zero configuration)
 - **Real-time**: WebSocket connections for live updates
-- **Build System**: Vite for frontend, setuptools for backend
+- **Build System**: setuptools for backend
 - **Containerization**: Docker and Docker Compose support
 
 ## 📄 License
