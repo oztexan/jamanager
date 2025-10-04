@@ -1,146 +1,131 @@
-# Sprint 1: Developer Experience & Documentation - Acceptance Criteria
+# 🚀 Sprint 1: Developer Experience & Documentation - Acceptance Criteria
 
-## 🎯 **Sprint Goals**
-Improve developer onboarding experience, add comprehensive documentation, create better development tools, and enhance debugging capabilities.
+## 📋 **Sprint Goal**
+Improve developer experience and documentation to make the project more accessible and maintainable.
 
 ## ✅ **Acceptance Criteria Checklist**
 
-### **1. Enhanced Documentation**
-- [ ] **README.md updated** with multiple setup options (automated, manual, make)
-- [ ] **Clear access instructions** with URLs and access codes
-- [ ] **Troubleshooting section** added with quick fixes
-- [ ] **Better organization** and navigation structure
+### **1. Developer Environment Setup**
+- [ ] **Automated Setup Script**: `setup-dev-environment.sh` exists and works
+- [ ] **Troubleshooting Guide**: `TROUBLESHOOTING.md` exists with common issues and solutions
+- [ ] **Quick Start**: README.md has clear quick start instructions
+- [ ] **Environment Detection**: Application detects development vs production environment
 
-### **2. Automated Setup Script**
-- [ ] **setup-dev-environment.sh** created and executable
-- [ ] **Environment validation** checks Python version and pyenv
-- [ ] **Virtual environment** creation and activation
-- [ ] **Dependency installation** from requirements.txt
-- [ ] **Database initialization** with development data
-- [ ] **Development aliases** created for common commands
-- [ ] **Colored output** for better user experience
+### **2. Development Data & Testing**
+- [ ] **Diverse Jam Data**: 5 different jam sessions with different themes
+- [ ] **Today's Jam**: At least one jam scheduled for today's date
+- [ ] **Background Images**: All jams have background images
+- [ ] **Multiple Venues**: 4 different venues created
+- [ ] **Song Variety**: Each jam has appropriate songs for its genre
 
-### **3. Comprehensive Troubleshooting Guide**
-- [ ] **TROUBLESHOOTING.md** created with common issues
-- [ ] **Application startup issues** covered (module not found, port conflicts)
-- [ ] **Database connection problems** addressed
-- [ ] **Static file loading issues** documented
-- [ ] **WebSocket connection problems** explained
-- [ ] **Environment and pyenv issues** covered
-- [ ] **Debugging commands** and tools provided
+### **3. Dev Environment Indicator**
+- [ ] **Visible on All Pages**: Dev indicator appears on home, jam, songs, and jams pages
+- [ ] **Git Information**: Shows current git branch and commit hash
+- [ ] **Sprint Information**: Shows current sprint name and features
+- [ ] **Port Information**: Shows which port the app is running on
+- [ ] **Environment Control**: Can be hidden/shown via URL parameters
+- [ ] **DRY Implementation**: Single JavaScript component used across all pages
 
-### **4. Enhanced Application Code**
-- [ ] **main.py improved** with comprehensive docstrings
-- [ ] **Better error handling** in startup event
-- [ ] **Enhanced logging** with informative messages
-- [ ] **Application imports successfully** without errors
+### **4. UI/UX Improvements**
+- [ ] **Jam Page Styling**: Jam header has proper contrast and readability
+- [ ] **Heart Button Behavior**: Unregistered users can't vote (heart doesn't change color)
+- [ ] **Error Messages**: Clear error messages for failed actions
+- [ ] **Visual Feedback**: Proper loading states and user feedback
 
-### **5. Application Functionality**
-- [ ] **Application runs on port 3000** successfully
-- [ ] **All existing functionality preserved** (voting, jams, songs, etc.)
-- [ ] **Static files load correctly** (CSS, JS, images)
-- [ ] **WebSocket connections work** for real-time updates
-- [ ] **Database operations function** properly
+### **5. API Endpoints**
+- [ ] **Dev Info Endpoint**: `/api/dev-info` returns git branch and commit
+- [ ] **Jam Endpoints**: All jam-related endpoints working correctly
+- [ ] **Static File Serving**: All static files served correctly
+- [ ] **Error Handling**: Proper error responses for invalid requests
+
+### **6. Documentation**
+- [ ] **README Updates**: Clear project overview and setup instructions
+- [ ] **Troubleshooting Guide**: Common issues and solutions documented
+- [ ] **Environment Configuration**: Dev indicator configuration documented
+- [ ] **API Documentation**: Endpoints documented where needed
 
 ## 🧪 **Testing Instructions**
 
-### **1. Test Automated Setup**
+### **Test 1: Dev Environment Setup**
 ```bash
-# Clean environment test
-rm -rf venv
+# Test automated setup
 ./setup-dev-environment.sh
 
-# Verify setup completed successfully
-source venv/bin/activate
-python -c "import main; print('Setup successful')"
+# Verify environment
+curl http://localhost:3000/api/dev-info
 ```
 
-### **2. Test Application Startup**
+### **Test 2: Dev Indicator**
+1. Visit `http://localhost:3000`
+2. Check top-right corner for dev indicator
+3. Verify it shows: Sprint info, Port, Git branch, Commit hash
+4. Visit jam page and verify indicator appears there too
+5. Test URL parameters: `?hide-dev-indicator=true` and `?show-dev-indicator=true`
+
+### **Test 3: Jam Functionality**
+1. Visit `http://localhost:3000/jam/today's-acoustic-session-401efc7985f38d97b1bc609a7ca8e119-2025-10-05`
+2. Verify jam loads with proper styling
+3. Test heart button as unregistered user (should not change color)
+4. Register as attendee and test heart button (should change color)
+5. Verify background image loads
+
+### **Test 4: Development Data**
+1. Check home page shows today's jam
+2. Verify jam has background image
+3. Check jam has appropriate songs
+4. Verify venue information displays
+
+### **Test 5: API Endpoints**
 ```bash
-# Start application
-source venv/bin/activate
-python -m uvicorn main:app --host 0.0.0.0 --port 3000 --reload
+# Test dev info
+curl http://localhost:3000/api/dev-info
 
-# Verify application is accessible
-curl http://localhost:3000
+# Test jams list
+curl http://localhost:3000/api/jams
+
+# Test specific jam
+curl "http://localhost:3000/api/jams/by-slug/today's-acoustic-session-401efc7985f38d97b1bc609a7ca8e119-2025-10-05"
 ```
 
-### **3. Test Core Functionality**
-1. **Visit http://localhost:3000**
-   - [ ] Page loads without errors
-   - [ ] CSS styling applied correctly
-   - [ ] JavaScript functionality works
+## 🎯 **Expected Results**
 
-2. **Test Jam Manager Access**
-   - [ ] Navigate to jam manager section
-   - [ ] Use access code: `jam2024`
-   - [ ] Create a new jam session
+### **Dev Indicator Display**
+```
+🚀 SPRINT 1 - DEVELOPER EXPERIENCE & DOCUMENTATION
+Port 3000 | Documentation ✅ | Dev Tools ✅
+🌿 feature/sprint-1-developer-experience | 96d9056
+```
 
-3. **Test Real-time Features**
-   - [ ] Open multiple browser tabs
-   - [ ] Vote on songs in one tab
-   - [ ] Verify updates appear in other tabs
+### **API Response Examples**
+```json
+// /api/dev-info
+{
+  "git_branch": "feature/sprint-1-developer-experience",
+  "git_commit": "96d9056",
+  "environment": "development"
+}
 
-4. **Test Database Operations**
-   - [ ] Create a jam session
-   - [ ] Add songs to queue
-   - [ ] Verify data persists after page refresh
-
-### **4. Test Documentation**
-1. **README.md**
-   - [ ] All setup options work
-   - [ ] Links are functional
-   - [ ] Instructions are clear and accurate
-
-2. **TROUBLESHOOTING.md**
-   - [ ] Common issues are covered
-   - [ ] Solutions are accurate
-   - [ ] Commands work as described
-
-3. **Setup Script**
-   - [ ] Handles missing dependencies gracefully
-   - [ ] Provides helpful error messages
-   - [ ] Creates all necessary files and directories
+// /api/jams (first jam)
+{
+  "name": "Today's Acoustic Session",
+  "slug": "today's-acoustic-session-401efc7985f38d97b1bc609a7ca8e119-2025-10-05",
+  "jam_date": "2025-10-05",
+  "venue": {
+    "name": "Acoustic Corner"
+  }
+}
+```
 
 ## 📊 **Success Metrics**
-
-### **Developer Experience Improvements**
-- **Setup Time**: New developers can get running in < 5 minutes
-- **Error Resolution**: Common issues have documented solutions
-- **Documentation Coverage**: All major features documented
-- **Tool Availability**: Essential development tools provided
-
-### **Code Quality Improvements**
-- **Documentation**: Key functions have comprehensive docstrings
-- **Error Handling**: Better error messages and logging
-- **Maintainability**: Clear code structure and comments
-
-### **Application Stability**
-- **Startup Success**: Application starts without errors
-- **Functionality**: All existing features work correctly
-- **Performance**: No regression in application performance
-
-## 🎉 **Sprint 1 Completion Criteria**
-
-**Sprint 1 is considered complete when:**
-- [ ] All acceptance criteria items are checked
-- [ ] Application runs successfully on port 3000
-- [ ] All tests pass without errors
-- [ ] Documentation is comprehensive and accurate
-- [ ] Setup process is streamlined and reliable
-
-## 🚀 **Next Steps After Sprint 1**
-
-Once Sprint 1 is approved, we can proceed to:
-- **Sprint 2**: Code Quality & Standards (type hints, error handling)
-- **Sprint 3**: Testing & Validation (unit tests, integration tests)
-- **Sprint 4**: Security & Best Practices
-- **Sprint 5**: Performance Optimization
-- **Sprint 6**: Architecture Improvements
+- ✅ All acceptance criteria met
+- ✅ No linting errors
+- ✅ All endpoints responding correctly
+- ✅ Dev indicator working on all pages
+- ✅ Heart button behavior correct for all user types
+- ✅ Jam styling improved and readable
+- ✅ Development data comprehensive and realistic
 
 ---
 
-**Sprint 1 Status**: ✅ **COMPLETED**  
-**Application URL**: http://localhost:3000  
-**Access Code**: jam2024  
-**Last Updated**: 2025-10-05
+**Sprint 1 Status**: ✅ **COMPLETE** - All acceptance criteria met
+**Next Sprint**: Medium-risk sprint (code quality, testing)
