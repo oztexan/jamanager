@@ -21,9 +21,10 @@ Version: 1.0.0
 """
 import os
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from dotenv import load_dotenv
 
 # Configure logging
@@ -32,6 +33,27 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
+
+def is_development_environment() -> bool:
+    """
+    Determine if the application is running in development mode.
+    
+    Returns:
+        bool: True if in development mode, False otherwise
+    """
+    # Check environment variables
+    debug_mode = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
+    show_dev_indicator = os.getenv("SHOW_DEV_INDICATOR", "True").lower() in ("true", "1", "yes")
+    
+    # Check if running on development port
+    port = os.getenv("PORT", "3000")
+    dev_ports = ["3000", "8000", "5000", "3001", "8001"]
+    is_dev_port = port in dev_ports
+    
+    # Check if running locally (not in production)
+    is_local = os.getenv("ENVIRONMENT", "").lower() not in ("production", "prod")
+    
+    return debug_mode or show_dev_indicator or is_dev_port or is_local
 
 # Import core modules
 from core.database import init_database
@@ -54,6 +76,49 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add development environment middleware
+@app.middleware("http")
+async def add_dev_environment_middleware(request: Request, call_next):
+    """
+    Middleware to inject development environment meta tag into HTML responses.
+    """
+    response = await call_next(request)
+    
+    # Only modify HTML responses
+    if (response.headers.get("content-type", "").startswith("text/html") and 
+        is_development_environment()):
+        
+        # Read the response body
+        body = b""
+        async for chunk in response.body_iterator:
+            body += chunk
+        
+        # Convert to string and inject dev environment meta tag
+        html_content = body.decode("utf-8")
+        
+        # Replace the meta tag if it exists, or add it if it doesn't
+        if '<meta name="dev-environment"' in html_content:
+            # Update existing meta tag
+            html_content = html_content.replace(
+                '<meta name="dev-environment" content="true">',
+                '<meta name="dev-environment" content="true">'
+            )
+        else:
+            # Add meta tag after viewport meta tag
+            html_content = html_content.replace(
+                '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+                '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <meta name="dev-environment" content="true">'
+            )
+        
+        # Create new response with modified content
+        response = HTMLResponse(
+            content=html_content,
+            status_code=response.status_code,
+            headers=dict(response.headers)
+        )
+    
+    return response
 
 # Include API routers
 app.include_router(feature_flag_router)

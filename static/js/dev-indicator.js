@@ -117,11 +117,43 @@ class DevIndicator {
 
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Only show in development (when running on localhost)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    // Check if dev indicator should be shown
+    if (shouldShowDevIndicator()) {
         window.devIndicator = new DevIndicator();
     }
 });
+
+/**
+ * Determine if the dev indicator should be shown
+ * @returns {boolean} True if dev indicator should be displayed
+ */
+function shouldShowDevIndicator() {
+    // Check for explicit disable flag in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('hide-dev-indicator') === 'true') {
+        return false;
+    }
+    
+    // Check for explicit enable flag in URL
+    if (urlParams.get('show-dev-indicator') === 'true') {
+        return true;
+    }
+    
+    // Check if we're in a development environment
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname === '0.0.0.0';
+    
+    // Check for development port (3000, 8000, 5000, etc.)
+    const isDevPort = [3000, 8000, 5000, 3001, 8001].includes(parseInt(window.location.port));
+    
+    // Check for development indicators in the page
+    const hasDevMeta = document.querySelector('meta[name="dev-environment"]');
+    const isDevFromMeta = hasDevMeta && hasDevMeta.getAttribute('content') === 'true';
+    
+    // Show if any development indicators are present
+    return isLocalhost || isDevPort || isDevFromMeta;
+}
 
 // Export for manual initialization if needed
 if (typeof module !== 'undefined' && module.exports) {
