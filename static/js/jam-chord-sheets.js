@@ -116,7 +116,6 @@ class JamChordSheets {
             } else if (type === 'success') {
                 this.jamCore.showSuccess(message);
             } else {
-                console.log(`Info: ${message}`);
             }
         }
     }
