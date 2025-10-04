@@ -301,8 +301,8 @@ class JamanagerApp {
                                 <div class="chord-sheet-rating">⭐ ${sheet.rating.toFixed(2)} (${sheet.votes} votes)</div>
                             </div>
                             <div class="chord-sheet-actions">
-                                <button class="btn btn-sm btn-outline" onclick="selectChordSheet('${sheet.url}')">Use This</button>
-                                <button class="btn btn-sm btn-outline" onclick="window.open('${sheet.url}', '_blank')">🔗</button>
+                                <button class="btn btn-sm btn-outline" onclick= onkeydown="selectChordSheet('${sheet.url}')">Use This</button>
+                                <button class="btn btn-sm btn-outline" onclick= onkeydown="window.open('${sheet.url}', '_blank')">🔗</button>
                             </div>
                         `;
                         links.appendChild(linkDiv);

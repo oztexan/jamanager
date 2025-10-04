@@ -22,8 +22,8 @@
             <h3>Join the Jam</h3>
             <p>Enter your name to vote on songs and register to perform</p>
             <div class="form-group">
-                <input type="text" id="userName" placeholder="Your name" class="form-control">
-                <button class="btn btn-primary" onclick="jamUI.registerUser()">Join Jam</button>
+                <input type="text" id="userName" placeholder="Your name" class="form-control" aria-label="Input" tabindex="0">
+                <button class="btn btn-primary" onclick="jamUI.registerUser()" aria-label="Button" tabindex="0">Join Jam</button>
             </div>
         </div>
 
@@ -32,7 +32,7 @@
             <h3>Welcome, <span id="userDisplayName"></span>!</h3>
             <p>You can vote on songs and register to perform</p>
             <div class="user-actions">
-                <button id="addSongBtn" class="btn btn-primary btn-sm hidden" onclick="jamUI.showAddSongModal()">
+                <button id="addSongBtn" class="btn btn-primary btn-sm hidden" onclick="jamUI.showAddSongModal()" aria-label="Button" tabindex="0">
                     <span class="btn-icon">➕</span>
                     Add Song
                 </button>
@@ -59,8 +59,8 @@
                 </select>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="jamUI.closeAddSongModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="jamUI.addSongToJam()">Add Song</button>
+                <button class="btn btn-secondary" onclick="jamUI.closeAddSongModal()" aria-label="Button" tabindex="0">Cancel</button>
+                <button class="btn btn-primary" onclick="jamUI.addSongToJam()" aria-label="Button" tabindex="0">Add Song</button>
             </div>
         </div>
     </div>

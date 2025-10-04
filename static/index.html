@@ -719,7 +719,7 @@
                     <p>Real-time song voting and jam management</p>
                 </div>
                 <div class="header-right">
-                    <button id="lockButton" class="lock-button" onclick="toggleAccessDialog()" title="Jam Manager Access">
+                    <button id="lockButton" class="lock-button" onclick="toggleAccessDialog()" title="Jam Manager Access" aria-label="Button" tabindex="0">
                         🔒
                     </button>
                 </div>
@@ -748,37 +748,37 @@
         <!-- Navigation Grid -->
         <div class="nav-grid">
             <!-- Jam Manager features - hidden by default, shown via JavaScript -->
-            <a href="#" class="nav-card jam-manager-feature" onclick="showCreateJamModal()" style="display: none;">
+            <a href="#" class="nav-card jam-manager-feature" onclick="showCreateJamModal()" style="display: none;" tabindex="0">
                 <span class="icon">➕</span>
                 <h3>Create Jam</h3>
                 <p>Start a new jam session and invite others to join and vote on songs</p>
             </a>
 
-            <a href="#" class="nav-card jam-manager-feature" onclick="showCreateSongModal()" style="display: none;">
+            <a href="#" class="nav-card jam-manager-feature" onclick="showCreateSongModal()" style="display: none;" tabindex="0">
                 <span class="icon">🎵</span>
                 <h3>Add Song</h3>
                 <p>Add new songs to the library with metadata</p>
             </a>
 
-            <a href="#" class="nav-card jam-manager-feature" onclick="showSongLibrary()" style="display: none;">
+            <a href="#" class="nav-card jam-manager-feature" onclick="showSongLibrary()" style="display: none;" tabindex="0">
                 <span class="icon">📚</span>
                 <h3>Song Library</h3>
                 <p>Browse and manage your song collection</p>
             </a>
 
-            <a href="#" class="nav-card jam-manager-feature" onclick="showJamManagement()" style="display: none;">
+            <a href="#" class="nav-card jam-manager-feature" onclick="showJamManagement()" style="display: none;" tabindex="0">
                 <span class="icon">⚙️</span>
                 <h3>Manage Jams</h3>
                 <p>View and manage all your jam sessions, past and present</p>
             </a>
 
-            <a href="#" class="nav-card jam-manager-feature" onclick="showJamManagerPanel()" style="display: none;">
+            <a href="#" class="nav-card jam-manager-feature" onclick="showJamManagerPanel()" style="display: none;" tabindex="0">
                 <span class="icon">🎛️</span>
                 <h3>Jam Manager</h3>
                 <p>Advanced management tools and feature flag administration</p>
             </a>
 
-            <a href="/jam-manager/venues" class="nav-card jam-manager-feature" style="display: none;">
+            <a href="/jam-manager/venues" class="nav-card jam-manager-feature" style="display: none;" tabindex="0">
                 <span class="icon">🏢</span>
                 <h3>Venue Management</h3>
                 <p>Manage venues and locations for your jam sessions</p>
@@ -790,9 +790,9 @@
             <h2>Quick Actions</h2>
             <div class="action-buttons">
                 <!-- Join Jam button removed - users can click on today's jams instead -->
-                <button class="btn btn-success" onclick="showCreateJamModal()">New Jam</button>
-                <button class="btn btn-warning" onclick="showCreateSongModal()">Add Song</button>
-                <button class="btn btn-secondary" onclick="loadRecentJams()">Recent Jams</button>
+                <button class="btn btn-success" onclick="showCreateJamModal()" aria-label="Button" tabindex="0">New Jam</button>
+                <button class="btn btn-warning" onclick="showCreateSongModal()" aria-label="Button" tabindex="0">Add Song</button>
+                <button class="btn btn-secondary" onclick="loadRecentJams()" aria-label="Button" tabindex="0">Recent Jams</button>
             </div>
         </div>
 
@@ -817,7 +817,7 @@
             <div id="createJamSuccess" class="success hidden"></div>
             <div class="form-group">
                 <label for="jamName">Jam Name *</label>
-                <input type="text" id="jamName" placeholder="e.g., Friday Night Jam" required>
+                <input type="text" id="jamName" placeholder="e.g., Friday Night Jam" required aria-label="Input" tabindex="0">
             </div>
             <div class="form-group">
                 <label for="jamVenue">Venue *</label>
@@ -827,7 +827,7 @@
             </div>
             <div class="form-group">
                 <label for="jamDate">Date *</label>
-                <input type="date" id="jamDate" required>
+                <input type="date" id="jamDate" required aria-label="Input" tabindex="0">
             </div>
             <div class="form-group">
                 <label for="jamDescription">Description:</label>
@@ -835,12 +835,12 @@
             </div>
             <div class="form-group">
                 <label for="jamBackgroundImage">Background Image (optional):</label>
-                <input type="file" id="jamBackgroundImage" accept="image/*">
+                <input type="file" id="jamBackgroundImage" accept="image/*" aria-label="Input" tabindex="0">
                 <small>Upload a PNG, JPG, or GIF image to use as the jam page background</small>
             </div>
             <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="hideCreateJamModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="createJam()">Create Jam</button>
+                <button class="btn btn-secondary" onclick="hideCreateJamModal()" aria-label="Button" tabindex="0">Cancel</button>
+                <button class="btn btn-primary" onclick="createJam()" aria-label="Button" tabindex="0">Create Jam</button>
             </div>
         </div>
     </div>
@@ -853,11 +853,11 @@
             <div id="createSongSuccess" class="success hidden"></div>
             <div class="form-group">
                 <label for="songTitle">Song Title:</label>
-                <input type="text" id="songTitle" placeholder="e.g., Sweet Child O' Mine">
+                <input type="text" id="songTitle" placeholder="e.g., Sweet Child O' Mine" aria-label="Input" tabindex="0">
             </div>
             <div class="form-group">
                 <label for="songArtist">Artist:</label>
-                <input type="text" id="songArtist" placeholder="e.g., Guns N' Roses">
+                <input type="text" id="songArtist" placeholder="e.g., Guns N' Roses" aria-label="Input" tabindex="0">
             </div>
             <!-- Chord Sheet Section -->
             <div class="form-group">
@@ -872,7 +872,7 @@
                     
                     <!-- Automatic Lookup -->
                     <div class="chord-sheet-lookup">
-                        <button type="button" id="findChordSheetBtn" class="btn btn-outline" onclick="findChordSheet()">
+                        <button type="button" id="findChordSheetBtn" class="btn btn-outline" onclick="findChordSheet()" aria-label="Button" tabindex="0">
                             <span id="chordSheetBtnText">Find Chord Sheet Automatically</span>
                             <span id="chordSheetSpinner" class="spinner hidden">⏳</span>
                         </button>
@@ -884,8 +884,8 @@
                 </div>
             </div>
             <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="hideCreateSongModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="createSong()">Add Song</button>
+                <button class="btn btn-secondary" onclick="hideCreateSongModal()" aria-label="Button" tabindex="0">Cancel</button>
+                <button class="btn btn-primary" onclick="createSong()" aria-label="Button" tabindex="0">Add Song</button>
             </div>
         </div>
     </div>
@@ -897,12 +897,12 @@
             <p>Enter the access code to gain jam manager privileges:</p>
             
             <div class="form-group">
-                <input type="password" id="accessCodeInput" placeholder="Enter access code" maxlength="20">
+                <input type="password" id="accessCodeInput" placeholder="Enter access code" maxlength="20" aria-label="Input" tabindex="0">
             </div>
             
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeAccessDialog()">Cancel</button>
-                <button class="btn btn-primary" onclick="verifyAccessCode()">Verify</button>
+                <button class="btn btn-secondary" onclick="closeAccessDialog()" aria-label="Button" tabindex="0">Cancel</button>
+                <button class="btn btn-primary" onclick="verifyAccessCode()" aria-label="Button" tabindex="0">Verify</button>
             </div>
             
             <div id="accessCodeMessage" class="access-message hidden"></div>

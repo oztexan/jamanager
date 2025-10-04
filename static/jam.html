@@ -25,7 +25,7 @@
                 <h1 id="jamName">Loading Jam...</h1>
                 <p id="jamDescription" class="jam-description"></p>
                 <div class="jam-actions">
-                    <button id="shareBtn" class="btn btn-secondary" onclick="jamUI.showShareModal()">
+                    <button id="shareBtn" class="btn btn-secondary" onclick="jamUI.showShareModal()" aria-label="Button" tabindex="0">
                         <span class="btn-icon">🔗</span>
                         Share Jam
                     </button>
@@ -40,8 +40,8 @@
                 <h3>Join the Jam</h3>
                 <p>Enter your name to vote on songs and register to perform</p>
                 <div class="form-group">
-                    <input type="text" id="userName" placeholder="Your name" class="form-control">
-                    <button class="btn btn-primary" onclick="jamUI.registerUser()">Join Jam</button>
+                    <input type="text" id="userName" placeholder="Your name" class="form-control" aria-label="Input" tabindex="0">
+                    <button class="btn btn-primary" onclick="jamUI.registerUser()" aria-label="Button" tabindex="0">Join Jam</button>
                 </div>
             </div>
 
@@ -50,7 +50,7 @@
                 <h3>Welcome, <span id="userDisplayName"></span>!</h3>
                 <p>You can vote on songs and register to perform</p>
                 <div class="user-actions">
-                    <button id="addSongBtn" class="btn btn-primary btn-sm hidden" onclick="jamUI.showAddSongModal()">
+                    <button id="addSongBtn" class="btn btn-primary btn-sm hidden" onclick="jamUI.showAddSongModal()" aria-label="Button" tabindex="0">
                         <span class="btn-icon">➕</span>
                         Add Song
                     </button>
@@ -72,7 +72,7 @@
                             <option value="votes">Vote Count</option>
                             <option value="performance">Performance Order</option>
                         </select>
-                        <button id="sortDirection" class="sort-toggle-btn" type="button" title="Toggle sort direction">
+                        <button id="sortDirection" class="sort-toggle-btn" type="button" title="Toggle sort direction" aria-label="Button" tabindex="0">
                             <span class="sort-icon">↓</span>
                         </button>
                     </div>
@@ -80,7 +80,7 @@
                     <!-- Performance Filter (Muso Only) -->
                     <div id="performanceFilter" class="filter-controls hidden">
                         <label class="checkbox-label">
-                            <input type="checkbox" id="showOnlyMyPerformances">
+                            <input type="checkbox" id="showOnlyMyPerformances" aria-label="Input" tabindex="0">
                             <span class="checkmark"></span>
                             Show only my performances
                         </label>
@@ -100,8 +100,8 @@
             <div class="share-content">
                 <div class="share-url">
                     <label>Jam URL:</label>
-                    <input type="text" id="shareUrl" readonly class="form-control">
-                    <button class="btn btn-secondary btn-sm" onclick="jamUI.copyUrl()">Copy URL</button>
+                    <input type="text" id="shareUrl" readonly class="form-control" aria-label="Input" tabindex="0">
+                    <button class="btn btn-secondary btn-sm" onclick="jamUI.copyUrl()" aria-label="Button" tabindex="0">Copy URL</button>
                 </div>
                 <div class="share-qr">
                     <label>QR Code:</label>
@@ -112,7 +112,7 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="jamUI.closeShareModal()">Close</button>
+                <button class="btn btn-secondary" onclick="jamUI.closeShareModal()" aria-label="Button" tabindex="0">Close</button>
             </div>
         </div>
     </div>
@@ -128,8 +128,8 @@
                 </select>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="jamUI.closeAddSongModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="jamUI.addSongToJam()">Add Song</button>
+                <button class="btn btn-secondary" onclick="jamUI.closeAddSongModal()" aria-label="Button" tabindex="0">Cancel</button>
+                <button class="btn btn-primary" onclick="jamUI.addSongToJam()" aria-label="Button" tabindex="0">Add Song</button>
             </div>
         </div>
     </div>
@@ -140,11 +140,11 @@
             <h3>Register to Perform</h3>
             <div class="form-group">
                 <label>Instrument:</label>
-                <input type="text" id="instrumentInput" placeholder="e.g., Guitar, Piano, Vocals" class="form-control">
+                <input type="text" id="instrumentInput" placeholder="e.g., Guitar, Piano, Vocals" class="form-control" aria-label="Input" tabindex="0">
             </div>
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="jamUI.closePerformModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="jamUI.confirmPerformRegistration()">Register to Perform</button>
+                <button class="btn btn-secondary" onclick="jamUI.closePerformModal()" aria-label="Button" tabindex="0">Cancel</button>
+                <button class="btn btn-primary" onclick="jamUI.confirmPerformRegistration()" aria-label="Button" tabindex="0">Register to Perform</button>
             </div>
         </div>
     </div>
@@ -182,8 +182,8 @@
                 <!-- Manual URL Input -->
                 <div class="form-group">
                     <label for="chordSheetUrlInput">Chord Sheet URL:</label>
-                    <input type="url" id="chordSheetUrlInput" class="form-control" placeholder="Enter chord sheet URL">
-                    <button type="button" id="validateUrlBtn" class="btn btn-outline btn-sm">Validate URL</button>
+                    <input type="url" id="chordSheetUrlInput" class="form-control" placeholder="Enter chord sheet URL" aria-label="Input" tabindex="0">
+                    <button type="button" id="validateUrlBtn" class="btn btn-outline btn-sm" aria-label="Button" tabindex="0">Validate URL</button>
                     <div id="urlValidationResult" class="validation-result hidden"></div>
                 </div>
                 
@@ -191,7 +191,7 @@
                 <div class="form-group">
                     <label>Or find chord sheets automatically:</label>
                     <div class="chord-sheet-search">
-                        <button type="button" id="searchChordSheetsBtn" class="btn btn-primary">
+                        <button type="button" id="searchChordSheetsBtn" class="btn btn-primary" aria-label="Button" tabindex="0">
                             <span id="searchChordSheetsBtnText">Search Ultimate Guitar</span>
                             <span id="searchChordSheetsSpinner" class="spinner hidden">⏳</span>
                         </button>
@@ -203,8 +203,8 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="jamUI.closeChordSheetModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="jamUI.saveChordSheet()">Save Chord Sheet</button>
+                <button class="btn btn-secondary" onclick="jamUI.closeChordSheetModal()" aria-label="Button" tabindex="0">Cancel</button>
+                <button class="btn btn-primary" onclick="jamUI.saveChordSheet()" aria-label="Button" tabindex="0">Save Chord Sheet</button>
             </div>
         </div>
     </div>
