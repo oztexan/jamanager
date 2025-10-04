@@ -28,6 +28,25 @@ jamanager/
 
 ## 🚀 Quick Start
 
+### Database Initialization
+
+The development database comes pre-populated with 30 popular cover songs including:
+- **Dreams** by Fleetwood Mac
+- **Valerie** by Amy Winehouse  
+- Classic rock hits (Sweet Child O' Mine, Hotel California, Wonderwall, etc.)
+- Pop favorites (I Will Survive, Dancing Queen, Billie Jean, etc.)
+- Alternative/Indie tracks (Creep, Mr. Brightside, Ho Hey, etc.)
+- Country/Folk songs (Wagon Wheel, Tennessee Whiskey, Jolene, etc.)
+- Blues/Soul classics (Ain't No Sunshine, Georgia on My Mind, etc.)
+- Modern pop hits (Shallow, Perfect, Shape of You, etc.)
+
+To reset the development database with this song set:
+```bash
+python reset_dev_database.py
+```
+
+## 🚀 Quick Start
+
 ### Prerequisites
 - Python 3.11+
 - pip

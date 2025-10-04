@@ -423,6 +423,9 @@ Jamanager is a real-time jam session management application that allows musician
 - And I should be able to use the chord sheet lookup service to choose another chord sheet
 - And I should be able to save this for the song in this specific jam
 - And if a chord sheet is defined for this song in this jam, clicking on the song should open a new window to the chord sheet URL
+- And I should see a visual indicator (green checkmark icon) next to the song title when a valid, accessible chord sheet is available
+- And I should see an orange warning icon when a chord sheet URL exists but is broken or inaccessible (404, etc.)
+- And I should see a gray warning icon when no chord sheet is available at all
 
 ### Story 8.2: Manual Chord Sheet Input
 **As a** boss or muso  
@@ -437,6 +440,35 @@ Jamanager is a real-time jam session management application that allows musician
   - Edit existing chord sheet URLs
   - Save the changes
 - And the URL should be validated for accessibility
+
+### Story 8.3: Chord Sheet Access Control
+**As a** pleb (anonymous user)  
+**I want** to be unable to see or manage chord sheets  
+**So that** only authorized users (bosses and musos) can access chord sheet information  
+
+**Acceptance Criteria:**
+- Given I'm viewing a jam session as an anonymous user (pleb)
+- When I look at the song list
+- Then I should not see chord sheet status icons (✓, ⚠) next to song titles
+- And I should not see the "Chord Sheet" button for any songs
+- And I should not be able to access chord sheet editing functionality
+- And only registered users (bosses and musos) should see chord sheet status and the "Chord Sheet" button
+
+### Story 8.4: Real-time Chord Sheet Updates
+**As a** user  
+**I want** to see chord sheet changes in real-time  
+**So that** I can see when chord sheets are added, updated, or removed by other users  
+
+**Acceptance Criteria:**
+- Given I'm viewing a jam session
+- When another user adds a chord sheet to a song
+- Then I should see the chord sheet icon and status update immediately
+- And when another user updates a chord sheet URL
+- Then I should see the updated chord sheet status immediately
+- And when another user removes a chord sheet
+- Then I should see the chord sheet icon disappear immediately
+- And I should not need to refresh the page to see these updates
+- And the updates should appear for all users viewing the jam simultaneously
 
 ---
 

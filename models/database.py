@@ -14,6 +14,8 @@ class Song(Base):
     title = Column(String(255), nullable=False)
     artist = Column(String(255), nullable=False)
     chord_sheet_url = Column(String(500), nullable=True)  # URL to Ultimate Guitar chord sheet
+    chord_sheet_is_valid = Column(Boolean, nullable=True)  # Whether the chord sheet URL is valid/accessible
+    chord_sheet_validated_at = Column(DateTime, nullable=True)  # When the URL was last validated
     times_played = Column(Integer, default=0)
     last_played = Column(DateTime, nullable=True)
     play_history = Column(JSON, nullable=True, default=list)  # Store as JSON array
@@ -115,6 +117,32 @@ class PerformanceRegistration(Base):
         {'extend_existing': True}
     )
 
+class JamChordSheet(Base):
+    __tablename__ = "jam_chord_sheets"
+    
+    id = Column(String, primary_key=True, default=lambda: str(__import__('secrets').token_hex(16)))
+    jam_id = Column(String, ForeignKey("jams.id"), nullable=False)
+    song_id = Column(String, ForeignKey("songs.id"), nullable=False)
+    chord_sheet_url = Column(String(500), nullable=False)  # Jam-specific chord sheet URL
+    chord_sheet_is_valid = Column(Boolean, nullable=True)  # Whether the chord sheet URL is valid/accessible
+    chord_sheet_validated_at = Column(DateTime, nullable=True)  # When the URL was last validated
+    title = Column(String(255), nullable=True)  # Optional title for the chord sheet
+    rating = Column(String(10), nullable=True)  # Optional rating from Ultimate Guitar
+    created_by = Column(String, ForeignKey("attendees.id"), nullable=True)  # Who set this chord sheet
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    # Relationships
+    jam = relationship("Jam")
+    song = relationship("Song")
+    creator = relationship("Attendee")
+    
+    # Unique constraint on jam_id + song_id (one chord sheet per song per jam)
+    __table_args__ = (
+        UniqueConstraint('jam_id', 'song_id', name='unique_chord_sheet_per_jam_song'),
+        {'extend_existing': True}
+    )
+
 class Venue(Base):
     __tablename__ = "venues"
     
@@ -133,6 +161,8 @@ class SongBase(BaseModel):
     title: str
     artist: str
     chord_sheet_url: Optional[str] = None
+    chord_sheet_is_valid: Optional[bool] = None
+    chord_sheet_validated_at: Optional[datetime] = None
     times_played: Optional[int] = 0
     last_played: Optional[datetime] = None
     play_history: Optional[List[Dict[str, Any]]] = []
@@ -220,6 +250,35 @@ class VenueUpdate(VenueBase):
 
 class VenueInDB(VenueBase):
     id: str
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# JamChordSheet Pydantic Models
+class JamChordSheetBase(BaseModel):
+    chord_sheet_url: str
+    chord_sheet_is_valid: Optional[bool] = None
+    chord_sheet_validated_at: Optional[datetime] = None
+    title: Optional[str] = None
+    rating: Optional[str] = None
+
+class JamChordSheetCreate(JamChordSheetBase):
+    song_id: str
+
+class JamChordSheetUpdate(JamChordSheetBase):
+    chord_sheet_url: Optional[str] = None
+    chord_sheet_is_valid: Optional[bool] = None
+    chord_sheet_validated_at: Optional[datetime] = None
+    title: Optional[str] = None
+    rating: Optional[str] = None
+
+class JamChordSheetInDB(JamChordSheetBase):
+    id: str
+    jam_id: str
+    song_id: str
+    created_by: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     

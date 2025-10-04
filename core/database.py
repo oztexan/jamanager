@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
     pass
 
 # Database URL from environment
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./backend/jamanager.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./jamanager.db")
 
 # Create async engine
 engine = create_async_engine(DATABASE_URL, echo=True)

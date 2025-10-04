@@ -12,6 +12,7 @@ class JamSongs {
         this.userPerformanceRegistrations = {}; // Track user's performance registrations
         this.userVotes = {}; // Track user's votes
         this.allPerformers = {}; // song_id -> array of performer objects
+        this.chordSheetStatus = {}; // Track chord sheet availability for each song
         this.performanceLimit = 3; // Default limit
         this.jamCore = null;
         this.attendee = null;
@@ -76,6 +77,18 @@ class JamSongs {
                 this.showOnlyMyPerformances = e.target.checked;
                 this.displaySongs();
             });
+        }
+
+        // Chord sheet modal event listeners
+        const searchChordSheetsBtn = document.getElementById('searchChordSheetsBtn');
+        const validateUrlBtn = document.getElementById('validateUrlBtn');
+
+        if (searchChordSheetsBtn) {
+            searchChordSheetsBtn.addEventListener('click', () => this.searchChordSheets());
+        }
+
+        if (validateUrlBtn) {
+            validateUrlBtn.addEventListener('click', () => this.validateUrl());
         }
     }
 
@@ -160,6 +173,7 @@ class JamSongs {
         }
     }
 
+
     /**
      * Called when jam data is loaded
      */
@@ -174,6 +188,7 @@ class JamSongs {
         this.loadAllSongs(); // Load all songs for the add song modal
         this.loadUserPerformanceRegistrations(); // Load user's performance registrations
         this.loadAllPerformers(); // Load all performers for all songs
+        this.loadChordSheetStatus(); // Load chord sheet status for all songs
     }
 
     /**
@@ -275,13 +290,25 @@ class JamSongs {
             const isVoted = this.isVoted(song.id) || currentVotedState[song.id];
             const isPerforming = this.userPerformanceRegistrations[song.id];
             const performanceOrder = orderMap[song.id] || '';
+                const chordSheetStatus = this.chordSheetStatus[song.id] || { hasChordSheet: false, url: null, isValid: false };
+                console.log(`🔍 Song ${song.title} chord sheet status:`, chordSheetStatus);
+                
+                // Only show chord sheet status for registered users (bosses and musos)
+                const currentAttendee = this.attendee ? this.attendee.getCurrentAttendee() : null;
+                const showChordSheetStatus = currentAttendee !== null;
+                
+                const chordSheetIcon = showChordSheetStatus ? this.getChordSheetIcon(chordSheetStatus) : '';
+                const isClickable = showChordSheetStatus && chordSheetStatus.hasChordSheet && chordSheetStatus.isValid;
+                console.log(`🔍 Song ${song.title} is clickable:`, isClickable);
 
             listItem.innerHTML = `
                 <div class="song-order">
                     <span class="order-number">${performanceOrder}</span>
                 </div>
-                <div class="song-info">
-                    <h4>${song.title}</h4>
+                <div class="song-info ${isClickable ? 'clickable' : ''}" 
+                     ${isClickable ? `data-chord-sheet-url="${chordSheetStatus.url}"` : ''}
+                     title="${isClickable ? 'Click to open chord sheet' : (chordSheetStatus.url && !chordSheetStatus.isValid ? 'Chord sheet URL is broken' : 'No chord sheet available')}">
+                    <h4>${song.title} ${chordSheetIcon}</h4>
                     <p class="song-artist">Artist: ${song.artist}</p>
                     <div class="song-meta">
                         <div class="vote-count">
@@ -298,14 +325,15 @@ class JamSongs {
                     </div>
                 </div>
                 <div class="song-actions">
-                    <button class="btn ${isPerforming ? 'btn-warning' : 'btn-info'} ${this.attendee ? '' : 'hidden'}" 
+                    <button class="btn ${isPerforming ? 'btn-warning' : 'btn-info'} ${this.attendee && this.attendee.getCurrentAttendee() ? '' : 'hidden'}" 
                             data-action="perform" 
                             data-song-id="${song.id}">
                         ${isPerforming ? 'Unregister' : 'Perform'}
                     </button>
-                    <button class="btn btn-secondary" 
+                    <button class="btn btn-secondary ${this.attendee && this.attendee.getCurrentAttendee() ? '' : 'hidden'}" 
                             data-action="chord-sheet" 
-                            data-song-id="${song.id}">
+                            data-song-id="${song.id}"
+                            title="Edit chord sheet for this song">
                         Chord Sheet
                     </button>
                 </div>
@@ -388,6 +416,20 @@ class JamSongs {
         
         container.querySelectorAll('button[data-action="chord-sheet"]').forEach(button => {
             button.addEventListener('click', (event) => this.handleChordSheet(event.target.dataset.songId));
+        });
+        
+        // Add chord sheet click handler for clickable song-info areas
+        container.querySelectorAll('.song-info.clickable').forEach(element => {
+            element.addEventListener('click', (event) => {
+                // Don't trigger if clicking on action buttons or heart
+                if (event.target.closest('button') || event.target.closest('.heart-toggle')) {
+                    return;
+                }
+                const url = element.dataset.chordSheetUrl;
+                if (url) {
+                    window.open(url, '_blank');
+                }
+            });
         });
     }
 
@@ -661,6 +703,160 @@ class JamSongs {
     }
 
     /**
+     * Get chord sheet icon based on status
+     */
+    getChordSheetIcon(status) {
+        console.log('🔍 Getting chord sheet icon for status:', status);
+        
+        if (status.hasChordSheet && status.isValid) {
+            console.log('🔍 Returning available icon');
+            return '<span class="chord-sheet-icon available" title="Chord sheet available">✓</span>';
+        } else if (status.url && !status.isValid) {
+            console.log('🔍 Returning broken icon');
+            return '<span class="chord-sheet-icon broken" title="Chord sheet URL is broken or inaccessible">⚠</span>';
+        } else {
+            console.log('🔍 Returning unavailable icon');
+            return '<span class="chord-sheet-icon unavailable" title="No chord sheet available">⚠</span>';
+        }
+    }
+
+    /**
+     * Load chord sheet status for all songs in the jam
+     */
+    async loadChordSheetStatus() {
+        if (!this.jamCore || !this.jamCore.getJamId()) {
+            this.chordSheetStatus = {};
+            return;
+        }
+
+        try {
+            // Process songs sequentially to avoid Safari issues with Promise.all
+            for (const jamSong of this.jamSongs) {
+                const songId = jamSong.song.id;
+                try {
+                    console.log(`🔍 Processing chord sheet status for song: ${jamSong.song.title}`);
+                    
+                    const response = await fetch(`/api/jams/${this.jamCore.getJamId()}/chord-sheets/${songId}`);
+                    if (response.ok) {
+                        const chordSheet = await response.json();
+                        // Check if we have a jam-specific chord sheet or a valid default one
+                        if (chordSheet && chordSheet.chord_sheet_url) {
+                            // Use database validation result if available, otherwise validate
+                            let isValid = chordSheet.chord_sheet_is_valid;
+                            if (isValid === null || isValid === undefined) {
+                                isValid = await this.validateChordSheetUrl(chordSheet.chord_sheet_url, songId);
+                            }
+                            this.chordSheetStatus[songId] = {
+                                hasChordSheet: isValid,
+                                url: chordSheet.chord_sheet_url,
+                                isJamSpecific: true,
+                                isValid: isValid
+                            };
+                        } else if (jamSong.song.chord_sheet_url) {
+                            // Fall back to default song chord sheet
+                            let isValid = jamSong.song.chord_sheet_is_valid;
+                            if (isValid === null || isValid === undefined) {
+                                isValid = await this.validateChordSheetUrl(jamSong.song.chord_sheet_url, songId);
+                            }
+                            this.chordSheetStatus[songId] = {
+                                hasChordSheet: isValid,
+                                url: jamSong.song.chord_sheet_url,
+                                isJamSpecific: false,
+                                isValid: isValid
+                            };
+                        } else {
+                            this.chordSheetStatus[songId] = {
+                                hasChordSheet: false,
+                                url: null,
+                                isJamSpecific: false,
+                                isValid: false
+                            };
+                        }
+                    } else {
+                        // No jam-specific chord sheet, check default
+                        if (jamSong.song.chord_sheet_url) {
+                            let isValid = jamSong.song.chord_sheet_is_valid;
+                            if (isValid === null || isValid === undefined) {
+                                isValid = await this.validateChordSheetUrl(jamSong.song.chord_sheet_url, songId);
+                            }
+                            this.chordSheetStatus[songId] = {
+                                hasChordSheet: isValid,
+                                url: jamSong.song.chord_sheet_url,
+                                isJamSpecific: false,
+                                isValid: isValid
+                            };
+                        } else {
+                            this.chordSheetStatus[songId] = {
+                                hasChordSheet: false,
+                                url: null,
+                                isJamSpecific: false,
+                                isValid: false
+                            };
+                        }
+                    }
+                } catch (error) {
+                    console.error(`🔍 Error loading chord sheet status for song ${songId}:`, error);
+                    this.chordSheetStatus[songId] = {
+                        hasChordSheet: false,
+                        url: null,
+                        isJamSpecific: false,
+                        isValid: false
+                    };
+                }
+            }
+            console.log('🔍 Loaded chord sheet status:', this.chordSheetStatus);
+            
+            // Force a display update after loading status
+            setTimeout(() => {
+                console.log('🔍 Forcing display update after chord sheet status load');
+                this.displaySongs();
+            }, 100);
+            
+        } catch (error) {
+            console.error('🔍 Error loading chord sheet status:', error);
+        }
+    }
+
+    /**
+     * Validate if a chord sheet URL is accessible (using database validation results)
+     */
+    async validateChordSheetUrl(url, songId = null) {
+        if (!url) {
+            console.log('🔍 No URL provided for validation');
+            return false;
+        }
+        
+        try {
+            const jamId = this.jamCore.getJamId();
+            console.log(`🔍 Validating URL: ${url}`);
+            
+            const requestBody = { url: url };
+            if (songId) {
+                requestBody.song_id = songId;
+            }
+            
+            const response = await fetch(`/api/jams/${jamId}/chord-sheets/validate-url`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                const isValid = result.valid === true;
+                console.log(`🔍 URL validation result for ${url}: ${isValid}`);
+                return isValid;
+            } else {
+                console.log(`🔍 URL validation failed with status: ${response.status}`);
+                return false;
+            }
+        } catch (error) {
+            console.error('🔍 Error validating chord sheet URL:', error);
+            return false;
+        }
+    }
+
+    /**
      * Load all performers for all songs in the jam
      */
     async loadAllPerformers() {
@@ -717,13 +913,321 @@ class JamSongs {
      * Handle chord sheet action
      */
     handleChordSheet(songId) {
+        // Show chord sheet editor modal instead of directly opening
+        this.showChordSheetModal(songId);
+    }
+
+    /**
+     * Show chord sheet editor modal
+     */
+    async showChordSheetModal(songId) {
         const jamSong = this.jamSongs.find(js => js.song.id === songId);
-        if (!jamSong || !jamSong.song.chord_sheet_url) {
-            this.showMessage('No chord sheet available for this song.', 'info');
+        if (!jamSong) {
+            this.showMessage('Song not found.', 'error');
             return;
         }
+
+        // Set current song for chord sheet editing
+        this.currentChordSheetSongId = songId;
         
-        window.open(jamSong.song.chord_sheet_url, '_blank');
+        // Update modal content
+        document.getElementById('chordSheetSongInfo').textContent = 
+            `${jamSong.song.title} - ${jamSong.song.artist}`;
+        
+        // Load current chord sheet (jam-specific or default)
+        await this.loadCurrentChordSheet(songId);
+        
+        // Show modal
+        document.getElementById('chordSheetModal').classList.remove('hidden');
+    }
+
+    /**
+     * Load current chord sheet for a song
+     */
+    async loadCurrentChordSheet(songId) {
+        try {
+            const jamId = this.jamCore.getJamId();
+            const response = await fetch(`/api/jams/${jamId}/chord-sheets/${songId}`);
+            
+            if (response.ok) {
+                const chordSheet = await response.json();
+                const currentUrlDiv = document.getElementById('chordSheetCurrentUrl');
+                
+                if (chordSheet && chordSheet.chord_sheet_url) {
+                    currentUrlDiv.innerHTML = `
+                        <a href="${chordSheet.chord_sheet_url}" target="_blank">${chordSheet.chord_sheet_url}</a>
+                        ${chordSheet.is_default ? '<span class="badge badge-info">Default</span>' : ''}
+                    `;
+                    document.getElementById('chordSheetUrlInput').value = chordSheet.chord_sheet_url;
+                    document.getElementById('deleteChordSheetBtn').style.display = chordSheet.is_default ? 'none' : 'inline-block';
+                } else {
+                    currentUrlDiv.textContent = 'No chord sheet set';
+                    document.getElementById('chordSheetUrlInput').value = '';
+                    document.getElementById('deleteChordSheetBtn').style.display = 'none';
+                }
+            } else {
+                console.error('Failed to load chord sheet:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error loading chord sheet:', error);
+        }
+    }
+
+    /**
+     * Close chord sheet modal
+     */
+    closeChordSheetModal() {
+        console.log('🔍 Closing chord sheet modal');
+        const urlInput = document.getElementById('chordSheetUrlInput');
+        console.log('🔍 URL input value before closing:', urlInput ? urlInput.value : 'input not found');
+        document.getElementById('chordSheetModal').classList.add('hidden');
+        this.currentChordSheetSongId = null;
+        this.clearChordSheetForm();
+    }
+
+    /**
+     * Clear chord sheet form
+     */
+    clearChordSheetForm() {
+        document.getElementById('chordSheetUrlInput').value = '';
+        document.getElementById('urlValidationResult').classList.add('hidden');
+        document.getElementById('chordSheetSearchResults').classList.add('hidden');
+        document.getElementById('deleteChordSheetBtn').style.display = 'none';
+    }
+
+    /**
+     * Save chord sheet
+     */
+    async saveChordSheet() {
+        const url = document.getElementById('chordSheetUrlInput').value.trim();
+        console.log('🔍 Saving chord sheet with URL:', url);
+        
+        if (!url) {
+            this.showMessage('Please enter a chord sheet URL.', 'error');
+            return;
+        }
+
+        try {
+            const jamId = this.jamCore.getJamId();
+            const songId = this.currentChordSheetSongId;
+            
+            const response = await fetch(`/api/jams/${jamId}/chord-sheets`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    song_id: songId,
+                    chord_sheet_url: url
+                })
+            });
+
+            if (response.ok) {
+                this.showMessage('Chord sheet saved successfully!', 'success');
+                this.closeChordSheetModal();
+                // Validate the URL and save to database
+                const isValid = await this.validateChordSheetUrl(url, songId);
+                this.chordSheetStatus[songId] = {
+                    hasChordSheet: isValid,
+                    url: url,
+                    isJamSpecific: true,
+                    isValid: isValid
+                };
+                // Refresh the song display to show updated chord sheet
+                this.displaySongs();
+            } else {
+                const error = await response.json();
+                this.showMessage(`Failed to save chord sheet: ${error.detail}`, 'error');
+            }
+        } catch (error) {
+            console.error('Error saving chord sheet:', error);
+            this.showMessage('Failed to save chord sheet.', 'error');
+        }
+    }
+
+    /**
+     * Delete chord sheet
+     */
+    async deleteChordSheet() {
+        if (!confirm('Are you sure you want to remove this chord sheet?')) {
+            return;
+        }
+
+        try {
+            const jamId = this.jamCore.getJamId();
+            const songId = this.currentChordSheetSongId;
+            
+            const response = await fetch(`/api/jams/${jamId}/chord-sheets/${songId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                this.showMessage('Chord sheet removed successfully!', 'success');
+                this.closeChordSheetModal();
+                // Update chord sheet status for this song
+                this.chordSheetStatus[songId] = {
+                    hasChordSheet: false,
+                    url: null,
+                    isJamSpecific: false
+                };
+                // Refresh the song display
+                this.displaySongs();
+            } else {
+                const error = await response.json();
+                this.showMessage(`Failed to remove chord sheet: ${error.detail}`, 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting chord sheet:', error);
+            this.showMessage('Failed to remove chord sheet.', 'error');
+        }
+    }
+
+    /**
+     * Search for chord sheets using Ultimate Guitar
+     */
+    async searchChordSheets() {
+        const jamSong = this.jamSongs.find(js => js.song.id === this.currentChordSheetSongId);
+        if (!jamSong) {
+            this.showMessage('Song not found.', 'error');
+            return;
+        }
+
+        const searchBtn = document.getElementById('searchChordSheetsBtn');
+        const btnText = document.getElementById('searchChordSheetsBtnText');
+        const spinner = document.getElementById('searchChordSheetsSpinner');
+        const resultsDiv = document.getElementById('chordSheetSearchResults');
+        const messageDiv = document.getElementById('chordSheetSearchMessage');
+        const linksDiv = document.getElementById('chordSheetSearchLinks');
+
+        // Show loading state
+        searchBtn.disabled = true;
+        btnText.textContent = 'Searching...';
+        spinner.classList.remove('hidden');
+        resultsDiv.classList.remove('hidden');
+        messageDiv.textContent = 'Searching Ultimate Guitar...';
+
+        try {
+            const jamId = this.jamCore.getJamId();
+            const response = await fetch(`/api/jams/${jamId}/chord-sheets/search`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    song_title: jamSong.song.title,
+                    artist_name: jamSong.song.artist
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0) {
+                    messageDiv.textContent = `Found ${data.total_found} chord sheets, showing top ${data.results.length}:`;
+                    
+                    linksDiv.innerHTML = data.results.map((result, index) => `
+                        <div class="chord-sheet-option" data-url="${result.url}" data-title="${result.title}" data-rating="${result.rating}">
+                            <div class="chord-sheet-info">
+                                <div class="chord-sheet-title">${result.title}</div>
+                                <div class="chord-sheet-rating">Rating: ${result.rating} (${result.votes} votes)</div>
+                            </div>
+                            <div class="chord-sheet-actions">
+                                <button class="btn-outline select-chord-sheet-btn" data-url="${result.url}">Select</button>
+                                <button class="btn-outline preview-chord-sheet-btn" data-url="${result.url}">Preview</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // Add event listeners for the new buttons
+                    linksDiv.querySelectorAll('.select-chord-sheet-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const url = e.target.getAttribute('data-url');
+                            this.selectChordSheet(url);
+                        });
+                    });
+
+                    linksDiv.querySelectorAll('.preview-chord-sheet-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const url = e.target.getAttribute('data-url');
+                            window.open(url, '_blank');
+                        });
+                    });
+                } else {
+                    messageDiv.textContent = 'No chord sheets found for this song.';
+                    linksDiv.innerHTML = '';
+                }
+            } else {
+                const error = await response.json();
+                messageDiv.textContent = `Search failed: ${error.detail}`;
+                linksDiv.innerHTML = '';
+            }
+        } catch (error) {
+            console.error('Error searching chord sheets:', error);
+            messageDiv.textContent = 'Search failed. Please try again.';
+            linksDiv.innerHTML = '';
+        } finally {
+            // Reset button state
+            searchBtn.disabled = false;
+            btnText.textContent = 'Search Ultimate Guitar';
+            spinner.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Select a chord sheet from search results
+     */
+    async selectChordSheet(url) {
+        document.getElementById('chordSheetUrlInput').value = url;
+        
+        // Update visual selection
+        document.querySelectorAll('.chord-sheet-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        const selectedOption = document.querySelector(`[data-url="${url}"]`);
+        if (selectedOption) {
+            selectedOption.classList.add('selected');
+        }
+        
+        // Pre-validate the selected URL and save to database
+        console.log(`🔍 Pre-validating selected chord sheet URL: ${url}`);
+        await this.validateChordSheetUrl(url, this.currentChordSheetSongId);
+    }
+
+    /**
+     * Validate chord sheet URL
+     */
+    async validateUrl() {
+        const url = document.getElementById('chordSheetUrlInput').value.trim();
+        const resultDiv = document.getElementById('urlValidationResult');
+        
+        console.log('🔍 Frontend validating URL:', url);
+        
+        if (!url) {
+            resultDiv.classList.add('hidden');
+            return;
+        }
+
+        resultDiv.classList.remove('hidden');
+        resultDiv.textContent = 'Validating...';
+        resultDiv.className = 'validation-result';
+
+        try {
+            // Use the validation method with song ID
+            const isValid = await this.validateChordSheetUrl(url, this.currentChordSheetSongId);
+            
+            if (isValid) {
+                resultDiv.textContent = '✓ URL is valid and accessible';
+                resultDiv.className = 'validation-result success';
+            } else {
+                resultDiv.textContent = '✗ URL is not accessible or invalid';
+                resultDiv.className = 'validation-result error';
+            }
+        } catch (error) {
+            console.error('Error validating URL:', error);
+            resultDiv.textContent = '✗ Validation failed';
+            resultDiv.className = 'validation-result error';
+        }
     }
 
     /**

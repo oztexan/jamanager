@@ -6,7 +6,7 @@
     <title>Jam Session - Jamanager</title>
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/components.css">
-    <link rel="stylesheet" href="/static/css/jam.css">
+    <link rel="stylesheet" href="/static/css/jam.css?v=20251004t">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
 </head>
 <body>
@@ -149,13 +149,62 @@
         </div>
     </div>
 
+    <!-- Chord Sheet Editor Modal -->
+    <div id="chordSheetModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="chordSheetModalTitle">Edit Chord Sheet</h3>
+                <button class="modal-close" onclick="jamUI.closeChordSheetModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Song:</label>
+                    <div id="chordSheetSongInfo" class="song-info-display"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Current Chord Sheet:</label>
+                    <div id="chordSheetCurrentUrl" class="current-url-display"></div>
+                </div>
+                
+                <!-- Manual URL Input -->
+                <div class="form-group">
+                    <label for="chordSheetUrlInput">Chord Sheet URL:</label>
+                    <input type="url" id="chordSheetUrlInput" class="form-control" placeholder="Enter chord sheet URL">
+                    <button type="button" id="validateUrlBtn" class="btn btn-outline btn-sm">Validate URL</button>
+                    <div id="urlValidationResult" class="validation-result hidden"></div>
+                </div>
+                
+                <!-- Ultimate Guitar Search -->
+                <div class="form-group">
+                    <label>Or find chord sheets automatically:</label>
+                    <div class="chord-sheet-search">
+                        <button type="button" id="searchChordSheetsBtn" class="btn btn-primary">
+                            <span id="searchChordSheetsBtnText">Search Ultimate Guitar</span>
+                            <span id="searchChordSheetsSpinner" class="spinner hidden">⏳</span>
+                        </button>
+                        <div id="chordSheetSearchResults" class="chord-sheet-results hidden">
+                            <div id="chordSheetSearchMessage" class="search-message"></div>
+                            <div id="chordSheetSearchLinks" class="search-links"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="jamUI.closeChordSheetModal()">Cancel</button>
+                <button class="btn btn-danger" id="deleteChordSheetBtn" onclick="jamUI.deleteChordSheet()" style="display: none;">Remove Chord Sheet</button>
+                <button class="btn btn-primary" onclick="jamUI.saveChordSheet()">Save Chord Sheet</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="/static/js/notification-system.js?v=20251004"></script>
     <script src="/static/js/jam-core.js?v=20251004"></script>
     <script src="/static/js/jam-attendee.js?v=20251004e"></script>
-    <script src="/static/js/jam-songs.js?v=20251004n"></script>
-    <script src="/static/js/jam-websocket.js?v=20251004e"></script>
+    <script src="/static/js/jam-songs.js?v=20251004aa"></script>
+    <script src="/static/js/jam-websocket.js?v=20251004g"></script>
     <script src="/static/js/jam-chord-sheets.js?v=20251004"></script>
-    <script src="/static/js/jam-main.js?v=20251004"></script>
+    <script src="/static/js/jam-main.js?v=20251004s"></script>
 </body>
 </html>

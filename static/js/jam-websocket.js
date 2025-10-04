@@ -86,30 +86,44 @@ class JamWebSocket {
      * Handle incoming WebSocket messages
      */
     handleMessage(message) {
-        console.log('WebSocket message received:', message);
+        console.log('📡 WebSocket message received:', message);
+        console.log('📡 Message type:', typeof message);
+        console.log('📡 Message keys:', Object.keys(message));
         
         // Handle the new message format with event and data fields
         const event = message.event;
         const data = message.data || message; // Fallback to old format for compatibility
         
+        console.log('📡 Parsed event:', event);
+        console.log('📡 Parsed data:', data);
+        
         switch (event) {
             case 'vote_update':
+                console.log('📡 Handling vote_update');
                 this.handleVoteUpdate(data);
                 break;
             case 'performance_update':
+                console.log('📡 Handling performance_update');
                 this.handlePerformanceUpdate(data);
                 break;
             case 'song_added':
+                console.log('📡 Handling song_added');
                 this.handleSongAdded(data);
                 break;
             case 'performance_registered':
+                console.log('📡 Handling performance_registered');
                 this.handlePerformanceRegistered(data);
                 break;
             case 'attendee_registered':
+                console.log('📡 Handling attendee_registered');
                 this.handleAttendeeRegistered(data);
                 break;
+            case 'chord_sheet_update':
+                console.log('📡 Handling chord_sheet_update');
+                this.handleChordSheetUpdate(data);
+                break;
             default:
-                console.log('Unknown message type:', event);
+                console.log('📡 Unknown message type:', event);
         }
     }
 
@@ -246,6 +260,25 @@ class JamWebSocket {
             this.socket = null;
         }
         this.isConnected = false;
+    }
+
+    /**
+     * Handle chord sheet updates
+     */
+    handleChordSheetUpdate(data) {
+        console.log('🎵 Chord sheet update received:', data);
+        console.log('🎵 Updating chord sheet for song_id:', data.song_id, 'action:', data.action);
+        console.log('🎵 Full message data:', JSON.stringify(data, null, 2));
+        
+        // Reload jam data to get updated chord sheet status and refresh the entire song list
+        if (window.jamUI && window.jamUI.jamCore) {
+            console.log('🎵 Reloading jam data for chord sheet update...');
+            window.jamUI.jamCore.loadJamData();
+        } else {
+            console.log('🎵 jamUI or jamCore not available for chord sheet update');
+            console.log('🎵 window.jamUI:', window.jamUI);
+            console.log('🎵 window.jamUI.jamCore:', window.jamUI ? window.jamUI.jamCore : 'jamUI is null');
+        }
     }
 
     /**

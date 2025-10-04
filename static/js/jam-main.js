@@ -107,6 +107,45 @@ class JamUI {
     }
 
     /**
+     * Chord sheet modal methods - delegate to jamSongs
+     */
+    closeChordSheetModal() {
+        console.log('closeChordSheetModal called, songs:', this.songs);
+        if (this.songs) {
+            this.songs.closeChordSheetModal();
+        } else {
+            console.error('songs is not available');
+        }
+    }
+
+    saveChordSheet() {
+        console.log('saveChordSheet called, songs:', this.songs);
+        if (this.songs) {
+            this.songs.saveChordSheet();
+        } else {
+            console.error('songs is not available');
+        }
+    }
+
+    deleteChordSheet() {
+        console.log('deleteChordSheet called, songs:', this.songs);
+        if (this.songs) {
+            this.songs.deleteChordSheet();
+        } else {
+            console.error('songs is not available');
+        }
+    }
+
+    selectChordSheet(url) {
+        console.log('selectChordSheet called with url:', url, 'songs:', this.songs);
+        if (this.songs) {
+            this.songs.selectChordSheet(url);
+        } else {
+            console.error('songs is not available');
+        }
+    }
+
+    /**
      * Show share modal
      */
     showShareModal() {

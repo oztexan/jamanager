@@ -24,7 +24,7 @@ from services.chord_sheet_api import router as chord_sheet_router
 from services.connection_manager import ConnectionManager
 
 # Import endpoint routers
-from api.endpoints import static, songs, venues, jams, websocket, auth
+from api.endpoints import static, songs, venues, jams, websocket, auth, jam_chord_sheets
 
 # Create FastAPI app
 app = FastAPI(title="Jamanager API", version="1.0.0")
@@ -45,6 +45,7 @@ app.include_router(static.router)
 app.include_router(songs.router)
 app.include_router(venues.router)
 app.include_router(jams.router)
+app.include_router(jam_chord_sheets.router, prefix="/api/jams", tags=["jam-chord-sheets"])
 app.include_router(websocket.router)
 app.include_router(auth.router)
 
