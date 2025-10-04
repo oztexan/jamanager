@@ -15,6 +15,7 @@ Welcome to the JaManager documentation! This directory contains all the technica
 
 ### Database & Migration
 - **[DATABASE_SETUP.md](./DATABASE_SETUP.md)** - Database setup and configuration
+- **[DATABASE_ERD.md](./DATABASE_ERD.md)** - Entity Relationship Diagram and schema overview
 - **[MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md)** - Database migration history
 
 ### Features & Integration

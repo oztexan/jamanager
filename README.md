@@ -160,6 +160,7 @@ All documentation is organized in the [`docs/`](./docs/) directory:
 - **[Test Plan](docs/TEST_PLAN.md)** - Comprehensive testing guide
 - **[Testing Guide](docs/TESTING_GUIDE.md)** - How to test the application
 - **[Database Setup](docs/DATABASE_SETUP.md)** - Database configuration and setup
+- **[Database ERD](docs/DATABASE_ERD.md)** - Entity Relationship Diagram and schema overview
 - **[Deployment Plan](docs/DEPLOYMENT_PLAN.md)** - Deployment strategy and procedures
 - **[Session Summary](docs/SESSION_SUMMARY.md)** - Development history
 
