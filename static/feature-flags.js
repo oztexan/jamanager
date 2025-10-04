@@ -30,9 +30,6 @@ class FeatureFlagsManager {
                 this.permissions = data.permissions;
                 this.enabledFeatures = data.enabled_features;
                 
-                console.log('🎭 User Role:', data.role_display_name);
-                console.log('🔑 Permissions:', this.permissions);
-                console.log('🚀 Enabled Features:', this.enabledFeatures);
                 
                 return data;
             } else {

@@ -60,7 +60,6 @@ class ComponentLoader {
         
         try {
             await Promise.all(promises);
-            console.log('All components loaded successfully');
         } catch (error) {
             console.error('Error loading components:', error);
             throw error;

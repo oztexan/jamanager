@@ -3,9 +3,6 @@
  * Coordinates all jam page modules and handles global UI interactions
  */
 
-console.log('jam-main.js loaded successfully');
-console.log('Document ready state:', document.readyState);
-console.log('DOM loaded?', document.readyState === 'loading' ? 'No' : 'Yes');
 
 class JamUI {
     constructor() {
@@ -21,44 +18,33 @@ class JamUI {
      */
     async init() {
         try {
-            console.log('JamMain: Starting initialization...');
             // Initialize core modules
             this.jamCore = new JamCore();
-            console.log('JamMain: JamCore created');
             this.attendee = new JamAttendee();
-            console.log('JamMain: JamAttendee created');
             this.songs = new JamSongs();
-            console.log('JamMain: JamSongs created');
             this.websocket = new JamWebSocket();
             this.chordSheets = new JamChordSheets();
 
             // Make modules globally available BEFORE initializing
             window.jamAttendee = this.attendee;
             window.jamSongs = this.songs;
-            console.log('JamMain: Modules made globally available');
 
             // Initialize modules
             this.attendee.init(this.jamCore);
-            console.log('JamMain: JamAttendee initialized');
             this.songs.init(this.jamCore, this.attendee);
-            console.log('JamMain: JamSongs initialized');
             this.chordSheets.init(this.jamCore);
 
             // Load jam data
-            console.log('JamMain: Loading jam data...');
             await this.jamCore.loadJamData();
-            console.log('JamMain: Jam data loaded');
 
             // Initialize WebSocket if jam is loaded
             if (this.jamCore.getJamId()) {
-                console.log('JamMain: Initializing WebSocket with jam ID:', this.jamCore.getJamId());
                 this.websocket.init(this.jamCore.getJamId());
             }
 
             // Setup global event listeners
             this.setupEventListeners();
 
-            console.log('Jam UI initialized successfully');
 
         } catch (error) {
             console.error('Error initializing Jam UI:', error);
@@ -110,7 +96,6 @@ class JamUI {
      * Chord sheet modal methods - delegate to jamSongs
      */
     closeChordSheetModal() {
-        console.log('closeChordSheetModal called, songs:', this.songs);
         if (this.songs) {
             this.songs.closeChordSheetModal();
         } else {
@@ -119,7 +104,6 @@ class JamUI {
     }
 
     saveChordSheet() {
-        console.log('saveChordSheet called, songs:', this.songs);
         if (this.songs) {
             this.songs.saveChordSheet();
         } else {
@@ -128,7 +112,6 @@ class JamUI {
     }
 
     deleteChordSheet() {
-        console.log('deleteChordSheet called, songs:', this.songs);
         if (this.songs) {
             this.songs.deleteChordSheet();
         } else {
@@ -137,7 +120,6 @@ class JamUI {
     }
 
     selectChordSheet(url) {
-        console.log('selectChordSheet called with url:', url, 'songs:', this.songs);
         if (this.songs) {
             this.songs.selectChordSheet(url);
         } else {
@@ -314,7 +296,6 @@ class JamUI {
             } else if (type === 'success') {
                 this.jamCore.showSuccess(message);
             } else {
-                console.log(`Info: ${message}`);
             }
         }
     }
@@ -339,17 +320,12 @@ let jamUI = null;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOMContentLoaded event fired');
     try {
-        console.log('Creating JamUI instance...');
         jamUI = new JamUI();
-        console.log('JamUI instance created, calling init...');
         await jamUI.init();
-        console.log('JamUI init completed');
         
         // Make jamUI globally available for onclick handlers
         window.jamUI = jamUI;
-        console.log('jamUI made globally available');
     } catch (error) {
         console.error('Error during JamUI initialization:', error);
     }

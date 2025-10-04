@@ -26,20 +26,15 @@ class JamAttendee {
     getOrCreateSessionId() {
         // First check if we have an existing session for this jam in localStorage
         const storedData = localStorage.getItem('jam_attendee');
-        console.log('CHECKING LOCALSTORAGE FOR EXISTING SESSION:', storedData);
         
         if (storedData) {
             try {
                 const data = JSON.parse(storedData);
-                console.log('PARSED STORED DATA:', data);
-                console.log('CURRENT JAM ID:', this.jamCore ? this.jamCore.getJamId() : 'jamCore not available');
                 
                 // Only use stored session if it's for the current jam
                 if (data.jam_id === this.jamCore.getJamId() && data.session_id) {
-                    console.log('RESTORING EXISTING SESSION:', data.session_id);
                     return data.session_id;
                 } else {
-                    console.log('STORED SESSION NOT FOR CURRENT JAM - stored jam_id:', data.jam_id, 'current jam_id:', this.jamCore.getJamId());
                 }
             } catch (error) {
                 console.error('Error parsing stored session data:', error);
@@ -48,7 +43,6 @@ class JamAttendee {
         
         // Generate a new session ID if no existing session found
         const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
-        console.log('NEW SESSION ID GENERATED:', sessionId);
         return sessionId;
     }
 
@@ -78,7 +72,6 @@ class JamAttendee {
             const response = await fetch(`/api/jams/${this.jamCore.getJamId()}/attendees?session_id=${this.sessionId}`);
             if (response.ok) {
                 const attendees = await response.json();
-                console.log('CHECKING EXISTING REGISTRATION - session_id:', this.sessionId, 'attendees found:', attendees);
                 if (attendees.length > 0) {
                     this.currentAttendee = attendees[0];
                     const dataToStore = {
@@ -86,7 +79,6 @@ class JamAttendee {
                         session_id: this.sessionId,
                         attendee: this.currentAttendee
                     };
-                    console.log('STORING TO LOCALSTORAGE:', dataToStore);
                     localStorage.setItem('jam_attendee', JSON.stringify(dataToStore));
                     this.updateAttendeeUI();
                     
@@ -163,7 +155,6 @@ class JamAttendee {
                 session_id: this.sessionId,
                 attendee: this.currentAttendee
             };
-            console.log('STORING TO LOCALSTORAGE (REGISTER):', dataToStore);
             localStorage.setItem('jam_attendee', JSON.stringify(dataToStore));
             
             this.updateAttendeeUI();
@@ -206,20 +197,13 @@ class JamAttendee {
      */
     restoreAttendee() {
         const storedData = localStorage.getItem('jam_attendee');
-        console.log('RESTORE ATTENDEE - storedData:', storedData);
-        console.log('RESTORE ATTENDEE - jamCore available:', !!this.jamCore);
-        console.log('RESTORE ATTENDEE - current sessionId:', this.sessionId);
         
         if (storedData && this.jamCore && this.jamCore.getJamId()) {
             try {
                 const data = JSON.parse(storedData);
-                console.log('RESTORE ATTENDEE - parsed data:', data);
-                console.log('RESTORE ATTENDEE - jam_id match:', data.jam_id === this.jamCore.getJamId());
-                console.log('RESTORE ATTENDEE - session_id match:', data.session_id === this.sessionId);
                 
                 // Only restore if the stored attendee is for the current jam AND same session
                 if (data.jam_id === this.jamCore.getJamId() && data.session_id === this.sessionId) {
-                    console.log('RESTORING ATTENDEE:', data.attendee);
                     this.currentAttendee = data.attendee;
                     
                     // Notify other modules about restored attendee
@@ -227,7 +211,6 @@ class JamAttendee {
                         window.jamSongs.onAttendeeRegistered(this.currentAttendee);
                     }
                 } else {
-                    console.log('CLEARING LOCALSTORAGE - different jam or session');
                     // Clear localStorage if it's for a different jam or session
                     localStorage.removeItem('jam_attendee');
                 }
@@ -236,7 +219,6 @@ class JamAttendee {
                 localStorage.removeItem('jam_attendee');
             }
         } else {
-            console.log('RESTORE ATTENDEE - no stored data or jamCore not available');
         }
     }
 
@@ -315,7 +297,6 @@ class JamAttendee {
             } else if (type === 'success') {
                 this.jamCore.showSuccess(message);
             } else {
-                console.log(`Info: ${message}`);
             }
         }
     }
