@@ -643,7 +643,7 @@
         </div>
         
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search songs by title, artist, or key...">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search songs by title, artist, or key..." aria-label="Input" tabindex="0">
         </div>
         
         <div id="loading" class="loading">
@@ -657,7 +657,7 @@
         <div id="empty-state" class="empty-state" style="display: none;">
             <h2>No Songs Found</h2>
             <p>There are no songs in the library at the moment.</p>
-            <a href="/" class="btn btn-primary">Go Home</a>
+            <a href="/" class="btn btn-primary" tabindex="0">Go Home</a>
         </div>
     </div>
 
@@ -756,8 +756,8 @@
                         <span class="chord-sheet-status-text">${chordSheetStatus.text}</span>
                     </div>
                     <div class="actions">
-                        <button class="btn btn-primary" data-song-id="${song.id}" data-action="add-to-jam">Add to Jam</button>
-                        <button class="btn btn-secondary" data-song-id="${song.id}" data-action="view-details">View Details</button>
+                        <button class="btn btn-primary" data-song-id="${song.id}" data-action="add-to-jam" aria-label="Button" tabindex="0">Add to Jam</button>
+                        <button class="btn btn-secondary" data-song-id="${song.id}" data-action="view-details" aria-label="Button" tabindex="0">View Details</button>
                     </div>
                 `;
 
