@@ -346,9 +346,9 @@
         <div class="content">
             <div class="toolbar">
                 <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search venues..." />
+                    <input type="text" id="searchInput" placeholder="Search venues..." / aria-label="Input" tabindex="0">
                 </div>
-                <button class="btn" onclick="openCreateModal()">+ Add Venue</button>
+                <button class="btn" onclick="openCreateModal()" aria-label="Button" tabindex="0">+ Add Venue</button>
             </div>
             
             <div id="loadingMessage" class="loading" style="display: none;">
@@ -377,12 +377,12 @@
             <form id="venueForm">
                 <div class="form-group">
                     <label for="venueName">Venue Name *</label>
-                    <input type="text" id="venueName" name="name" required />
+                    <input type="text" id="venueName" name="name" required / aria-label="Input" tabindex="0">
                 </div>
                 
                 <div class="form-group">
                     <label for="venueAddress">Address</label>
-                    <input type="text" id="venueAddress" name="address" />
+                    <input type="text" id="venueAddress" name="address" / aria-label="Input" tabindex="0">
                 </div>
                 
                 <div class="form-group">
@@ -391,8 +391,8 @@
                 </div>
                 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn" id="submitBtn">Save Venue</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()" aria-label="Button" tabindex="0">Cancel</button>
+                    <button type="submit" class="btn" id="submitBtn" aria-label="Button" tabindex="0">Save Venue</button>
                 </div>
             </form>
         </div>
@@ -454,8 +454,8 @@
                     ${venue.address ? `<div class="address">📍 ${escapeHtml(venue.address)}</div>` : ''}
                     ${venue.description ? `<div class="description">${escapeHtml(venue.description)}</div>` : ''}
                     <div class="venue-actions">
-                        <button class="btn btn-small" onclick="editVenue('${venue.id}')">Edit</button>
-                        <button class="btn btn-danger btn-small" onclick="deleteVenue('${venue.id}', '${escapeHtml(venue.name)}')">Delete</button>
+                        <button class="btn btn-small" onclick="editVenue('${venue.id}')" aria-label="Button" tabindex="0">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteVenue('${venue.id}', '${escapeHtml(venue.name)}')" aria-label="Button" tabindex="0">Delete</button>
                     </div>
                 </div>
             `).join('');

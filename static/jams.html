@@ -163,7 +163,7 @@
         <div id="empty-state" class="empty-state" style="display: none;">
             <h2>No Jams Found</h2>
             <p>There are no jam sessions available at the moment.</p>
-            <a href="/" class="btn btn-primary">Go Home</a>
+            <a href="/" class="btn btn-primary" tabindex="0">Go Home</a>
         </div>
     </div>
 
@@ -231,8 +231,8 @@
                     <div class="date">📅 ${date}</div>
                     ${jam.description ? `<div class="description">${jam.description}</div>` : ''}
                     <div class="actions">
-                        <a href="/jam/${jam.slug}" class="btn btn-primary">Join Jam</a>
-                        <a href="/jam/${jam.slug}" class="btn btn-secondary">View Details</a>
+                        <a href="/jam/${jam.slug}" class="btn btn-primary" tabindex="0">Join Jam</a>
+                        <a href="/jam/${jam.slug}" class="btn btn-secondary" tabindex="0">View Details</a>
                     </div>
                 `;
 

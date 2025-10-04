@@ -20,7 +20,7 @@
 
 /* Button Components */
 .btn {
-    display: inline-flex;
+    .btn:focus { outline: 2px solid #3498db; outline-offset: 2px; }    display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 12px 24px;
@@ -222,7 +222,7 @@
 }
 
 .song-actions .btn {
-    flex: 1;
+    .btn:focus { outline: 2px solid #3498db; outline-offset: 2px; }    flex: 1;
     min-width: 80px;
 }
 
@@ -267,7 +267,7 @@
     }
     
     .btn {
-        padding: 10px 20px;
+    .btn:focus { outline: 2px solid #3498db; outline-offset: 2px; }        padding: 10px 20px;
         font-size: 13px;
     }
     
@@ -281,7 +281,7 @@
     }
     
     .song-actions .btn {
-        flex: none;
+    .btn:focus { outline: 2px solid #3498db; outline-offset: 2px; }        flex: none;
         width: 100%;
     }
     
@@ -295,7 +295,7 @@
     }
     
     .modal-actions .btn {
-        width: 100%;
+    .btn:focus { outline: 2px solid #3498db; outline-offset: 2px; }        width: 100%;
     }
 }
 
