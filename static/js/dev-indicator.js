@@ -25,8 +25,12 @@ class DevIndicator {
         this.indicator.className = 'dev-indicator sprint-1-version';
         this.indicator.innerHTML = `
             🚀 SPRINT 1 - DEVELOPER EXPERIENCE & DOCUMENTATION<br>
-            Port 3000 | Documentation ✅ | Dev Tools ✅
+            Port 3000 | Documentation ✅ | Dev Tools ✅<br>
+            <span class="git-info">Loading git info...</span>
         `;
+        
+        // Fetch git information
+        this.loadGitInfo();
     }
 
     addToPage() {
@@ -76,6 +80,11 @@ class DevIndicator {
             .dev-indicator.sprint-6-version {
                 background: #8e44ad;
             }
+            .dev-indicator .git-info {
+                font-size: 10px;
+                opacity: 0.9;
+                font-weight: normal;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -96,8 +105,12 @@ class DevIndicator {
         this.indicator.className = `dev-indicator ${colors[sprintNumber] || 'sprint-1-version'}`;
         this.indicator.innerHTML = `
             🚀 SPRINT ${sprintNumber} - ${sprintName.toUpperCase()}<br>
-            Port 3000 | ${features}
+            Port 3000 | ${features}<br>
+            <span class="git-info">Loading git info...</span>
         `;
+        
+        // Reload git information
+        this.loadGitInfo();
     }
 
     // Method to hide the indicator (for production)
@@ -111,6 +124,33 @@ class DevIndicator {
     show() {
         if (this.indicator) {
             this.indicator.style.display = 'block';
+        }
+    }
+
+    // Method to load git information
+    async loadGitInfo() {
+        try {
+            const response = await fetch('/api/dev-info');
+            if (response.ok) {
+                const data = await response.json();
+                const gitInfoElement = this.indicator.querySelector('.git-info');
+                if (gitInfoElement) {
+                    gitInfoElement.innerHTML = `
+                        🌿 ${data.git_branch} | ${data.git_commit}
+                    `;
+                }
+            } else {
+                const gitInfoElement = this.indicator.querySelector('.git-info');
+                if (gitInfoElement) {
+                    gitInfoElement.innerHTML = '🌿 git info unavailable';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading git info:', error);
+            const gitInfoElement = this.indicator.querySelector('.git-info');
+            if (gitInfoElement) {
+                gitInfoElement.innerHTML = '🌿 git info unavailable';
+            }
         }
     }
 }
