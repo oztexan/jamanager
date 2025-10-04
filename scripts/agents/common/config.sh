@@ -8,12 +8,15 @@ AGENT_PHASE="phase-2"
 # Base directories
 BASE_DIR="/Users/chrisrobertson/dev"
 MAIN_REPO="$BASE_DIR/jamanager"
-AGENT_WORKSPACE="$BASE_DIR/jamanager-agents"
-MERGE_WORKSPACE="$BASE_DIR/jamanager-merge"
+WORKZONE_DIR="$BASE_DIR/jamanager-workzone"
+AGENT_WORKSPACE="$WORKZONE_DIR/workspaces/agent-workspaces"
+MERGE_WORKSPACE="$WORKZONE_DIR/workspaces/merge-workspace"
 
 # Agent directories
 AGENT_CONSOLE_LOGS="$AGENT_WORKSPACE/agent-console-logs"
 AGENT_ACCESSIBILITY="$AGENT_WORKSPACE/agent-accessibility"
+AGENT_TYPE_HINTS="$AGENT_WORKSPACE/agent-type-hints"
+AGENT_ERROR_HANDLING="$AGENT_WORKSPACE/agent-error-handling"
 
 # Git configuration
 MAIN_BRANCH="main"
@@ -23,8 +26,12 @@ AGENT_BRANCH_PREFIX="feature/agent"
 # Remote repository
 REMOTE_ORIGIN="https://github.com/oztexan/jamanager.git"
 
+# Python environment
+PYENV_VERSION="jv3.11.11"
+PYTHON_CMD="python"
+
 # Logging
-LOG_DIR="$BASE_DIR/jamanager-logs"
+LOG_DIR="$WORKZONE_DIR/logs"
 LOG_FILE="$LOG_DIR/agent-$(date +%Y%m%d-%H%M%S).log"
 
 # Colors for output
@@ -73,6 +80,34 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Setup Python environment
+setup_python_environment() {
+    log_info "Setting up Python environment..."
+    
+    # Check if pyenv is available
+    if command_exists pyenv; then
+        log_info "Using pyenv version: $PYENV_VERSION"
+        export PYENV_VERSION="$PYENV_VERSION"
+        eval "$(pyenv init -)"
+        
+        # Verify Python version
+        python_version=$(python --version 2>&1)
+        log_info "Python version: $python_version"
+        
+        # Set pip command
+        export PIP_CMD="pip"
+    else
+        log_warning "pyenv not found, using system Python"
+        # Check if python command exists
+        if ! command_exists python; then
+            log_error "Python is not installed"
+            exit 1
+        fi
+    fi
+    
+    log_success "Python environment setup completed"
+}
+
 # Validate environment
 validate_environment() {
     log_info "Validating environment..."
@@ -94,6 +129,9 @@ validate_environment() {
         log_error "Not in the correct repository directory"
         exit 1
     fi
+    
+    # Setup Python environment
+    setup_python_environment
     
     log_success "Environment validation passed"
 }
@@ -135,6 +173,9 @@ get_agent_status() {
     fi
 }
 
+# Database management
+DATABASE_MANAGER="$(dirname "${BASH_SOURCE[0]:-${0}}")/database-manager.sh"
+
 # Export functions for use in other scripts
 export -f log log_success log_error log_warning log_info
-export -f command_exists validate_environment create_agent_workspace get_agent_status
+export -f command_exists setup_python_environment validate_environment create_agent_workspace get_agent_status

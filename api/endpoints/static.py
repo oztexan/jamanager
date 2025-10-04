@@ -13,12 +13,26 @@ router = APIRouter()
 @router.get("/")
 async def read_index():
     """Serve the main HTML file"""
-    index_path = os.path.join(os.path.dirname(__file__), "..", "..", "static", "index.html")
+    # Use absolute path to static directory
+    static_dir = os.path.join(os.path.dirname(__file__), "..", "..", "static")
+    index_path = os.path.join(static_dir, "index.html")
+    index_path = os.path.abspath(index_path)
+    
     logger.info(f"Root route called - looking for index.html at: {index_path}")
     logger.info(f"Current working directory: {os.getcwd()}")
+    logger.info(f"Static directory: {static_dir}")
     logger.info(f"Index file exists: {os.path.exists(index_path)}")
+    
     if not os.path.exists(index_path):
         logger.error(f"Index file not found at {index_path}")
+        # Try alternative path
+        alt_path = os.path.join(os.getcwd(), "static", "index.html")
+        logger.info(f"Trying alternative path: {alt_path}")
+        if os.path.exists(alt_path):
+            index_path = alt_path
+        else:
+            logger.error(f"Alternative path also not found: {alt_path}")
+    
     return FileResponse(index_path)
 
 @router.get("/test-chords")
@@ -76,4 +90,12 @@ async def venue_management_page():
 async def favicon():
     """Serve the favicon"""
     favicon_path = os.path.join(os.path.dirname(__file__), "..", "..", "static", "favicon.ico")
+    favicon_path = os.path.abspath(favicon_path)
+    
+    if not os.path.exists(favicon_path):
+        # Try alternative path
+        alt_path = os.path.join(os.getcwd(), "static", "favicon.ico")
+        if os.path.exists(alt_path):
+            favicon_path = alt_path
+    
     return FileResponse(favicon_path)

@@ -26,10 +26,11 @@ fi
 
 # Merge Console Logs Agent
 log_info "Merging Console Logs Agent..."
-git fetch "$AGENT_CONSOLE_LOGS" "$AGENT_BRANCH_PREFIX-console-logs"
+git remote add agent-console-logs "$AGENT_CONSOLE_LOGS"
+git fetch agent-console-logs "$AGENT_BRANCH_PREFIX-console-logs"
 
 if [ $? -eq 0 ]; then
-    git merge "$AGENT_CONSOLE_LOGS/$AGENT_BRANCH_PREFIX-console-logs" --no-ff -m "Merge Console Logs Agent
+    git merge "agent-console-logs/$AGENT_BRANCH_PREFIX-console-logs" --no-ff -m "Merge Console Logs Agent
 
 - Removed console.log statements from all .js files
 - Agent: console-logs
@@ -48,10 +49,11 @@ fi
 
 # Merge Accessibility Agent
 log_info "Merging Accessibility Agent..."
-git fetch "$AGENT_ACCESSIBILITY" "$AGENT_BRANCH_PREFIX-accessibility"
+git remote add agent-accessibility "$AGENT_ACCESSIBILITY"
+git fetch agent-accessibility "$AGENT_BRANCH_PREFIX-accessibility"
 
 if [ $? -eq 0 ]; then
-    git merge "$AGENT_ACCESSIBILITY/$AGENT_BRANCH_PREFIX-accessibility" --no-ff -m "Merge Accessibility Agent
+    git merge "agent-accessibility/$AGENT_BRANCH_PREFIX-accessibility" --no-ff -m "Merge Accessibility Agent
 
 - Added ARIA labels and keyboard navigation
 - Agent: accessibility
@@ -73,16 +75,19 @@ log_info "Running validation tests..."
 
 # Check if tests exist
 if [ -f "requirements.txt" ]; then
+    # Setup Python environment
+    setup_python_environment
+    
     # Install dependencies if needed
-    if ! python -c "import pytest" 2>/dev/null; then
+    if ! $PYTHON_CMD -c "import pytest" 2>/dev/null; then
         log_info "Installing test dependencies..."
-        pip install -r requirements.txt
+        $PIP_CMD install -r requirements.txt
     fi
     
     # Run tests
     if [ -d "tests" ]; then
         log_info "Running tests..."
-        python -m pytest tests/ -v
+        $PYTHON_CMD -m pytest tests/ -v
         
         if [ $? -eq 0 ]; then
             log_success "All tests passed"
