@@ -48,14 +48,46 @@ python reset_dev_database.py
 ### Prerequisites
 - Python 3.11+
 - pip
+- (Optional) pyenv with jv3.11.11 environment
 
 ### Installation
 
+#### Option 1: Automated Setup (Recommended)
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd jamanager
 
+# Run the automated setup script
+./setup-dev-environment.sh
+
+# Start the development server
+source venv/bin/activate
+python -m uvicorn main:app --host 0.0.0.0 --port 3000 --reload
+```
+
+#### Option 2: Manual Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd jamanager
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Initialize the database
+python init_dev_database.py
+
+# Start development server
+python -m uvicorn main:app --host 0.0.0.0 --port 3000 --reload
+```
+
+#### Option 3: Using Make Commands
+```bash
 # Install all dependencies
 make install
 
@@ -66,9 +98,10 @@ make setup-db
 make dev
 ```
 
-This will start:
-- Backend API: http://localhost:8000
-- Frontend: http://localhost:3000
+### Access the Application
+- **Frontend**: http://localhost:3000
+- **API Documentation**: http://localhost:3000/docs
+- **Jam Manager Access Code**: `jam2024`
 
 ### Alternative: Docker
 
@@ -145,6 +178,28 @@ Create a `.env` file in the project root:
 ```env
 DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
 JAM_MANAGER_ACCESS_CODE=jam2024
+```
+
+## 🆘 Troubleshooting
+
+If you encounter issues, check our comprehensive troubleshooting guide:
+
+- **[Troubleshooting Guide](TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Setup Script](setup-dev-environment.sh)** - Automated environment setup
+
+### Quick Fixes
+```bash
+# Reset development environment
+./setup-dev-environment.sh
+
+# Reset database
+python reset_dev_database.py
+
+# Kill existing processes
+pkill -f uvicorn
+
+# Check application status
+ps aux | grep uvicorn
 ```
 
 ## 📚 Documentation

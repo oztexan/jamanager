@@ -3,27 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="dev-environment" content="true">
     <title>Jamanager - FastAPI</title>
     
-    <!-- Dev Environment Indicator -->
-    <style>
-        .dev-indicator {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #9b59b6;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 9999;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        .dev-indicator.sprint-2-version {
-            background: #9b59b6;
-        }
-    </style>
     <style>
         * {
             margin: 0;
@@ -699,11 +681,6 @@
     </style>
 </head>
 <body>
-    <!-- Dev Environment Indicator -->
-    <div class="dev-indicator sprint-2-version">
-        🚀 SPRINT 2 - TYPE HINTS + ERROR HANDLING<br>
-        Port 3000 | Type Hints ✅ | Error Handling ✅
-    </div>
     
     <!-- Notification Container -->
     <div id="notificationContainer" class="notification-container"></div>
@@ -800,9 +777,9 @@
         <div class="recent-jams jam-manager-feature" style="display: none;">
             <h2>Recent Jams</h2>
             <ul class="jam-list" id="recentJamsList">
-                <li class="jam-item" onclick="joinJam('friday-night-jam')">
-                    <h4>Friday Night Jam</h4>
-                    <p>Our weekly jam session • 4 songs • Active</p>
+                <li class="jam-item" onclick="joinJam('today\'s-acoustic-session-401efc7985f38d97b1bc609a7ca8e119-2025-10-05')">
+                    <h4>Today's Acoustic Session</h4>
+                    <p>Join us for an intimate acoustic jam session • 5 songs • Active</p>
                 </li>
             </ul>
         </div>
@@ -909,6 +886,7 @@
         </div>
     </div>
 
+    <script src="/static/js/dev-indicator.js"></script>
     <script src="/static/breadcrumbs.js"></script>
     <script src="/static/js/notification-system.js"></script>
     <script src="/static/app.js"></script>

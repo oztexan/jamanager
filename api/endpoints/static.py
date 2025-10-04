@@ -3,6 +3,7 @@ Static file serving endpoints for the Jamanager application.
 """
 import os
 import logging
+import subprocess
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
@@ -99,3 +100,38 @@ async def favicon():
             favicon_path = alt_path
     
     return FileResponse(favicon_path)
+
+@router.get("/api/dev-info")
+async def get_dev_info():
+    """Get development environment information including git branch"""
+    try:
+        # Get git branch
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        git_branch = result.stdout.strip() if result.returncode == 0 else "unknown"
+        
+        # Get git commit hash (short)
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        git_commit = result.stdout.strip() if result.returncode == 0 else "unknown"
+        
+        return {
+            "git_branch": git_branch,
+            "git_commit": git_commit,
+            "environment": "development"
+        }
+    except Exception as e:
+        logger.error(f"Error getting git info: {e}")
+        return {
+            "git_branch": "unknown",
+            "git_commit": "unknown", 
+            "environment": "development"
+        }
