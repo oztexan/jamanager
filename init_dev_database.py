@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_database, engine
 from models.database import Song, Jam, Venue, JamSong, Base
-from datetime import date
+from datetime import date, datetime, timedelta
 
 # Popular cover songs with Ultimate Guitar URLs - Default dev database set
 DEFAULT_DEV_SONGS = [
@@ -80,22 +80,34 @@ async def init_dev_database():
         async for db in get_database():
             try:
                 # Create sample venues
-                venue1 = Venue(
-                    name="The Jazz Club",
-                    address="123 Music Street, Sydney NSW 2000",
-                    description="Intimate jazz and blues venue"
-                )
-                venue2 = Venue(
-                    name="Rock Arena",
-                    address="456 Rock Boulevard, Sydney NSW 2000",
-                    description="Large venue for rock concerts"
-                )
+                venues = [
+                    Venue(
+                        name="The Jazz Club",
+                        address="123 Music Street, Sydney NSW 2000",
+                        description="Intimate jazz and blues venue"
+                    ),
+                    Venue(
+                        name="Rock Arena",
+                        address="456 Rock Boulevard, Sydney NSW 2000",
+                        description="Large venue for rock concerts"
+                    ),
+                    Venue(
+                        name="Acoustic Corner",
+                        address="789 Folk Lane, Sydney NSW 2000",
+                        description="Cozy acoustic music venue"
+                    ),
+                    Venue(
+                        name="The Underground",
+                        address="321 Alternative Ave, Sydney NSW 2000",
+                        description="Underground music scene"
+                    )
+                ]
                 
-                db.add(venue1)
-                db.add(venue2)
+                for venue in venues:
+                    db.add(venue)
                 await db.flush()  # Get the IDs
-                print(f"✅ Created venue: {venue1.name}")
-                print(f"✅ Created venue: {venue2.name}")
+                for venue in venues:
+                    print(f"✅ Created venue: {venue.name}")
                 
                 # Create popular songs
                 songs = []
@@ -113,33 +125,90 @@ async def init_dev_database():
                 
                 await db.flush()  # Get the song IDs
                 
-                # Create sample jam with proper slug format
-                jam = Jam(
-                    name="Friday Night Jam",
-                    slug="friday-night-jam-the-jazz-club-2025-10-03",
-                    description="Weekly jam session",
-                    venue_id=venue1.id,
-                    jam_date=date(2025, 10, 3),
-                    status="waiting"
-                )
-                db.add(jam)
-                await db.flush()  # Get the jam ID
-                print(f"✅ Created jam: {jam.name}")
+                # Create diverse sample jams
+                today = date.today()
+                jams_data = [
+                    {
+                        "name": "Today's Acoustic Session",
+                        "description": "Join us for an intimate acoustic jam session featuring folk and indie favorites",
+                        "venue_id": venues[2].id,  # Acoustic Corner
+                        "jam_date": today,
+                        "status": "active",
+                        "background_image": "/static/uploads/acoustic-bg.jpg",
+                        "songs": songs[15:20]  # Alternative/Indie songs
+                    },
+                    {
+                        "name": "Rock Night at The Underground",
+                        "description": "Loud guitars, heavy drums, and classic rock anthems",
+                        "venue_id": venues[3].id,  # The Underground
+                        "jam_date": today + timedelta(days=1),
+                        "status": "waiting",
+                        "background_image": "/static/uploads/rock-bg.jpg",
+                        "songs": songs[2:8]  # Classic Rock songs
+                    },
+                    {
+                        "name": "Jazz & Blues Evening",
+                        "description": "Smooth jazz and soulful blues in an intimate setting",
+                        "venue_id": venues[0].id,  # The Jazz Club
+                        "jam_date": today + timedelta(days=2),
+                        "status": "waiting",
+                        "background_image": "/static/uploads/jazz-bg.jpg",
+                        "songs": songs[54:58]  # Blues/Soul songs
+                    },
+                    {
+                        "name": "Pop Hits Showcase",
+                        "description": "Modern pop hits and chart-toppers for everyone to sing along",
+                        "venue_id": venues[1].id,  # Rock Arena
+                        "jam_date": today + timedelta(days=3),
+                        "status": "waiting",
+                        "background_image": "/static/uploads/pop-bg.jpg",
+                        "songs": songs[59:63]  # Modern Pop songs
+                    },
+                    {
+                        "name": "Country & Folk Gathering",
+                        "description": "Boots, banjos, and beautiful storytelling through music",
+                        "venue_id": venues[2].id,  # Acoustic Corner
+                        "jam_date": today + timedelta(days=4),
+                        "status": "waiting",
+                        "background_image": "/static/uploads/country-bg.jpg",
+                        "songs": songs[48:53]  # Country/Folk songs
+                    }
+                ]
                 
-                # Add first 4 songs to the jam for testing
-                for song in songs[:4]:
-                    jam_song = JamSong(
-                        jam_id=jam.id,
-                        song_id=song.id
+                created_jams = []
+                for jam_data in jams_data:
+                    jam = Jam(
+                        name=jam_data["name"],
+                        slug=f"{jam_data['name'].lower().replace(' ', '-').replace('&', 'and')}-{jam_data['venue_id']}-{jam_data['jam_date']}",
+                        description=jam_data["description"],
+                        venue_id=jam_data["venue_id"],
+                        jam_date=jam_data["jam_date"],
+                        status=jam_data["status"],
+                        background_image=jam_data["background_image"]
                     )
-                    db.add(jam_song)
-                print(f"✅ Added {len(songs[:4])} songs to jam")
+                    db.add(jam)
+                    created_jams.append((jam, jam_data["songs"]))
+                    print(f"✅ Created jam: {jam.name} ({jam_data['jam_date']})")
+                
+                await db.flush()  # Get the jam IDs
+                
+                # Add songs to each jam
+                for jam, jam_songs in created_jams:
+                    for song in jam_songs:
+                        jam_song = JamSong(
+                            jam_id=jam.id,
+                            song_id=song.id
+                        )
+                        db.add(jam_song)
+                    print(f"✅ Added {len(jam_songs)} songs to {jam.name}")
                 
                 await db.commit()
                 print(f"\n🎵 Development Database Initialization Complete:")
                 print(f"   Created: {len(songs)} popular songs")
-                print(f"   Created: 2 venues")
-                print(f"   Created: 1 jam with {len(songs[:4])} songs")
+                print(f"   Created: {len(venues)} venues")
+                print(f"   Created: {len(created_jams)} diverse jams")
+                print(f"   Today's jam: 'Today's Acoustic Session' (active)")
+                print(f"   Jams with background images: {len([j for j in jams_data if j['background_image']])}")
                 
             except Exception as e:
                 await db.rollback()
