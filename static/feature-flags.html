@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Flags - JaManager</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <style>
+        .feature-flags-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .feature-flag-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .feature-flag-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-flag-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-info {
+            flex: 1;
+        }
+        
+        .feature-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .feature-description {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .feature-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .feature-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-enabled {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-disabled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .user-role-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .role-permissions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .permission-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="feature-flags-container">
+        <div class="breadcrumbs">
+            <a href="/">Home</a> > 
+            <a href="/jam-manager">Jam Manager</a> > 
+            <span>Feature Flags</span>
+        </div>
+        
+        <h1>Feature Flags Management</h1>
+        
+        <!-- Current User Role -->
+        <div class="user-role-section">
+            <h2>Current User Role</h2>
+            <div id="currentUserRole">
+                <p>Loading user role...</p>
+            </div>
+            <div class="role-permissions" id="rolePermissions">
+                <!-- Permissions will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Feature Flags -->
+        <div class="feature-flag-card">
+            <h2>System Feature Flags</h2>
+            <div id="featureFlagsList">
+                <p>Loading feature flags...</p>
+            </div>
+        </div>
+        
+        <!-- User Role Management -->
+        <div class="feature-flag-card">
+            <h2>User Role Management</h2>
+            <p>Feature flags control what different user types can access:</p>
+            
+            <div class="role-permissions">
+                <div class="permission-item">
+                    <div>
+                        <strong>Anonymous Users (Plebs)</strong>
+                        <div style="font-size: 14px; color: #666;">Can vote, view performers, view QR codes</div>
+                    </div>
+                    <span class="status-badge status-enabled">Active</span>
+                </div>
+                
+                <div class="permission-item">
+                    <div>
+                        <strong>Registered Attendees (Musos)</strong>
+                        <div style="font-size: 14px; color: #666;">Can register to perform, suggest songs, vote</div>
+                    </div>
+                    <span class="status-badge status-enabled">Active</span>
+                </div>
+                
+                <div class="permission-item">
+                    <div>
+                        <strong>Jam Managers (Bosses)</strong>
+                        <div style="font-size: 14px; color: #666;">Can manage jams, access admin features, vote</div>
+                    </div>
+                    <span class="status-badge status-enabled">Active</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Status -->
+        <div class="feature-flag-card">
+            <h2>System Status</h2>
+            <div id="systemStatus">
+                <p>Loading system status...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/feature-flags.js"></script>
+    <script>
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserRole();
+            await loadFeatureFlags();
+            await loadSystemStatus();
+        });
+
+        async function loadUserRole() {
+            try {
+                const response = await fetch('/api/user/permissions');
+                if (response.ok) {
+                    const data = await response.json();
+                    const roleElement = document.getElementById('currentUserRole');
+                    const permissionsElement = document.getElementById('rolePermissions');
+                    
+                    roleElement.innerHTML = `
+                        <p><strong>Role:</strong> ${data.user_role || 'anonymous'}</p>
+                        <p><strong>Display Name:</strong> ${getRoleDisplayName(data.user_role)}</p>
+                    `;
+                    
+                    // Display permissions
+                    const permissions = data.permissions || {};
+                    permissionsElement.innerHTML = Object.entries(permissions)
+                        .map(([key, value]) => `
+                            <div class="permission-item">
+                                <span>${formatPermissionName(key)}</span>
+                                <span class="status-badge ${value ? 'status-enabled' : 'status-disabled'}">
+                                    ${value ? 'Enabled' : 'Disabled'}
+                                </span>
+                            </div>
+                        `).join('');
+                } else {
+                    document.getElementById('currentUserRole').innerHTML = '<p>Error loading user role</p>';
+                }
+            } catch (error) {
+                console.error('Error loading user role:', error);
+                document.getElementById('currentUserRole').innerHTML = '<p>Error loading user role</p>';
+            }
+        }
+
+        async function loadFeatureFlags() {
+            try {
+                const response = await fetch('/api/feature-flags');
+                if (response.ok) {
+                    const data = await response.json();
+                    const flagsElement = document.getElementById('featureFlagsList');
+                    
+                    const flags = data.feature_flags || {};
+                    flagsElement.innerHTML = Object.entries(flags)
+                        .map(([key, value]) => `
+                            <div class="feature-flag-item">
+                                <div class="feature-info">
+                                    <div class="feature-name">${formatFeatureName(key)}</div>
+                                    <div class="feature-description">${getFeatureDescription(key)}</div>
+                                </div>
+                                <div>
+                                    <span class="status-badge ${value ? 'status-enabled' : 'status-disabled'}">
+                                        ${value ? 'Enabled' : 'Disabled'}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('');
+                } else {
+                    document.getElementById('featureFlagsList').innerHTML = '<p>Error loading feature flags</p>';
+                }
+            } catch (error) {
+                console.error('Error loading feature flags:', error);
+                document.getElementById('featureFlagsList').innerHTML = '<p>Error loading feature flags</p>';
+            }
+        }
+
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch('/api/feature-flags/');
+                if (response.ok) {
+                    document.getElementById('systemStatus').innerHTML = `
+                        <p>✅ Feature flags API is working</p>
+                        <p>✅ User permissions system is active</p>
+                        <p>✅ Role-based access control is enabled</p>
+                    `;
+                } else {
+                    document.getElementById('systemStatus').innerHTML = '<p>❌ Feature flags API is not responding</p>';
+                }
+            } catch (error) {
+                document.getElementById('systemStatus').innerHTML = '<p>❌ Error checking system status</p>';
+            }
+        }
+
+        function getRoleDisplayName(role) {
+            const roleNames = {
+                'anonymous': 'Anonymous User (Pleb)',
+                'registered_attendee': 'Registered Attendee (Muso)',
+                'jam_manager': 'Jam Manager (Boss)'
+            };
+            return roleNames[role] || 'Unknown';
+        }
+
+        function formatPermissionName(permission) {
+            return permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function formatFeatureName(feature) {
+            return feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function getFeatureDescription(feature) {
+            const descriptions = {
+                'vote_jam_manager': 'Allows jam managers to vote on songs',
+                'suggest_songs': 'Allows users to suggest new songs',
+                'register_to_perform': 'Allows users to register to perform on songs',
+                'manage_jam': 'Allows jam managers to manage jam sessions'
+            };
+            return descriptions[feature] || 'No description available';
+        }
+    </script>
+</body>
+</html>

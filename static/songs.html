@@ -417,6 +417,51 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+
+        /* Chord Sheet Status Styles */
+        .chord-sheet-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .chord-sheet-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .chord-sheet-icon.available {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .chord-sheet-icon.unavailable {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .chord-sheet-icon.broken {
+            background: #fbb6ce;
+            color: #b83280;
+        }
+
+        .chord-sheet-icon.unknown {
+            background: #e2e8f0;
+            color: #718096;
+        }
+
+        .chord-sheet-status-text {
+            color: #4a5568;
+            font-weight: 500;
+        }
         
         .loading {
             text-align: center;
@@ -424,10 +469,135 @@
             padding: 40px;
             font-size: 1.1rem;
         }
+
+        /* Breadcrumb Navigation Styles */
+        .breadcrumb-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .breadcrumb-item {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: #5a67d8;
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .breadcrumb-separator {
+            color: #a0aec0;
+            margin: 0 8px;
+            font-weight: 400;
+        }
+
+        .breadcrumb-nav a {
+            text-decoration: none;
+        }
+
+        .breadcrumb-nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Notification System Styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid #667eea;
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left-color: #48bb78;
+        }
+
+        .notification.error {
+            border-left-color: #f56565;
+        }
+
+        .notification.warning {
+            border-left-color: #ed8936;
+        }
+
+        .notification.info {
+            border-left-color: #4299e1;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .notification-icon {
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .notification-text {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #2d3748;
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #a0aec0;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .notification-close:hover {
+            color: #718096;
+        }
     </style>
 </head>
 <body>
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
     <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <div id="breadcrumb-container"></div>
         <div class="header">
             <h1>🎵 Song Library</h1>
             <p>Browse and discover songs</p>
@@ -588,9 +758,16 @@
                 const card = document.createElement('div');
                 card.className = 'song-card';
 
+                // Get chord sheet status
+                const chordSheetStatus = this.getChordSheetStatus(song);
+
                 card.innerHTML = `
                     <h3>${song.title}</h3>
                     <div class="artist">👤 ${song.artist}</div>
+                    <div class="chord-sheet-status">
+                        <div class="chord-sheet-icon ${chordSheetStatus.class}">${chordSheetStatus.icon}</div>
+                        <span class="chord-sheet-status-text">${chordSheetStatus.text}</span>
+                    </div>
                     <div class="actions">
                         <button class="btn btn-primary" data-song-id="${song.id}" data-action="add-to-jam">Add to Jam</button>
                         <button class="btn btn-secondary" data-song-id="${song.id}" data-action="view-details">View Details</button>
@@ -746,6 +923,8 @@
                 }
 
                 try {
+                    console.log('Saving chord sheet for song:', this.currentSong.id, 'URL:', newUrl);
+                    
                     const response = await fetch(`/api/songs/${this.currentSong.id}`, {
                         method: 'PUT',
                         headers: {
@@ -756,11 +935,51 @@
                         })
                     });
 
+                    console.log('Response status:', response.status);
+                    
                     if (response.ok) {
                         const updatedSong = await response.json();
+                        console.log('Updated song:', updatedSong);
+                        
+                        // If we have a new URL, validate it and save to database
+                        if (newUrl) {
+                            console.log('Validating chord sheet URL:', newUrl);
+                            const isValid = await this.validateChordSheetUrl(newUrl);
+                            console.log('Validation result:', isValid);
+                            
+                            // Update the song in the database with validation result
+                            try {
+                                const updateResponse = await fetch(`/api/songs/${this.currentSong.id}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        chord_sheet_is_valid: isValid,
+                                        chord_sheet_validated_at: new Date().toISOString()
+                                    })
+                                });
+                                
+                                if (updateResponse.ok) {
+                                    const updatedSongWithValidation = await updateResponse.json();
+                                    console.log('Updated song with validation:', updatedSongWithValidation);
+                                    updatedSong.chord_sheet_is_valid = updatedSongWithValidation.chord_sheet_is_valid;
+                                } else {
+                                    console.error('Failed to update validation status');
+                                    // Still update locally even if database update fails
+                                    updatedSong.chord_sheet_is_valid = isValid;
+                                }
+                            } catch (error) {
+                                console.error('Error updating validation status:', error);
+                                // Still update locally even if database update fails
+                                updatedSong.chord_sheet_is_valid = isValid;
+                            }
+                        }
                         
                         // Update the current song object
                         this.currentSong.chord_sheet_url = updatedSong.chord_sheet_url;
+                        this.currentSong.chord_sheet_is_valid = updatedSong.chord_sheet_is_valid;
+                        this.currentSong.chord_sheet_validated_at = updatedSong.chord_sheet_validated_at;
                         
                         // Update the display
                         const chordSheetUrl = updatedSong.chord_sheet_url || 'No chord sheet URL set';
@@ -772,13 +991,32 @@
                             this.songs[songIndex] = updatedSong;
                         }
                         
-                        this.showSuccess('Chord sheet URL updated successfully!');
+                        // Update the filtered songs list as well
+                        const filteredIndex = this.filteredSongs.findIndex(s => s.id === this.currentSong.id);
+                        if (filteredIndex !== -1) {
+                            this.filteredSongs[filteredIndex] = updatedSong;
+                        }
+                        
+                        // Refresh the display to show updated chord sheet status
+                        this.displaySongs();
+                        
+                        // Show standard notification instead of modal alert
+                        if (window.notificationSystem) {
+                            window.notificationSystem.show('Chord sheet URL updated successfully!', 'success');
+                        } else {
+                            this.showSongDetailsSuccess('Chord sheet URL updated successfully!');
+                        }
+                        
+                        // Close the modal immediately
+                        this.hideSongDetailsModal();
                     } else {
                         const error = await response.json();
-                        this.showError(error.detail || 'Failed to update chord sheet URL');
+                        console.error('API Error:', error);
+                        this.showSongDetailsError(error.detail || 'Failed to update chord sheet URL');
                     }
                 } catch (error) {
-                    this.showError('Network error: ' + error.message);
+                    console.error('Network error:', error);
+                    this.showSongDetailsError('Network error: ' + error.message);
                 }
             }
 
@@ -813,6 +1051,76 @@
                     errorDiv.classList.add('hidden');
                 }, 5000);
             }
+
+            showSongDetailsSuccess(message) {
+                const successDiv = document.getElementById('songDetailsSuccess');
+                successDiv.textContent = message;
+                successDiv.classList.remove('hidden');
+                setTimeout(() => {
+                    successDiv.classList.add('hidden');
+                }, 3000);
+            }
+
+            showSongDetailsError(message) {
+                const errorDiv = document.getElementById('songDetailsError');
+                errorDiv.textContent = message;
+                errorDiv.classList.remove('hidden');
+                setTimeout(() => {
+                    errorDiv.classList.add('hidden');
+                }, 5000);
+            }
+
+            getChordSheetStatus(song) {
+                // Check if song has a chord sheet URL
+                if (!song.chord_sheet_url) {
+                    return {
+                        class: 'unavailable',
+                        icon: '✗',
+                        text: 'No chord sheet'
+                    };
+                }
+
+                // Check validation status if available
+                if (song.chord_sheet_is_valid === true) {
+                    return {
+                        class: 'available',
+                        icon: '✓',
+                        text: 'Valid chord sheet'
+                    };
+                } else if (song.chord_sheet_is_valid === false) {
+                    return {
+                        class: 'broken',
+                        icon: '⚠',
+                        text: 'Broken link'
+                    };
+                } else {
+                    // Unknown validation status - if URL exists but not validated, show as unknown
+                    return {
+                        class: 'unknown',
+                        icon: '?',
+                        text: 'Unvalidated'
+                    };
+                }
+            }
+
+            hideSongDetailsModal() {
+                document.getElementById('songDetailsModal').classList.add('hidden');
+            }
+
+            async validateChordSheetUrl(url) {
+                try {
+                    console.log('Validating URL:', url);
+                    
+                    // For now, assume URL is valid if it passes basic URL validation
+                    // In a real implementation, you might want to make a server-side call
+                    const isValid = this.isValidUrl(url);
+                    console.log('URL validation result:', isValid);
+                    return isValid;
+                } catch (error) {
+                    console.log('URL validation failed:', error.message);
+                    return false;
+                }
+            }
         }
 
         // Global functions for modal interactions
@@ -841,8 +1149,23 @@
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialize notification system
+            if (window.NotificationSystem) {
+                window.notificationSystem = new window.NotificationSystem();
+            }
+            
             window.songsPage = new SongsPage();
+            
+            // Initialize breadcrumbs for songs page
+            if (window.breadcrumbManager) {
+                window.breadcrumbManager.setBreadcrumbs([
+                    { label: 'Home', url: '/' },
+                    { label: 'Song Library', url: '/songs', isActive: true }
+                ]);
+            }
         });
     </script>
+    <script src="/static/breadcrumbs.js"></script>
+    <script src="/static/js/notification-system.js"></script>
 </body>
 </html>
