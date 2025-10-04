@@ -151,10 +151,17 @@ JAM_MANAGER_ACCESS_CODE=jam2024
 
 ## 📚 Documentation
 
-- [Requirements](docs/REQUIREMENTS.md) - Detailed feature specifications
-- [Test Plan](docs/TEST_PLAN.md) - Comprehensive testing guide
-- [Testing Guide](docs/TESTING_GUIDE.md) - How to test the application
-- [Session Summary](docs/SESSION_SUMMARY.md) - Development history
+All documentation is organized in the [`docs/`](./docs/) directory:
+
+- **[Documentation Index](docs/README.md)** - Complete documentation overview
+- **[User Stories](docs/USER_STORIES.md)** - Complete user stories and requirements
+- **[Technical Architecture](docs/TECHNICAL_ARCHITECTURE.md)** - System design and architecture
+- **[Requirements](docs/REQUIREMENTS.md)** - Detailed feature specifications
+- **[Test Plan](docs/TEST_PLAN.md)** - Comprehensive testing guide
+- **[Testing Guide](docs/TESTING_GUIDE.md)** - How to test the application
+- **[Database Setup](docs/DATABASE_SETUP.md)** - Database configuration and setup
+- **[Deployment Plan](docs/DEPLOYMENT_PLAN.md)** - Deployment strategy and procedures
+- **[Session Summary](docs/SESSION_SUMMARY.md)** - Development history
 
 ## 🏗️ Architecture
 
