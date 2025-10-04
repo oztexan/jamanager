@@ -1,7 +1,7 @@
-# Jamanager - User Stories & Requirements
+# JaManager - User Stories & Requirements
 
 ## Overview
-Jamanager is a real-time song voting and jam management system with two main user types: **Jam Managers** and **Attendees**.
+JaManager is a modern, real-time jam session management application with three user types: **Anonymous Users (Plebs)**, **Registered Musicians (Musos)**, and **Jam Managers (Bosses)**.
 
 ## User Stories
 
@@ -178,37 +178,15 @@ Jamanager is a real-time song voting and jam management system with two main use
   - ✅ Access code is configurable via environment variable
 - **Implementation**: Complete access code system with session management
 
-#### JM-002: Jam Creation & Management
-**As a jam manager, I can create and manage jam sessions**
-- **Acceptance Criteria:**
-  - Create new jam with name and description
-  - Set jam status (waiting, active, ended)
-  - Manage jam settings and permissions
-  - Archive or delete jam sessions
-
-#### JM-002: Song Queue Management
-**As a jam manager, I can manage the song queue**
-- **Acceptance Criteria:**
-  - Reorder songs in queue
-  - Remove songs from queue
-  - Set current playing song
-  - Mark songs as played/skipped
-
-#### JM-003: Attendee Management
-**As a jam manager, I can view and manage attendees**
-- **Acceptance Criteria:**
-  - View list of registered attendees
-  - See who's registered to perform on each song
-  - Manage performer assignments
-  - Remove problematic attendees if needed
-
-#### JM-004: Real-time Monitoring
+#### JM-006: Real-time Monitoring ✅ **COMPLETED**
 **As a jam manager, I can monitor jam activity in real-time**
 - **Acceptance Criteria:**
-  - Live vote counts and updates
-  - Real-time attendee registrations
-  - WebSocket notifications for all activities
-  - Dashboard with jam statistics
+  - ✅ Live vote counts and updates via WebSocket
+  - ✅ Real-time attendee registrations and performance updates
+  - ✅ Real-time chord sheet updates across all browsers
+  - ✅ WebSocket notifications for all activities
+  - ✅ Live song additions and queue updates
+- **Implementation**: Complete WebSocket real-time system with broadcasting
 
 ## Technical Requirements
 
@@ -224,6 +202,8 @@ Jamanager is a real-time song voting and jam management system with two main use
 - ✅ **Votes Table**: Track individual votes (attendee + song + jam)
 - ✅ **Performance Registrations Table**: Track who's registered to perform on songs
 - ✅ **Venues Table**: Store venue information (name, address, description)
+- ✅ **Jam Chord Sheets Table**: Store jam-specific chord sheet overrides
+- ✅ **Songs Table**: Enhanced with chord sheet URL and validation fields
 - ✅ **SQLite Database**: Uses SQLite for zero-configuration setup
 - ✅ **String IDs**: Converted from UUID to string-based IDs for better compatibility
 
@@ -242,8 +222,11 @@ Jamanager is a real-time song voting and jam management system with two main use
 - ✅ `PUT /api/venues/{venue_id}` - Update venue
 - ✅ `DELETE /api/venues/{venue_id}` - Delete venue
 - ✅ `POST /api/jams/{jam_id}/songs` - Add song to jam
-- ✅ `GET /api/chord-sheets/search` - Search Ultimate Guitar for chord sheets
-- ✅ `PUT /api/jams/{jam_id}/songs/{song_id}/chord-sheet` - Update chord sheet URL
+- ✅ `GET /api/jams/{jam_id}/chord-sheets/{song_id}` - Get chord sheet for song
+- ✅ `POST /api/jams/{jam_id}/chord-sheets` - Create/update chord sheet
+- ✅ `DELETE /api/jams/{jam_id}/chord-sheets/{song_id}` - Delete chord sheet
+- ✅ `POST /api/jams/{jam_id}/chord-sheets/search` - Search Ultimate Guitar
+- ✅ `POST /api/jams/{jam_id}/chord-sheets/validate-url` - Validate chord sheet URL
 
 ### Frontend Features ✅ **COMPLETED**
 - ✅ QR code generation and display
@@ -253,7 +236,14 @@ Jamanager is a real-time song voting and jam management system with two main use
 - ✅ Vote tracking and display
 - ✅ Real-time updates via WebSocket
 - ✅ Mobile-responsive design
-- ✅ Chord sheet lookup and linking
+- ✅ Chord sheet management modal with search and validation
+- ✅ Chord sheet status indicators (✓ available, ⚠ broken/unavailable)
+- ✅ Click-to-open chord sheet functionality
+- ✅ Real-time chord sheet updates across all browsers
+- ✅ Access control for chord sheet visibility (plebs can't see status)
+- ✅ Song sorting and filtering (by name, artist, votes, performance order)
+- ✅ Performance order numbers with automatic calculation
+- ✅ Modern notification system with auto-dismiss
 
 ## Implementation Priority
 1. **Phase 1**: Attendee registration and basic voting
@@ -290,16 +280,23 @@ Jamanager is a real-time song voting and jam management system with two main use
 - ✅ Role-Based Access Control
 - ✅ Dynamic Permission Checking
 
-**Jam Manager Features: 5/5 Complete (100%)**
+**Jam Manager Features: 6/6 Complete (100%)**
 - ✅ Access Code Authentication
 - ✅ Enhanced Jam Creation
 - ✅ Custom Jam Styling
 - ✅ Venue Management
 - ✅ Breadcrumb Navigation
+- ✅ Real-time Monitoring
 
 **Technical Infrastructure: 100% Complete**
 - ✅ SQLite Database Migration
 - ✅ String ID Conversion (UUID → String)
 - ✅ WebSocket Real-time Updates
 - ✅ Mobile Responsive Design
-- ✅ API Documentation
+- ✅ Chord Sheet Integration with Ultimate Guitar
+- ✅ Database-backed URL Validation
+- ✅ Real-time Broadcasting System
+- ✅ Access Control System
+- ✅ Modern Notification System
+- ✅ Song Sorting and Filtering
+- ✅ Performance Order Calculation

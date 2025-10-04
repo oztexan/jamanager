@@ -12,15 +12,13 @@ Welcome to the JaManager documentation! This directory contains all the technica
 ### Development & Testing
 - **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - Testing procedures and guidelines
 - **[TEST_PLAN.md](./TEST_PLAN.md)** - Comprehensive test plan
-- **[test_report.md](./test_report.md)** - Latest test results
 
 ### Database & Migration
 - **[DATABASE_SETUP.md](./DATABASE_SETUP.md)** - Database setup and configuration
 - **[MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md)** - Database migration history
 
 ### Features & Integration
-- **[CHORD_SHEET_INTEGRATION.md](./CHORD_SHEET_INTEGRATION.md)** - Chord sheet functionality documentation
-- **[REQUIREMENTS.md](./REQUIREMENTS.md)** - Detailed feature requirements
+- **[REQUIREMENTS.md](./REQUIREMENTS.md)** - Detailed feature requirements including chord sheet functionality
 - **[SESSION_SUMMARY.md](./SESSION_SUMMARY.md)** - Development session summaries
 
 ### Deployment & Operations
