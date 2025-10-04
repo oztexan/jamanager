@@ -3,7 +3,6 @@
  * Handles song display, voting, and performance registration
  */
 
-console.log('jam-songs.js loaded successfully');
 
 class JamSongs {
     constructor() {
@@ -291,7 +290,6 @@ class JamSongs {
             const isPerforming = this.userPerformanceRegistrations[song.id];
             const performanceOrder = orderMap[song.id] || '';
                 const chordSheetStatus = this.chordSheetStatus[song.id] || { hasChordSheet: false, url: null, isValid: false };
-                console.log(`🔍 Song ${song.title} chord sheet status:`, chordSheetStatus);
                 
                 // Only show chord sheet status for registered users (bosses and musos)
                 const currentAttendee = this.attendee ? this.attendee.getCurrentAttendee() : null;
@@ -299,7 +297,6 @@ class JamSongs {
                 
                 const chordSheetIcon = showChordSheetStatus ? this.getChordSheetIcon(chordSheetStatus) : '';
                 const isClickable = showChordSheetStatus && chordSheetStatus.hasChordSheet && chordSheetStatus.isValid;
-                console.log(`🔍 Song ${song.title} is clickable:`, isClickable);
 
             listItem.innerHTML = `
                 <div class="song-order">
@@ -706,16 +703,12 @@ class JamSongs {
      * Get chord sheet icon based on status
      */
     getChordSheetIcon(status) {
-        console.log('🔍 Getting chord sheet icon for status:', status);
         
         if (status.hasChordSheet && status.isValid) {
-            console.log('🔍 Returning available icon');
             return '<span class="chord-sheet-icon available" title="Chord sheet available">✓</span>';
         } else if (status.url && !status.isValid) {
-            console.log('🔍 Returning broken icon');
             return '<span class="chord-sheet-icon broken" title="Chord sheet URL is broken or inaccessible">⚠</span>';
         } else {
-            console.log('🔍 Returning unavailable icon');
             return '<span class="chord-sheet-icon unavailable" title="No chord sheet available">⚠</span>';
         }
     }
@@ -734,7 +727,6 @@ class JamSongs {
             for (const jamSong of this.jamSongs) {
                 const songId = jamSong.song.id;
                 try {
-                    console.log(`🔍 Processing chord sheet status for song: ${jamSong.song.title}`);
                     
                     const response = await fetch(`/api/jams/${this.jamCore.getJamId()}/chord-sheets/${songId}`);
                     if (response.ok) {
@@ -804,11 +796,9 @@ class JamSongs {
                     };
                 }
             }
-            console.log('🔍 Loaded chord sheet status:', this.chordSheetStatus);
             
             // Force a display update after loading status
             setTimeout(() => {
-                console.log('🔍 Forcing display update after chord sheet status load');
                 this.displaySongs();
             }, 100);
             
@@ -822,13 +812,11 @@ class JamSongs {
      */
     async validateChordSheetUrl(url, songId = null) {
         if (!url) {
-            console.log('🔍 No URL provided for validation');
             return false;
         }
         
         try {
             const jamId = this.jamCore.getJamId();
-            console.log(`🔍 Validating URL: ${url}`);
             
             const requestBody = { url: url };
             if (songId) {
@@ -844,10 +832,8 @@ class JamSongs {
             if (response.ok) {
                 const result = await response.json();
                 const isValid = result.valid === true;
-                console.log(`🔍 URL validation result for ${url}: ${isValid}`);
                 return isValid;
             } else {
-                console.log(`🔍 URL validation failed with status: ${response.status}`);
                 return false;
             }
         } catch (error) {
@@ -884,7 +870,6 @@ class JamSongs {
             });
 
             await Promise.all(promises);
-            console.log('Loaded all performers:', this.allPerformers);
             
         } catch (error) {
             console.error('Error loading all performers:', error);
@@ -964,9 +949,7 @@ class JamSongs {
      * Close chord sheet modal
      */
     closeChordSheetModal() {
-        console.log('🔍 Closing chord sheet modal');
         const urlInput = document.getElementById('chordSheetUrlInput');
-        console.log('🔍 URL input value before closing:', urlInput ? urlInput.value : 'input not found');
         document.getElementById('chordSheetModal').classList.add('hidden');
         this.currentChordSheetSongId = null;
         this.clearChordSheetForm();
@@ -986,7 +969,6 @@ class JamSongs {
      */
     async saveChordSheet() {
         const url = document.getElementById('chordSheetUrlInput').value.trim();
-        console.log('🔍 Saving chord sheet with URL:', url);
         
         if (!url) {
             this.showMessage('Please enter a chord sheet URL.', 'error');
@@ -1140,7 +1122,6 @@ class JamSongs {
         }
         
         // Pre-validate the selected URL and save to database
-        console.log(`🔍 Pre-validating selected chord sheet URL: ${url}`);
         await this.validateChordSheetUrl(url, this.currentChordSheetSongId);
     }
 
@@ -1151,7 +1132,6 @@ class JamSongs {
         const url = document.getElementById('chordSheetUrlInput').value.trim();
         const resultDiv = document.getElementById('urlValidationResult');
         
-        console.log('🔍 Frontend validating URL:', url);
         
         if (!url) {
             resultDiv.classList.add('hidden');
@@ -1221,10 +1201,7 @@ class JamSongs {
         selectElement.innerHTML = ''; // Clear existing options
 
         const jamSongIds = new Set(this.jamSongs.map(js => js.song.id));
-        console.log('Debug - Jam song IDs:', Array.from(jamSongIds));
-        console.log('Debug - All song IDs:', this.songs.map(s => s.id));
         const availableSongs = this.songs.filter(song => !jamSongIds.has(song.id));
-        console.log('Debug - Available song IDs:', availableSongs.map(s => s.id));
 
         if (availableSongs.length === 0) {
             const option = document.createElement('option');
@@ -1287,7 +1264,6 @@ class JamSongs {
             this.closeAddSongModal();
             
             // Reload jam data to update song list
-            console.log('Reloading jam data after adding song...');
             if (this.jamCore) {
                 await this.jamCore.loadJamData();
             }
@@ -1320,7 +1296,6 @@ class JamSongs {
             } else if (type === 'success') {
                 this.jamCore.showSuccess(message);
             } else {
-                console.log(`Info: ${message}`);
             }
         }
     }
