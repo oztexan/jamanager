@@ -501,6 +501,15 @@ async def add_song_to_jam(
         db.add(jam_song)
         await db.commit()
         
+        # Broadcast song addition via WebSocket
+        from api.endpoints.websocket import connection_manager
+        print(f"🎵 Broadcasting song addition for song {song_id} in jam {jam_id}")
+        await connection_manager.broadcast_to_jam(jam_id, "song_added", {
+            "type": "song_added", 
+            "song_id": song_id,
+            "jam_id": jam_id
+        })
+        
         return {"message": "Song added to jam successfully"}
         
     except HTTPException:
@@ -1050,6 +1059,17 @@ async def register_to_perform_simple(
         db.add(registration)
         await db.commit()
         
+        # Broadcast performance registration update via WebSocket
+        from api.endpoints.websocket import connection_manager
+        print(f"🎵 Broadcasting performance registration for song {song_id} in jam {jam_id}")
+        await connection_manager.broadcast_to_jam(jam_id, "performance_update", {
+            "type": "performance_update", 
+            "song_id": song_id, 
+            "attendee_id": attendee_id,
+            "instrument": instrument,
+            "action": "register"
+        })
+        
         return {"message": "Registered to perform successfully"}
         
     except HTTPException:
@@ -1087,6 +1107,16 @@ async def unregister_from_perform(
         # Delete the registration
         await db.delete(existing_registration)
         await db.commit()
+        
+        # Broadcast performance unregistration update via WebSocket
+        from api.endpoints.websocket import connection_manager
+        print(f"🎵 Broadcasting performance unregistration for song {song_id} in jam {jam_id}")
+        await connection_manager.broadcast_to_jam(jam_id, "performance_update", {
+            "type": "performance_update", 
+            "song_id": song_id, 
+            "attendee_id": attendee_id,
+            "action": "unregister"
+        })
         
         return {"message": "Unregistered from performance successfully"}
         

@@ -318,6 +318,20 @@ Jamanager is a real-time jam session management application that allows musician
 - And the button should change back to "Register to Perform"
 - And I should see confirmation of my unregistration
 
+### Story 5.5: Real-time Performance Registration Updates
+**As a** user  
+**I want** to see performance registrations and unregistrations in real-time  
+**So that** I can see the current lineup for each song as it changes  
+
+**Acceptance Criteria:**
+- Given I'm viewing a jam session
+- When another user registers to perform on a song
+- Then I should see their name and instrument appear immediately in the performers list
+- And when another user unregisters from performing
+- Then I should see their name and instrument disappear immediately
+- And I should not need to refresh the page to see these updates
+- And the updates should appear for all users viewing the jam simultaneously
+
 ---
 
 ## Epic 6: Jam Management (Jam Managers Only)

@@ -96,6 +96,9 @@ class JamWebSocket {
             case 'vote_update':
                 this.handleVoteUpdate(data);
                 break;
+            case 'performance_update':
+                this.handlePerformanceUpdate(data);
+                break;
             case 'song_added':
                 this.handleSongAdded(data);
                 break;
@@ -154,12 +157,33 @@ class JamWebSocket {
     }
 
     /**
+     * Handle performance update
+     */
+    handlePerformanceUpdate(data) {
+        console.log('Performance update received:', data);
+        console.log('Updating performance for song_id:', data.song_id, 'action:', data.action, 'attendee_id:', data.attendee_id);
+        
+        // Always reload jam data to get updated performance registrations and refresh the entire song list
+        if (window.jamUI && window.jamUI.jamCore) {
+            console.log('Reloading jam data for performance update...');
+            window.jamUI.jamCore.loadJamData();
+        } else {
+            console.log('jamUI or jamCore not available for performance update');
+        }
+    }
+
+    /**
      * Handle song added
      */
     handleSongAdded(data) {
+        console.log('Song added update received:', data);
+        console.log('Reloading jam data for new song...');
+        
         // Reload jam data to get the new song
-        if (window.jamCore) {
-            window.jamCore.loadJamData();
+        if (window.jamUI && window.jamUI.jamCore) {
+            window.jamUI.jamCore.loadJamData();
+        } else {
+            console.log('jamUI or jamCore not available for song addition');
         }
     }
 

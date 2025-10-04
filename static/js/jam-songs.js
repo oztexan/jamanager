@@ -11,6 +11,7 @@ class JamSongs {
         this.jamSongs = []; // Songs in the current jam
         this.userPerformanceRegistrations = {}; // Track user's performance registrations
         this.userVotes = {}; // Track user's votes
+        this.allPerformers = {}; // song_id -> array of performer objects
         this.performanceLimit = 3; // Default limit
         this.jamCore = null;
         this.attendee = null;
@@ -172,6 +173,7 @@ class JamSongs {
         
         this.loadAllSongs(); // Load all songs for the add song modal
         this.loadUserPerformanceRegistrations(); // Load user's performance registrations
+        this.loadAllPerformers(); // Load all performers for all songs
     }
 
     /**
@@ -182,6 +184,7 @@ class JamSongs {
         // The attendee object is passed as a parameter for reference
         this.loadUserPerformanceRegistrations();
         this.loadUserVotes(); // Load user's votes
+        this.loadAllPerformers(); // Load all performers
         this.updatePerformanceFilterVisibility(); // Show performance filter
         this.displaySongs(); // Re-render to show perform buttons
     }
@@ -193,6 +196,7 @@ class JamSongs {
         this.attendee = null;
         this.userPerformanceRegistrations = {};
         this.userVotes = {}; // Clear user votes
+        this.allPerformers = {}; // Clear all performers data
         this.showOnlyMyPerformances = false; // Reset filter
         this.updatePerformanceFilterVisibility(); // Hide performance filter
         this.displaySongs(); // Re-render to hide perform buttons
@@ -289,7 +293,7 @@ class JamSongs {
                             </div>
                         </div>
                         <div class="performers" id="performers-${song.id}">
-                            ${isPerforming ? `<span class="performer-tag">You (${this.userPerformanceRegistrations[song.id].instrument})</span>` : ''}
+                            ${this.generatePerformersHTML(song.id)}
                         </div>
                     </div>
                 </div>
@@ -616,6 +620,7 @@ class JamSongs {
             this.showMessage('Registered to perform!', 'success');
             this.closePerformModal();
             this.loadUserPerformanceRegistrations();
+            this.loadAllPerformers(); // Reload all performers
             this.displaySongs(); // Re-render to update perform buttons
             
         } catch (error) {
@@ -653,6 +658,59 @@ class JamSongs {
             console.error('Error loading user performance registrations:', error);
             this.showMessage('Failed to load your performance registrations.', 'error');
         }
+    }
+
+    /**
+     * Load all performers for all songs in the jam
+     */
+    async loadAllPerformers() {
+        if (!this.jamCore || !this.jamCore.getJamId()) {
+            this.allPerformers = {};
+            return;
+        }
+
+        try {
+            // Load performers for each song in the jam
+            const promises = this.jamSongs.map(async (jamSong) => {
+                const songId = jamSong.song.id;
+                try {
+                    const response = await fetch(`/api/jams/${this.jamCore.getJamId()}/songs/${songId}/performers`);
+                    if (response.ok) {
+                        const performers = await response.json();
+                        this.allPerformers[songId] = performers;
+                    } else {
+                        this.allPerformers[songId] = [];
+                    }
+                } catch (error) {
+                    console.error(`Error loading performers for song ${songId}:`, error);
+                    this.allPerformers[songId] = [];
+                }
+            });
+
+            await Promise.all(promises);
+            console.log('Loaded all performers:', this.allPerformers);
+            
+        } catch (error) {
+            console.error('Error loading all performers:', error);
+        }
+    }
+
+    /**
+     * Generate HTML for performers display
+     */
+    generatePerformersHTML(songId) {
+        const performers = this.allPerformers[songId] || [];
+        const currentAttendee = this.attendee ? this.attendee.getCurrentAttendee() : null;
+        
+        if (performers.length === 0) {
+            return '';
+        }
+        
+        return performers.map(performer => {
+            const isCurrentUser = currentAttendee && currentAttendee.id === performer.attendee_id;
+            const displayName = isCurrentUser ? 'You' : performer.name;
+            return `<span class="performer-tag">${displayName} (${performer.instrument})</span>`;
+        }).join(' ');
     }
 
     /**
