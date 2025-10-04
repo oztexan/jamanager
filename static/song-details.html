@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Details - JaManager</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .song-details-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .detail-row label {
+            font-weight: 600;
+            color: #4a5568;
+            min-width: 120px;
+            margin-right: 15px;
+            margin-top: 8px;
+        }
+        
+        .detail-row span {
+            color: #2d3748;
+            flex: 1;
+        }
+        
+        .detail-row textarea {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select,
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group input:disabled,
+        .form-group textarea:disabled,
+        .form-group select:disabled {
+            background-color: #f7fafc;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+        
+        /* Breadcrumb Navigation Styles */
+        .breadcrumb-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .breadcrumb-item {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        
+        .breadcrumb-item:hover {
+            color: #5a67d8;
+            text-decoration: underline;
+        }
+        
+        .breadcrumb-item.active {
+            color: #4a5568;
+            font-weight: 600;
+        }
+        
+        .breadcrumb-separator {
+            color: #a0aec0;
+            margin: 0 8px;
+            font-weight: 400;
+        }
+        
+        .breadcrumb-nav a {
+            text-decoration: none;
+        }
+        
+        .breadcrumb-nav a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Notification System Styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .notification {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid #667eea;
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left-color: #48bb78;
+        }
+        
+        .notification.error {
+            border-left-color: #f56565;
+        }
+        
+        .notification.warning {
+            border-left-color: #ed8936;
+        }
+        
+        .notification.info {
+            border-left-color: #4299e1;
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .notification-icon {
+            font-size: 20px;
+            margin-top: 2px;
+        }
+        
+        .notification-text {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #2d3748;
+        }
+        
+        .notification-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #a0aec0;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+        
+        .notification-close:hover {
+            color: #718096;
+        }
+        
+        
+        /* Chord Sheet Section Styles */
+        .chord-sheet-section {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f7fafc;
+            margin-bottom: 20px;
+        }
+        
+        .chord-sheet-section .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .chord-sheet-section .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-help {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #718096;
+            font-style: italic;
+        }
+        
+        .chord-sheet-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .chord-sheet-lookup {
+            margin-top: 15px;
+        }
+        
+        .chord-sheet-results {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .chord-sheet-message {
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .chord-sheet-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .chord-sheet-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #4a5568;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .chord-sheet-link:hover {
+            background: #f7fafc;
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .chord-sheet-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .chord-sheet-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .chord-sheet-rating {
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
+    <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <div id="breadcrumb-container"></div>
+        
+        <div class="header">
+            <h1 id="pageTitle">Song Details</h1>
+            <p id="pageSubtitle">Loading song information...</p>
+        </div>
+        
+        <div id="loading" class="loading">
+            Loading song details...
+        </div>
+        
+        <div id="songDetailsContent" class="song-details-card hidden">
+            <div id="errorMessage" class="error hidden"></div>
+            <div id="successMessage" class="success hidden"></div>
+            
+            <div class="form-group">
+                <label for="songTitleInput">Title:</label>
+                <input type="text" id="songTitleInput" class="form-control" placeholder="Song title">
+            </div>
+            
+            <div class="form-group">
+                <label for="songArtistInput">Artist:</label>
+                <input type="text" id="songArtistInput" class="form-control" placeholder="Artist name">
+            </div>
+            
+            <div class="detail-row">
+                <label>Current Chord Sheet:</label>
+                <div id="currentChordSheet">
+                    <span id="chordSheetUrl">-</span>
+                </div>
+            </div>
+            
+            <!-- Chord Sheet Section -->
+            <div class="chord-sheet-section">
+                <h3>🎸 Chord Sheet Management</h3>
+                
+                <!-- Manual URL Input -->
+                <div class="form-group">
+                    <label for="chordSheetUrlInput">Chord Sheet URL:</label>
+                    <textarea id="chordSheetUrlInput" rows="2" placeholder="Enter a direct link to a chord sheet (e.g., https://tabs.ultimate-guitar.com/tab/artist/song-chords-123456) or use the lookup below to find one automatically."></textarea>
+                    <small class="form-help">You can paste any chord sheet URL here, or use the automatic lookup below.</small>
+                </div>
+                
+                <!-- Automatic Lookup -->
+                <div class="chord-sheet-lookup">
+                    <button type="button" id="findChordSheetBtn" class="btn btn-outline" onclick="findChordSheet()">
+                        <span id="findChordSheetBtnText">Find Chord Sheet Automatically</span>
+                        <span id="findChordSheetSpinner" class="spinner hidden">⏳</span>
+                    </button>
+                    <div id="chordSheetResults" class="chord-sheet-results hidden">
+                        <div id="chordSheetMessage" class="chord-sheet-message"></div>
+                        <div id="chordSheetLinks" class="chord-sheet-links"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="goBack()">Close</button>
+                <button class="btn btn-primary" onclick="saveAll()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SongDetailsPage {
+            constructor() {
+                this.song = null;
+                this.isBoss = false;
+                this.songId = this.getSongIdFromUrl();
+                this.init();
+            }
+
+            getSongIdFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('id');
+            }
+
+            async init() {
+                if (!this.songId) {
+                    this.showError('No song ID provided');
+                    return;
+                }
+                
+                await this.checkBossPermissions();
+                await this.loadSong();
+                this.setupBreadcrumbs();
+            }
+
+            async checkBossPermissions() {
+                try {
+                    const response = await fetch('/api/user/permissions', {
+                        headers: {
+                            'X-Session-ID': this.getSessionId()
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.isBoss = data.user_role === 'jam_manager';
+                    } else {
+                        this.isBoss = false;
+                    }
+                } catch (error) {
+                    console.error('Error checking boss permissions:', error);
+                    this.isBoss = false;
+                }
+            }
+
+            getSessionId() {
+                let sessionId = localStorage.getItem('jam_session_id');
+                if (!sessionId) {
+                    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('jam_session_id', sessionId);
+                }
+                return sessionId;
+            }
+
+            async loadSong() {
+                try {
+                    const response = await fetch(`/api/songs/${this.songId}`);
+                    if (response.ok) {
+                        this.song = await response.json();
+                        this.displaySong();
+                    } else {
+                        this.showError('Song not found');
+                    }
+                } catch (error) {
+                    console.error('Error loading song:', error);
+                    this.showError('Failed to load song details');
+                }
+            }
+
+            displaySong() {
+                if (!this.song) return;
+
+                // Update page title
+                document.getElementById('pageTitle').textContent = `Song Details: ${this.song.title}`;
+                document.getElementById('pageSubtitle').textContent = `by ${this.song.artist}`;
+
+                // Populate song details
+                document.getElementById('songTitleInput').value = this.song.title;
+                document.getElementById('songArtistInput').value = this.song.artist;
+                
+                // Populate chord sheet URL
+                const chordSheetUrl = this.song.chord_sheet_url || 'No chord sheet URL set';
+                document.getElementById('chordSheetUrl').textContent = chordSheetUrl;
+                document.getElementById('chordSheetUrlInput').value = this.song.chord_sheet_url || '';
+
+                // Show/hide input fields based on boss permissions
+                this.updateFieldVisibility();
+
+                // Hide loading, show content
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('songDetailsContent').classList.remove('hidden');
+            }
+
+            updateFieldVisibility() {
+                const titleInput = document.getElementById('songTitleInput');
+                const artistInput = document.getElementById('songArtistInput');
+                
+                if (this.isBoss) {
+                    titleInput.disabled = false;
+                    artistInput.disabled = false;
+                } else {
+                    titleInput.disabled = true;
+                    artistInput.disabled = true;
+                }
+            }
+
+            async saveAll() {
+                if (!this.song) {
+                    this.showError('Song information not available');
+                    return;
+                }
+
+                const newTitle = document.getElementById('songTitleInput').value.trim();
+                const newArtist = document.getElementById('songArtistInput').value.trim();
+                const newChordSheetUrl = document.getElementById('chordSheetUrlInput').value.trim();
+
+                // Validate required fields
+                if (!newTitle) {
+                    if (window.notificationSystem) {
+                        window.notificationSystem.show('Song title cannot be empty', 'error');
+                    } else {
+                        this.showError('Song title cannot be empty');
+                    }
+                    return;
+                }
+                if (!newArtist) {
+                    if (window.notificationSystem) {
+                        window.notificationSystem.show('Artist name cannot be empty', 'error');
+                    } else {
+                        this.showError('Artist name cannot be empty');
+                    }
+                    return;
+                }
+
+                // Validate chord sheet URL if provided
+                if (newChordSheetUrl && !this.isValidUrl(newChordSheetUrl)) {
+                    if (window.notificationSystem) {
+                        window.notificationSystem.show('Please enter a valid URL for the chord sheet', 'error');
+                    } else {
+                        this.showError('Please enter a valid URL for the chord sheet');
+                    }
+                    return;
+                }
+
+                try {
+                    // Prepare update data
+                    const updateData = {
+                        title: newTitle,
+                        artist: newArtist,
+                        chord_sheet_url: newChordSheetUrl || null
+                    };
+
+                    console.log('Saving song:', this.song.id, 'Data:', updateData);
+                    
+                    const response = await fetch(`/api/songs/${this.song.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+
+                    console.log('Response status:', response.status);
+                    
+                    if (response.ok) {
+                        const updatedSong = await response.json();
+                        console.log('Updated song:', updatedSong);
+                        
+                        // If we have a new chord sheet URL, validate it
+                        if (newChordSheetUrl) {
+                            console.log('Validating chord sheet URL:', newChordSheetUrl);
+                            const isValid = await this.validateChordSheetUrl(newChordSheetUrl);
+                            console.log('Validation result:', isValid);
+                            
+                            // Update the song in the database with validation result
+                            try {
+                                const updateResponse = await fetch(`/api/songs/${this.song.id}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        chord_sheet_is_valid: isValid,
+                                        chord_sheet_validated_at: new Date().toISOString()
+                                    })
+                                });
+                                
+                                if (updateResponse.ok) {
+                                    const updatedSongWithValidation = await updateResponse.json();
+                                    console.log('Updated song with validation:', updatedSongWithValidation);
+                                    updatedSong.chord_sheet_is_valid = updatedSongWithValidation.chord_sheet_is_valid;
+                                } else {
+                                    console.error('Failed to update validation status');
+                                    updatedSong.chord_sheet_is_valid = isValid;
+                                }
+                            } catch (error) {
+                                console.error('Error updating validation status:', error);
+                                updatedSong.chord_sheet_is_valid = isValid;
+                            }
+                        }
+                        
+                        // Update the current song object
+                        this.song = updatedSong;
+                        
+                        // Update the display
+                        document.getElementById('pageTitle').textContent = `Song Details: ${updatedSong.title}`;
+                        document.getElementById('pageSubtitle').textContent = `by ${updatedSong.artist}`;
+                        
+                        const chordSheetUrl = updatedSong.chord_sheet_url || 'No chord sheet URL set';
+                        document.getElementById('chordSheetUrl').textContent = chordSheetUrl;
+                        
+                        if (window.notificationSystem) {
+                            window.notificationSystem.show('Song updated successfully!', 'success');
+                        } else {
+                            this.showSuccess('Song updated successfully!');
+                        }
+                        
+                        // Navigate back to songs page after successful save
+                        setTimeout(() => {
+                            this.goBack();
+                        }, 500);
+                    } else {
+                        const error = await response.json();
+                        console.error('API Error:', error);
+                        if (window.notificationSystem) {
+                            window.notificationSystem.show(error.detail || 'Failed to update song', 'error');
+                        } else {
+                            this.showError(error.detail || 'Failed to update song');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Network error:', error);
+                    if (window.notificationSystem) {
+                        window.notificationSystem.show('Network error: ' + error.message, 'error');
+                    } else {
+                        this.showError('Network error: ' + error.message);
+                    }
+                }
+            }
+
+            async findChordSheet() {
+                // Get song title and artist from input fields
+                const title = document.getElementById('songTitleInput').value.trim();
+                const artist = document.getElementById('songArtistInput').value.trim();
+
+                console.log('Finding chord sheet for:', { title, artist });
+
+                if (!title || !artist) {
+                    if (window.notificationSystem) {
+                        window.notificationSystem.show('Please enter both song title and artist name', 'error');
+                    } else {
+                        this.showError('Please enter both song title and artist name');
+                    }
+                    return;
+                }
+
+                const btn = document.getElementById('findChordSheetBtn');
+                const btnText = document.getElementById('findChordSheetBtnText');
+                const spinner = document.getElementById('findChordSheetSpinner');
+                const results = document.getElementById('chordSheetResults');
+                const message = document.getElementById('chordSheetMessage');
+                const links = document.getElementById('chordSheetLinks');
+
+                // Show loading state
+                btn.disabled = true;
+                btnText.textContent = 'Searching...';
+                spinner.classList.remove('hidden');
+                results.classList.remove('hidden');
+                message.textContent = 'Searching Ultimate Guitar for chord sheets...';
+                links.innerHTML = '';
+
+                try {
+                    const response = await fetch('/api/search-chord-sheets', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            song_name: title,
+                            artist_name: artist
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.chord_sheets && data.chord_sheets.length > 0) {
+                            message.textContent = `Found ${data.chord_sheets.length} chord sheet(s) for "${title}" by ${artist}`;
+                            
+                            // Sort by votes (highest to lowest) and show top 5 results
+                            const sortedResults = data.chord_sheets.sort((a, b) => b.votes - a.votes);
+                            const topResults = sortedResults.slice(0, 5);
+                            topResults.forEach((sheet, index) => {
+                                const linkDiv = document.createElement('div');
+                                linkDiv.className = 'chord-sheet-link';
+                                linkDiv.innerHTML = `
+                                    <div class="chord-sheet-info">
+                                        <div class="chord-sheet-title">${sheet.title}</div>
+                                        <div class="chord-sheet-rating">⭐ ${sheet.rating.toFixed(2)} (${sheet.votes} votes)</div>
+                                    </div>
+                                    <div class="chord-sheet-actions">
+                                        <button class="btn btn-sm btn-outline" onclick="selectChordSheet('${sheet.url}')">Select</button>
+                                        <button class="btn btn-sm btn-outline" onclick="window.open('${sheet.url}', '_blank')">🔗</button>
+                                    </div>
+                                `;
+                                links.appendChild(linkDiv);
+                            });
+                        } else {
+                            message.textContent = `No chord sheets found for "${title}" by ${artist}`;
+                        }
+                    } else {
+                        const error = await response.json();
+                        message.textContent = `Error: ${error.detail || 'Failed to search for chord sheets'}`;
+                    }
+                } catch (error) {
+                    message.textContent = `Network error: ${error.message}`;
+                } finally {
+                    // Reset button state
+                    btn.disabled = false;
+                    btnText.textContent = 'Find Chord Sheet Automatically';
+                    spinner.classList.add('hidden');
+                }
+            }
+
+            selectChordSheet(url) {
+                document.getElementById('chordSheetUrlInput').value = url;
+                if (window.notificationSystem) {
+                    window.notificationSystem.show('Chord sheet URL selected! You can now save the changes.', 'success');
+                } else {
+                    this.showSuccess('Chord sheet URL selected! You can now save the changes.');
+                }
+            }
+
+
+            async validateChordSheetUrl(url) {
+                try {
+                    console.log('Validating URL:', url);
+                    
+                    // For now, assume URL is valid if it passes basic URL validation
+                    const isValid = this.isValidUrl(url);
+                    console.log('URL validation result:', isValid);
+                    return isValid;
+                } catch (error) {
+                    console.log('URL validation failed:', error.message);
+                    return false;
+                }
+            }
+
+            isValidUrl(string) {
+                try {
+                    new URL(string);
+                    return true;
+                } catch (_) {
+                    return false;
+                }
+            }
+
+            setupBreadcrumbs() {
+                if (window.breadcrumbManager) {
+                    window.breadcrumbManager.setBreadcrumbs([
+                        { label: 'Home', url: '/' },
+                        { label: 'Song Library', url: '/songs' },
+                        { label: this.song ? this.song.title : 'Song Details', url: '', isActive: true }
+                    ]);
+                }
+            }
+
+            goBack() {
+                window.location.href = '/songs';
+            }
+
+            showError(message) {
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.textContent = message;
+                errorDiv.classList.remove('hidden');
+                setTimeout(() => {
+                    errorDiv.classList.add('hidden');
+                }, 5000);
+            }
+
+            showSuccess(message) {
+                const successDiv = document.getElementById('successMessage');
+                successDiv.textContent = message;
+                successDiv.classList.remove('hidden');
+                setTimeout(() => {
+                    successDiv.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        // Global functions
+        function saveAll() {
+            if (window.songDetailsPage) {
+                window.songDetailsPage.saveAll();
+            }
+        }
+
+        function findChordSheet() {
+            if (window.songDetailsPage) {
+                window.songDetailsPage.findChordSheet();
+            }
+        }
+
+        function selectChordSheet(url) {
+            if (window.songDetailsPage) {
+                window.songDetailsPage.selectChordSheet(url);
+            }
+        }
+
+        function saveChordSheet() {
+            if (window.songDetailsPage) {
+                window.songDetailsPage.saveChordSheet();
+            }
+        }
+
+        function goBack() {
+            if (window.songDetailsPage) {
+                window.songDetailsPage.goBack();
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize notification system
+            if (window.NotificationSystem) {
+                window.notificationSystem = new window.NotificationSystem();
+            }
+            
+            window.songDetailsPage = new SongDetailsPage();
+        });
+    </script>
+    <script src="/static/breadcrumbs.js"></script>
+    <script src="/static/js/notification-system.js"></script>
+</body>
+</html>

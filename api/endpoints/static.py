@@ -38,6 +38,12 @@ async def songs_page():
     songs_path = os.path.join(os.path.dirname(__file__), "..", "..", "static", "songs.html")
     return FileResponse(songs_path)
 
+@router.get("/song-details")
+async def song_details_page():
+    """Serve the song details page"""
+    song_details_path = os.path.join(os.path.dirname(__file__), "..", "..", "static", "song-details.html")
+    return FileResponse(song_details_path)
+
 @router.get("/jams")
 async def jams_page():
     """Serve the jams page"""

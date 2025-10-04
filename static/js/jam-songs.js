@@ -182,7 +182,7 @@ class JamSongs {
         
         // Add a small delay to ensure DOM is ready
         setTimeout(() => {
-            this.displaySongs();
+        this.displaySongs();
         }, 100);
         
         this.loadAllSongs(); // Load all songs for the add song modal
@@ -926,13 +926,9 @@ class JamSongs {
             this.showMessage('Song not found.', 'error');
             return;
         }
-
+        
         // Set current song for chord sheet editing
         this.currentChordSheetSongId = songId;
-        
-        // Update modal content
-        document.getElementById('chordSheetSongInfo').textContent = 
-            `${jamSong.song.title} - ${jamSong.song.artist}`;
         
         // Load current chord sheet (jam-specific or default)
         await this.loadCurrentChordSheet(songId);
@@ -951,19 +947,10 @@ class JamSongs {
             
             if (response.ok) {
                 const chordSheet = await response.json();
-                const currentUrlDiv = document.getElementById('chordSheetCurrentUrl');
-                
                 if (chordSheet && chordSheet.chord_sheet_url) {
-                    currentUrlDiv.innerHTML = `
-                        <a href="${chordSheet.chord_sheet_url}" target="_blank">${chordSheet.chord_sheet_url}</a>
-                        ${chordSheet.is_default ? '<span class="badge badge-info">Default</span>' : ''}
-                    `;
                     document.getElementById('chordSheetUrlInput').value = chordSheet.chord_sheet_url;
-                    document.getElementById('deleteChordSheetBtn').style.display = chordSheet.is_default ? 'none' : 'inline-block';
                 } else {
-                    currentUrlDiv.textContent = 'No chord sheet set';
                     document.getElementById('chordSheetUrlInput').value = '';
-                    document.getElementById('deleteChordSheetBtn').style.display = 'none';
                 }
             } else {
                 console.error('Failed to load chord sheet:', response.statusText);
@@ -992,7 +979,6 @@ class JamSongs {
         document.getElementById('chordSheetUrlInput').value = '';
         document.getElementById('urlValidationResult').classList.add('hidden');
         document.getElementById('chordSheetSearchResults').classList.add('hidden');
-        document.getElementById('deleteChordSheetBtn').style.display = 'none';
     }
 
     /**
@@ -1045,42 +1031,6 @@ class JamSongs {
         }
     }
 
-    /**
-     * Delete chord sheet
-     */
-    async deleteChordSheet() {
-        if (!confirm('Are you sure you want to remove this chord sheet?')) {
-            return;
-        }
-
-        try {
-            const jamId = this.jamCore.getJamId();
-            const songId = this.currentChordSheetSongId;
-            
-            const response = await fetch(`/api/jams/${jamId}/chord-sheets/${songId}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                this.showMessage('Chord sheet removed successfully!', 'success');
-                this.closeChordSheetModal();
-                // Update chord sheet status for this song
-                this.chordSheetStatus[songId] = {
-                    hasChordSheet: false,
-                    url: null,
-                    isJamSpecific: false
-                };
-                // Refresh the song display
-                this.displaySongs();
-            } else {
-                const error = await response.json();
-                this.showMessage(`Failed to remove chord sheet: ${error.detail}`, 'error');
-            }
-        } catch (error) {
-            console.error('Error deleting chord sheet:', error);
-            this.showMessage('Failed to remove chord sheet.', 'error');
-        }
-    }
 
     /**
      * Search for chord sheets using Ultimate Guitar

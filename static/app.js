@@ -471,11 +471,14 @@ class JamanagerApp {
 
     async verifyAccessCode() {
         const accessCodeInput = document.getElementById('accessCodeInput');
-        const messageDiv = document.getElementById('accessCodeMessage');
         const accessCode = accessCodeInput.value.trim();
         
         if (!accessCode) {
-            this.showAccessMessage('Please enter an access code', 'error');
+            if (window.notificationSystem) {
+                window.notificationSystem.show('Please enter an access code', 'error');
+            } else {
+                this.showAccessMessage('Please enter an access code', 'error');
+            }
             return;
         }
 
@@ -498,18 +501,31 @@ class JamanagerApp {
                 }
                 // Set localStorage to indicate jam manager access
                 localStorage.setItem('jamManagerAccess', 'true');
-                this.showAccessMessage('Access granted! You now have jam manager privileges.', 'success');
+                
+                // Show success notification and close dialog immediately
+                if (window.notificationSystem) {
+                    window.notificationSystem.show('Access granted! You now have jam manager privileges.', 'success');
+                } else {
+                    this.showAccessMessage('Access granted! You now have jam manager privileges.', 'success');
+                }
+                
                 this.updateLockButton(true);
                 this.updateBreadcrumbs();
-                setTimeout(() => {
-                    this.closeAccessDialog();
-                }, 1500);
+                this.closeAccessDialog();
             } else {
                 const error = await response.json();
-                this.showAccessMessage(error.detail || 'Invalid access code', 'error');
+                if (window.notificationSystem) {
+                    window.notificationSystem.show(error.detail || 'Invalid access code', 'error');
+                } else {
+                    this.showAccessMessage(error.detail || 'Invalid access code', 'error');
+                }
             }
         } catch (error) {
-            this.showAccessMessage('Network error: ' + error.message, 'error');
+            if (window.notificationSystem) {
+                window.notificationSystem.show('Network error: ' + error.message, 'error');
+            } else {
+                this.showAccessMessage('Network error: ' + error.message, 'error');
+            }
         }
     }
 
@@ -762,6 +778,11 @@ function loadRecentJams() {
 
 // Initialize the app first
 const app = new JamanagerApp();
+
+// Initialize notification system
+if (window.NotificationSystem) {
+    window.notificationSystem = new window.NotificationSystem();
+}
 
 // Access Code Dialog Functions
 function toggleAccessDialog() {

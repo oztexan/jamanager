@@ -470,6 +470,39 @@ Jamanager is a real-time jam session management application that allows musician
 - And I should not need to refresh the page to see these updates
 - And the updates should appear for all users viewing the jam simultaneously
 
+### Story 8.5: Boss Song Editing
+**As a** boss  
+**I want to** edit song names and artist names in the View Details dialog  
+**So that** I can correct or update song information when needed  
+
+**Acceptance Criteria:**
+- Given I'm a boss viewing the song details modal
+- When I look at the song title and artist fields
+- Then I should see "Edit" buttons next to each field
+- When I click an "Edit" button
+- Then the field should become editable with Save/Cancel buttons
+- When I save changes
+- Then the song information should be updated in the database
+- And the song list should refresh to show the updated information
+- And I should see a success notification
+- And the modal should return to display mode
+
+### Story 8.6: Mobile-Optimized Chord Sheet Selection
+**As a** boss on a mobile device (iPhone)  
+**I want** the chord sheet selection to open in a separate dialog  
+**So that** the interface is usable on small screens  
+
+**Acceptance Criteria:**
+- Given I'm a boss on a mobile device
+- When I click "Find Chord Sheet Automatically" in the song details modal
+- Then a separate chord sheet selection modal should open
+- And the selection modal should be optimized for mobile screens
+- And the modal should be scrollable if the content is too large
+- When I select a chord sheet from the results
+- Then the URL should be populated in the main song details modal
+- And the selection modal should close
+- And I should see a success message
+
 ---
 
 ## Epic 9: User Experience
