@@ -34,7 +34,8 @@ async def init_sqlite_database():
             
         print("✅ SQLite database initialization completed successfully")
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Error: {e}")
         import traceback
         traceback.print_exc()

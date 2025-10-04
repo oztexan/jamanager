@@ -95,7 +95,8 @@ async def create_jam(
                 new_jam.background_image = background_image_path
                 await db.commit()
                 await db.refresh(new_jam)
-            except Exception as e:
+            except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
                 # If image save fails, log the error but don't fail the jam creation
                 logger.error(f"Failed to save background image for jam {new_jam.id}: {e}")
                 # Set background_image to None so no broken reference is stored
@@ -120,7 +121,8 @@ async def create_jam(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -160,7 +162,8 @@ async def get_all_jams(db: AsyncSession = Depends(get_database)):
         
         return jam_list
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.get("/by-slug/{slug}", response_model=JamInDBWithVenue)
@@ -259,7 +262,8 @@ async def get_jam_qr_code(jam_id: str, db: AsyncSession = Depends(get_database))
         buffer.seek(0)
         return Response(content=buffer.getvalue(), media_type="image/png")
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Error generating QR code: {e}")
 
 @router.put("/{jam_id}/songs/{song_id}")
@@ -295,7 +299,8 @@ async def update_jam_song(
         
         return {"message": "Song updated successfully", "song": updated_song_obj}
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -338,7 +343,8 @@ async def update_song_chord_sheet(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -408,7 +414,8 @@ async def vote_for_song(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -453,7 +460,8 @@ async def mark_song_played(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -514,7 +522,8 @@ async def add_song_to_jam(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -570,7 +579,8 @@ async def register_attendee(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -593,7 +603,8 @@ async def get_attendees(
         result = await db.execute(query.order_by(Attendee.registered_at))
         attendees = result.scalars().all()
         return [{"id": str(a.id), "name": a.name, "registered_at": a.registered_at} for a in attendees]
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.post("/{jam_id}/songs/{song_id}/register")
@@ -641,7 +652,8 @@ async def register_to_perform(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -680,7 +692,8 @@ async def unregister_from_perform(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -712,7 +725,8 @@ async def get_song_performers(
             }
             for attendee, registration in performers
         ]
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.get("/{jam_id}/performers")
@@ -742,7 +756,8 @@ async def get_jam_performers(
             }
             for reg in registrations
         ]
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.post("/{jam_id}/songs/{song_id}/heart")
@@ -818,7 +833,8 @@ async def toggle_heart_vote(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -862,7 +878,8 @@ async def get_vote_status(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.get("/{jam_id}/votes")
@@ -898,7 +915,8 @@ async def get_jam_votes(
         
         return votes_list
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.post("/{jam_id}/vote")
@@ -991,7 +1009,8 @@ async def vote_for_song_simple(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -1074,7 +1093,8 @@ async def register_to_perform_simple(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 @router.delete("/{jam_id}/perform")
@@ -1122,6 +1142,7 @@ async def unregister_from_perform(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")

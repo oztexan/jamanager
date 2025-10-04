@@ -35,7 +35,8 @@ async def migrate_database():
         print("   - created_at, updated_at: Timestamps")
         print("   - Unique constraint on jam_id + song_id")
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Migration failed: {e}")
         sys.exit(1)
 

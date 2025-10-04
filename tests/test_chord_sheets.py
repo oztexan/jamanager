@@ -44,7 +44,8 @@ async def test_chord_search():
             else:
                 print("   ❌ No chord sheets found")
                 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"   ❌ Error: {e}")
     
     print("\n" + "=" * 50)

@@ -30,7 +30,8 @@ async def test_fastapi_db():
         
         print("✅ FastAPI database test completed successfully")
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ FastAPI database test failed: {e}")
         import traceback
         traceback.print_exc()

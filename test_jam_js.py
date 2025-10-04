@@ -31,7 +31,8 @@ def extract_js_from_html():
             
         return script_srcs
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"   Error: {e}")
         return None
 
@@ -66,7 +67,8 @@ def test_js_files():
             else:
                 print(f"   {js_file}: Error {response.status_code}")
                 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"   {js_file}: Error - {e}")
 
 def simulate_js_execution():
@@ -99,7 +101,8 @@ def simulate_js_execution():
         else:
             print(f"   API Error: {response.status_code}")
             
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"   Error: {e}")
 
 def main():

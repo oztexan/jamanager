@@ -63,7 +63,8 @@ async def test_database():
             
             print("✅ Database test completed successfully")
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Database test failed: {e}")
 
 if __name__ == "__main__":

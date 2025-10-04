@@ -49,7 +49,8 @@ class ImageUploader:
             # Return relative path for web access
             return f"/static/uploads/{unique_filename}"
             
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             raise HTTPException(status_code=500, detail=f"Failed to save image: {str(e)}")
     
     @staticmethod

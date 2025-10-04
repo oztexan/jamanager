@@ -243,7 +243,8 @@ async def reset_test_data():
             print(f"   - {len(test_votes)} votes created")
             print(f"   - Today's jams: {len([j for j in test_jams if j.jam_date == today])} (should be 2 for today's jams)")
             
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"❌ Error resetting test data: {e}")
             await db.rollback()
             raise

@@ -27,7 +27,8 @@ async def get_user_permissions_endpoint(
             "user_role": user_role.value if user_role else "anonymous",
             "permissions": permissions
         }
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         logger.error(f"Error getting user permissions: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -45,7 +46,8 @@ async def get_feature_flags():
                 "manage_jam": False
             }
         }
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         logger.error(f"Error getting feature flags: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -73,7 +75,8 @@ async def verify_access_code(request: Request):
                 "success": False,
                 "message": "Invalid access code"
             }
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         logger.error(f"Error verifying access code: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -89,7 +92,8 @@ async def logout_access_code(request: Request):
             return {"success": True, "message": "Logged out successfully"}
         else:
             return {"success": False, "message": "Session not found"}
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         logger.error(f"Error logging out: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -104,6 +108,7 @@ async def get_access_code_status(
             "has_access": user_role.value == "jam_manager" if user_role else False,
             "user_role": user_role.value if user_role else "anonymous"
         }
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         logger.error(f"Error checking access status: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")

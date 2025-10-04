@@ -51,7 +51,8 @@ def migrate_database():
         
         return True
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Migration failed: {e}")
         conn.rollback()
         return False

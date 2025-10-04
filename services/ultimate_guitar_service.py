@@ -120,7 +120,8 @@ class UltimateGuitarService:
         except json.JSONDecodeError as e:
             print(f"❌ Error parsing JSON data: {e}")
             return results
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"❌ Error extracting search results: {e}")
             return results
     

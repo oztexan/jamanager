@@ -63,7 +63,8 @@ async def save_validation_result(db: AsyncSession, jam_id: str, song_id: str, ur
         
         await db.commit()
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"🔍 Error saving validation result: {e}")
         await db.rollback()
 
@@ -81,7 +82,8 @@ async def get_jam_chord_sheets(
         )
         chord_sheets = result.scalars().all()
         return [JamChordSheetInDB.from_orm(cs) for cs in chord_sheets]
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.get("/{jam_id}/chord-sheets/{song_id}")
@@ -120,7 +122,8 @@ async def get_jam_song_chord_sheet(
             return None
         
         return JamChordSheetInDB.from_orm(chord_sheet)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.post("/{jam_id}/chord-sheets")
@@ -183,7 +186,8 @@ async def create_jam_chord_sheet(
                     "chord_sheet_url": chord_sheet_data.chord_sheet_url,
                     "is_valid": is_valid
                 })
-            except Exception as e:
+            except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
                 print(f"⚠️ WebSocket broadcast failed (non-critical): {e}")
             
             return JamChordSheetInDB.from_orm(existing)
@@ -213,14 +217,16 @@ async def create_jam_chord_sheet(
                     "chord_sheet_url": chord_sheet_data.chord_sheet_url,
                     "is_valid": is_valid
                 })
-            except Exception as e:
+            except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
                 print(f"⚠️ WebSocket broadcast failed (non-critical): {e}")
             
             return JamChordSheetInDB.from_orm(chord_sheet)
             
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -255,14 +261,16 @@ async def delete_jam_chord_sheet(
                 "chord_sheet_url": None,
                 "is_valid": False
             })
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"⚠️ WebSocket broadcast failed (non-critical): {e}")
         
         return {"message": "Chord sheet deleted successfully"}
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -293,7 +301,8 @@ async def search_chord_sheets(
             "total_found": len(results)
         }
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Search error: {e}")
 
 @router.post("/{jam_id}/chord-sheets/validate-url")
@@ -355,5 +364,6 @@ async def validate_chord_sheet_url(
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Validation error: {e}")

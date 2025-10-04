@@ -51,7 +51,8 @@ async def search_chord_sheets(request: ChordSheetSearchRequest):
             message=f"Found {len(chord_sheets)} chord sheet(s)" if chord_sheets else "No chord sheets found"
         )
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Error in search_chord_sheets: {e}")
         raise HTTPException(status_code=500, detail=f"Error searching for chord sheets: {str(e)}")
 
@@ -75,7 +76,8 @@ async def get_best_chord_sheet(request: ChordSheetSearchRequest):
             "message": "Best chord sheet found" if best_url else "No chord sheets found"
         }
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Error in get_best_chord_sheet: {e}")
         raise HTTPException(status_code=500, detail=f"Error getting best chord sheet: {str(e)}")
 
@@ -96,7 +98,8 @@ async def get_chord_sheet_info(request: ChordSheetInfoRequest):
         
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Error in get_chord_sheet_info: {e}")
         raise HTTPException(status_code=500, detail=f"Error getting chord sheet info: {str(e)}")
 
@@ -117,7 +120,8 @@ async def test_chord_search():
             "results_count": len(results),
             "sample_results": results[:3] if results else []
         }
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         return {
             "status": "error",
             "error": str(e)

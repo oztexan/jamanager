@@ -141,14 +141,16 @@ async def init_dev_database():
                 print(f"   Created: 2 venues")
                 print(f"   Created: 1 jam with {len(songs[:4])} songs")
                 
-            except Exception as e:
+            except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
                 await db.rollback()
                 print(f"❌ Error creating sample data: {e}")
                 raise
             finally:
                 await db.close()
                 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Error initializing database: {e}")
         import traceback
         traceback.print_exc()

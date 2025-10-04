@@ -16,7 +16,8 @@ def run_command(cmd, cwd=None):
     try:
         result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
         return result.returncode == 0, result.stdout, result.stderr
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         return False, "", str(e)
 
 def check_database():
@@ -41,7 +42,8 @@ def check_database():
         
         print("✅ Database exists and has tables")
         return True
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Database check failed: {e}")
         return False
 
@@ -82,7 +84,8 @@ def main():
         subprocess.run(cmd, env=env)
     except KeyboardInterrupt:
         print("\n👋 Server stopped by user")
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Server failed to start: {e}")
         return False
     

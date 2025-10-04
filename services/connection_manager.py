@@ -62,7 +62,8 @@ class ConnectionManager:
         for websocket in connections:
             try:
                 await websocket.send_text(message)
-            except Exception as e:
+            except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
                 logger.error(f"❌ Error broadcasting to client: {e}")
                 dead_connections.append(websocket)
         

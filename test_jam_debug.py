@@ -30,7 +30,8 @@ def test_jam_api():
             print(f"   Error: {response.text}")
             return None
             
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"   Error: {e}")
         return None
 
@@ -51,7 +52,8 @@ def test_static_files():
             print(f"   {file_path}: {response.status_code}")
             if response.status_code != 200:
                 print(f"      Error: {response.text[:100]}")
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"   {file_path}: Error - {e}")
 
 def test_jam_page():
@@ -84,7 +86,8 @@ def test_jam_page():
             print(f"   Error: {response.text}")
             return False
             
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"   Error: {e}")
         return False
 

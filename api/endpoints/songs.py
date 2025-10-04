@@ -25,7 +25,8 @@ async def create_song(
         await db.commit()
         await db.refresh(song)
         return song
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         logger.error(f"Error creating song: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -69,7 +70,8 @@ async def update_song(
         return song
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         logger.error(f"Error updating song: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -88,7 +90,8 @@ async def delete_song(song_id: str, db: AsyncSession = Depends(get_database)):
         return {"message": "Song deleted successfully"}
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         logger.error(f"Error deleting song: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")

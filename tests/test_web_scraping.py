@@ -87,7 +87,8 @@ def test_ultimate_guitar_search():
             print(f"❌ Failed to get response: {response.status_code}")
             print(f"Response text: {response.text[:500]}...")
             
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Error: {e}")
 
 def test_different_songs():
@@ -124,7 +125,8 @@ def test_different_songs():
             else:
                 print(f"   Failed: {response.status_code}")
                 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"   Error: {e}")
 
 if __name__ == "__main__":

@@ -32,7 +32,8 @@ async def create_venue(
         await db.commit()
         await db.refresh(venue)
         return venue
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         logger.error(f"Error creating venue: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -69,7 +70,8 @@ async def update_venue(
         return venue
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         logger.error(f"Error updating venue: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -88,7 +90,8 @@ async def delete_venue(venue_id: str, db: AsyncSession = Depends(get_database)):
         return {"message": "Venue deleted successfully"}
     except HTTPException:
         raise
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         await db.rollback()
         logger.error(f"Error deleting venue: {e}")
         raise HTTPException(status_code=500, detail=f"Database error: {e}")

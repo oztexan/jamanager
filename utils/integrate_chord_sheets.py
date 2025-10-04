@@ -45,7 +45,8 @@ class ChordSheetIntegration:
                 print(f"❌ API Error: {response.status_code}")
                 return None
                 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"❌ Error getting chord sheet: {e}")
             return None
     
@@ -77,7 +78,8 @@ class ChordSheetIntegration:
                 print(f"❌ API Error: {response.status_code}")
                 return None
                 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"❌ Error searching chord sheets: {e}")
             return None
 

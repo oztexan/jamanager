@@ -339,7 +339,8 @@ async def websocket_endpoint(websocket: WebSocket, jam_id: str):
                             
                             await connection_manager.broadcast(jam_id, {"type": "feature_flag_updated", "feature_name": feature_name, "scope": scope, "scope_id": scope_id, "value": value})
                             await connection_manager.send_personal_message({"type": "feature_flag_update_success", "feature_name": feature_name}, websocket)
-                        except Exception as e:
+                        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
                             logger.error(f"Error updating feature flag: {e}")
                             await connection_manager.send_personal_message({"type": "error", "message": f"Failed to update feature flag: {e}"}, websocket)
                 else:
@@ -351,7 +352,8 @@ async def websocket_endpoint(websocket: WebSocket, jam_id: str):
     except WebSocketDisconnect:
         connection_manager.disconnect(websocket, jam_id)
         logger.info(f"Client disconnected from jam {jam_id}")
-    except Exception as e:
+    except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
         logger.error(f"WebSocket error in jam {jam_id}: {e}")
         await connection_manager.send_personal_message({"type": "error", "message": f"An unexpected error occurred: {e}"}, websocket)
 

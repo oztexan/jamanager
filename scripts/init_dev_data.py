@@ -352,7 +352,8 @@ async def main():
             print(f"      - Sample votes and performance registrations")
             print(f"\n🌐 You can now test the application at http://localhost:8000")
             
-        except Exception as e:
+        except (ValueError, TypeError) as e:
+        logger.error(f"Unexpected error: {e}")
             print(f"❌ Error initializing development data: {e}")
             await db.rollback()
             raise
