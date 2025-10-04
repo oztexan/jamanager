@@ -447,14 +447,20 @@ class JamSongs {
         const currentAttendee = this.attendee ? this.attendee.getCurrentAttendee() : null;
         if (!currentAttendee || !currentAttendee.id) {
             this.showMessage('Please register to vote.', 'info');
-            // Revert local state
+            // Revert visual state and local state
+            if (heartElement) {
+                heartElement.classList.toggle('voted');
+            }
             this.userVotes[songId] = !this.userVotes[songId];
             return;
         }
 
         if (!this.jamCore || !this.jamCore.getJamId()) {
             this.showMessage('Jam not loaded yet. Please try again.', 'error');
-            // Revert local state
+            // Revert visual state and local state
+            if (heartElement) {
+                heartElement.classList.toggle('voted');
+            }
             this.userVotes[songId] = !this.userVotes[songId];
             return;
         }
