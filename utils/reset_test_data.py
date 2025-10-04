@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.database import get_database
 from models.database import Jam, Song, JamSong, Attendee, Vote, PerformanceRegistration
 
-async def reset_test_data():
+async def reset_test_data() -> None:
     """Delete all existing data and create new test data"""
     print("🗑️  Resetting test data...")
     

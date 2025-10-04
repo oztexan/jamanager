@@ -8,11 +8,11 @@ logger = logging.getLogger(__name__)
 class ConnectionManager:
     """Simple WebSocket connection manager"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         # Dictionary to store connections by jam_id
         self.active_connections: Dict[str, List[WebSocket]] = {}
     
-    async def connect(self, websocket: WebSocket, jam_id: str):
+    async def connect(self, websocket: WebSocket, jam_id: str) -> None:
         """Accept a WebSocket connection and add it to the jam room"""
         await websocket.accept()
         
@@ -25,7 +25,7 @@ class ConnectionManager:
         logger.info(f"🔌 Client connected to jam: {jam_id}")
         logger.info(f"📊 Total connections: {total_connections}")
     
-    def disconnect(self, websocket: WebSocket, jam_id: str):
+    def disconnect(self, websocket: WebSocket, jam_id: str) -> None:
         """Remove a WebSocket connection from the jam room"""
         if jam_id in self.active_connections:
             if websocket in self.active_connections[jam_id]:
@@ -39,7 +39,7 @@ class ConnectionManager:
         logger.info(f"🔌 Client disconnected from jam: {jam_id}")
         logger.info(f"📊 Total connections: {total_connections}")
     
-    async def broadcast_to_jam(self, jam_id: str, event: str, data: dict):
+    async def broadcast_to_jam(self, jam_id: str, event: str, data: dict) -> None:
         """Broadcast a message to all connections in a specific jam"""
         if jam_id not in self.active_connections:
             logger.info(f"📡 No connections for jam: {jam_id}")

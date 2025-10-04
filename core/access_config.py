@@ -41,7 +41,7 @@ class AccessConfig:
 class JamManagerSession:
     """Manages jam manager session state"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.active_sessions = {}  # session_id -> timestamp
     
     def grant_jam_manager_access(self, session_id: str) -> bool:

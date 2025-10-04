@@ -20,13 +20,13 @@ router = APIRouter()
 # Connection manager will be imported from the main app
 connection_manager = None
 
-def set_connection_manager(cm):
+def set_connection_manager(cm) -> None:
     """Set the connection manager instance"""
     global connection_manager
     connection_manager = cm
 
 @router.websocket("/ws/{jam_id}")
-async def websocket_endpoint(websocket: WebSocket, jam_id: str):
+async def websocket_endpoint(websocket: WebSocket, jam_id: str) -> None:
     if not connection_manager:
         logger.error("Connection manager not initialized")
         return
@@ -355,7 +355,7 @@ async def websocket_endpoint(websocket: WebSocket, jam_id: str):
         logger.error(f"WebSocket error in jam {jam_id}: {e}")
         await connection_manager.send_personal_message({"type": "error", "message": f"An unexpected error occurred: {e}"}, websocket)
 
-async def get_songs_for_jam(jam_id: str, db: AsyncSession):
+async def get_songs_for_jam(jam_id: str, db: AsyncSession) -> None:
     """Helper to fetch songs for a given jam, ordered by vote count."""
     result = await db.execute(
         select(Song)
@@ -366,7 +366,7 @@ async def get_songs_for_jam(jam_id: str, db: AsyncSession):
     songs = result.scalars().all()
     return [SongInDB.from_orm(song) for song in songs]
 
-async def get_performers_for_song(jam_id: str, song_id: str, db: AsyncSession):
+async def get_performers_for_song(jam_id: str, song_id: str, db: AsyncSession) -> None:
     """Helper to fetch performers for a specific song in a jam."""
     result = await db.execute(
         select(Attendee)

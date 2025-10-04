@@ -8,7 +8,7 @@ import os
 import shutil
 from datetime import datetime
 
-def fix_songs_table():
+def fix_songs_table() -> None:
     """Fix the songs table by recreating it with proper validation columns."""
     
     db_path = "jamanager.db"

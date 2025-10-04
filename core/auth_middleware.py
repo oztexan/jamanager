@@ -21,7 +21,7 @@ security = HTTPBearer(auto_error=False)
 class FeatureGate:
     """Feature gate decorator for protecting endpoints"""
     
-    def __init__(self, required_features: List[str], allowed_roles: Optional[List[UserRole]] = None):
+    def __init__(self, required_features: List[str], allowed_roles: Optional[List[UserRole]] = None) -> None:
         """
         Initialize feature gate
         
@@ -35,7 +35,7 @@ class FeatureGate:
     def __call__(self, func: Callable) -> Callable:
         """Decorator implementation"""
         @wraps(func)
-        async def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs) -> None:
             # Extract request and database session from kwargs
             request = None
             db = None

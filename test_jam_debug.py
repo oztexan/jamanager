@@ -1,3 +1,4 @@
+from typing import List, Dict, Optional, Union
 #!/usr/bin/env python3
 """
 Debug script to test the jam page functionality
@@ -7,7 +8,7 @@ import requests
 import json
 import sys
 
-def test_jam_api():
+def test_jam_api() -> None:
     """Test the jam API endpoint"""
     print("🔍 Testing jam API...")
     
@@ -34,7 +35,7 @@ def test_jam_api():
         print(f"   Error: {e}")
         return None
 
-def test_static_files():
+def test_static_files() -> None:
     """Test if static files are accessible"""
     print("\n🔍 Testing static files...")
     
@@ -54,7 +55,7 @@ def test_static_files():
         except Exception as e:
             print(f"   {file_path}: Error - {e}")
 
-def test_jam_page():
+def test_jam_page() -> None:
     """Test the jam page HTML"""
     print("\n🔍 Testing jam page...")
     
@@ -88,7 +89,7 @@ def test_jam_page():
         print(f"   Error: {e}")
         return False
 
-def main():
+def main() -> None:
     print("🚀 Starting jam page debug test...")
     
     # Test API

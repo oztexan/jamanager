@@ -11,7 +11,7 @@ import asyncio
 import aiosqlite
 from pathlib import Path
 
-def run_command(cmd, cwd=None):
+def run_command(cmd, cwd=None) -> None:
     """Run a command and return the result"""
     try:
         result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
@@ -19,7 +19,7 @@ def run_command(cmd, cwd=None):
     except Exception as e:
         return False, "", str(e)
 
-def check_database():
+def check_database() -> None:
     """Check if the SQLite database exists and has data"""
     db_path = "jamanager.db"
     if not os.path.exists(db_path):
@@ -28,7 +28,7 @@ def check_database():
     
     try:
         # Quick check to see if database has tables
-        async def check_db():
+        async def check_db() -> None:
             async with aiosqlite.connect(db_path) as db:
                 cursor = await db.execute("SELECT name FROM sqlite_master WHERE type='table'")
                 tables = await cursor.fetchall()
@@ -45,7 +45,7 @@ def check_database():
         print(f"❌ Database check failed: {e}")
         return False
 
-def main():
+def main() -> None:
     print("🚀 Starting Jamanager with SQLite...")
     
     # Change to the project directory

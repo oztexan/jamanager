@@ -141,7 +141,7 @@ TEST_ATTENDEES = [
     {"name": "Henry Taylor"},
 ]
 
-async def clear_existing_data(db):
+async def clear_existing_data(db) -> None:
     """Clear all existing data from the database"""
     print("🗑️  Clearing existing data...")
     
@@ -157,7 +157,7 @@ async def clear_existing_data(db):
     await db.commit()
     print("   ✅ Cleared all existing data")
 
-async def create_venues(db):
+async def create_venues(db) -> None:
     """Create test venues"""
     print("🏢 Creating venues...")
     
@@ -171,7 +171,7 @@ async def create_venues(db):
     print(f"   ✅ Created {len(venues)} venues")
     return venues
 
-async def create_songs(db):
+async def create_songs(db) -> None:
     """Create test songs"""
     print("🎵 Creating songs...")
     
@@ -185,7 +185,7 @@ async def create_songs(db):
     print(f"   ✅ Created {len(songs)} songs")
     return songs
 
-async def create_jams(db, venues):
+async def create_jams(db, venues) -> None:
     """Create test jams"""
     print("🎪 Creating jams...")
     
@@ -210,7 +210,7 @@ async def create_jams(db, venues):
     print(f"   ✅ Created {len(jams)} jams")
     return jams
 
-async def create_attendees(db, jams):
+async def create_attendees(db, jams) -> None:
     """Create test attendees"""
     print("👥 Creating attendees...")
     
@@ -229,7 +229,7 @@ async def create_attendees(db, jams):
     print(f"   ✅ Created {len(attendees)} attendees")
     return attendees
 
-async def create_jam_songs(db, jams, songs):
+async def create_jam_songs(db, jams, songs) -> None:
     """Create jam-song relationships with some sample data"""
     print("🎼 Creating jam-song relationships...")
     
@@ -269,7 +269,7 @@ async def create_jam_songs(db, jams, songs):
     await db.commit()
     print(f"   ✅ Created {jam_songs_created} jam-song relationships")
 
-async def create_sample_votes(db, jams, songs, attendees):
+async def create_sample_votes(db, jams, songs, attendees) -> None:
     """Create some sample votes"""
     print("🗳️  Creating sample votes...")
     
@@ -294,7 +294,7 @@ async def create_sample_votes(db, jams, songs, attendees):
     await db.commit()
     print(f"   ✅ Created {votes_created} sample votes")
 
-async def create_sample_performances(db, jams, songs, attendees):
+async def create_sample_performances(db, jams, songs, attendees) -> None:
     """Create some sample performance registrations"""
     print("🎤 Creating sample performance registrations...")
     
@@ -324,7 +324,7 @@ async def create_sample_performances(db, jams, songs, attendees):
     await db.commit()
     print(f"   ✅ Created {performances_created} performance registrations")
 
-async def main():
+async def main() -> None:
     """Main function to initialize development data"""
     print("🚀 Initializing Jamanager Development Data")
     print("=" * 50)

@@ -7,7 +7,7 @@ import requests
 import re
 import json
 
-def extract_js_from_html():
+def extract_js_from_html() -> None:
     """Extract JavaScript from the jam page HTML"""
     print("🔍 Extracting JavaScript from jam page...")
     
@@ -35,7 +35,7 @@ def extract_js_from_html():
         print(f"   Error: {e}")
         return None
 
-def test_js_files():
+def test_js_files() -> None:
     """Test individual JavaScript files for syntax errors"""
     print("\n🔍 Testing JavaScript files...")
     
@@ -69,7 +69,7 @@ def test_js_files():
         except Exception as e:
             print(f"   {js_file}: Error - {e}")
 
-def simulate_js_execution():
+def simulate_js_execution() -> None:
     """Simulate what should happen when JavaScript runs"""
     print("\n🔍 Simulating JavaScript execution...")
     
@@ -102,7 +102,7 @@ def simulate_js_execution():
     except Exception as e:
         print(f"   Error: {e}")
 
-def main():
+def main() -> None:
     print("🚀 Starting JavaScript debug test...")
     
     # Extract JS files from HTML

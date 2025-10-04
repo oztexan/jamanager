@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-def test_ultimate_guitar_search():
+def test_ultimate_guitar_search() -> None:
     """Test searching Ultimate Guitar directly"""
     print("🎸 Testing Ultimate Guitar Web Scraping")
     print("=" * 50)
@@ -90,7 +90,7 @@ def test_ultimate_guitar_search():
     except Exception as e:
         print(f"❌ Error: {e}")
 
-def test_different_songs():
+def test_different_songs() -> None:
     """Test with different songs that are more likely to have results"""
     print("\n🎵 Testing with different songs")
     print("=" * 30)

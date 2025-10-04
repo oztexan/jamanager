@@ -7,7 +7,7 @@ import asyncio
 from jamanager.database import AsyncSessionLocal, engine
 from jamanager.models import Base
 
-async def clear_database():
+async def clear_database() -> None:
     """Clear all data from the database"""
     print("🗑️  Clearing existing data...")
     
@@ -20,7 +20,7 @@ async def clear_database():
         await conn.run_sync(Base.metadata.create_all)
         print("✅ All tables recreated")
 
-async def main():
+async def main() -> None:
     """Main reset function"""
     print("🔄 Resetting JaManager database...")
     

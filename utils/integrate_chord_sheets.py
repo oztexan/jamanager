@@ -14,7 +14,7 @@ class ChordSheetIntegration:
     in the main application.
     """
     
-    def __init__(self, base_url: str = "http://localhost:8000"):
+    def __init__(self, base_url: str = "http://localhost:8000") -> None:
         self.base_url = base_url
     
     async def get_chord_sheet_for_song(self, song_name: str, artist_name: str) -> Optional[Dict[str, Any]]:
@@ -81,7 +81,7 @@ class ChordSheetIntegration:
             print(f"❌ Error searching chord sheets: {e}")
             return None
 
-async def demo_integration():
+async def demo_integration() -> None:
     """
     Demo showing how to use the chord sheet integration.
     """

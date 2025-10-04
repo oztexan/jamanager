@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from init_dev_database import init_dev_database
 
-async def reset_dev_database():
+async def reset_dev_database() -> None:
     """Reset and initialize development database"""
     print("🔄 Resetting development database...")
     await init_dev_database()

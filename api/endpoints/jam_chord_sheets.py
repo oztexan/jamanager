@@ -35,7 +35,7 @@ async def validate_url_async(url: str) -> bool:
     except Exception:
         return False
 
-async def save_validation_result(db: AsyncSession, jam_id: str, song_id: str, url: str, is_valid: bool):
+async def save_validation_result(db: AsyncSession, jam_id: str, song_id: str, url: str, is_valid: bool) -> None:
     """Save URL validation result to the appropriate database record"""
     try:
         # First, try to find an existing jam-specific chord sheet

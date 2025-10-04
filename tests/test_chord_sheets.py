@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from services.ultimate_guitar_service import ultimate_guitar_service
 
-async def test_chord_search():
+async def test_chord_search() -> None:
     """Test the chord sheet search functionality."""
     print("🎸 Testing Ultimate Guitar Chord Sheet Service")
     print("=" * 50)

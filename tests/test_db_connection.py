@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def test_database():
+async def test_database() -> None:
     """Test SQLite database connection and schema"""
     
     db_path = "jamanager.db"

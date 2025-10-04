@@ -68,6 +68,6 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 JamConfig.ensure_upload_dir()
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     """Initialize database on startup"""
     await init_database()

@@ -62,7 +62,7 @@ DEFAULT_DEV_SONGS = [
     ("Shape of You", "Ed Sheeran", "https://tabs.ultimate-guitar.com/tab/ed-sheeran/shape-of-you-chords-39144"),
 ]
 
-async def init_dev_database():
+async def init_dev_database() -> None:
     """Initialize development database with schema and popular songs"""
     try:
         # Remove existing database file if it exists

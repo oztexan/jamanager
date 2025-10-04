@@ -7,7 +7,7 @@ import asyncio
 import aiosqlite
 import os
 
-async def test_database():
+async def test_database() -> None:
     """Test the SQLite database connection and data"""
     
     db_path = "jamanager.db"

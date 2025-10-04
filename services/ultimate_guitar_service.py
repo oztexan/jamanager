@@ -13,7 +13,7 @@ class UltimateGuitarService:
     BASE_URL = "https://www.ultimate-guitar.com"
     SEARCH_URL = f"{BASE_URL}/search.php"
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -100,7 +100,7 @@ class UltimateGuitarService:
             print(f"🎸 Found {len(chord_results)} chord sheet results")
             
             # Sort by exact match first, then by votes
-            def sort_key(x):
+            def sort_key(x) -> None:
                 # Check for exact artist match
                 artist_match = x['artist_name'].lower() == artist_name.lower()
                 song_match = x['song_name'].lower() == song_name.lower()

@@ -29,7 +29,7 @@ class FeatureFlagRequest(BaseModel):
 feature_manager = FeatureFlagManager()
 
 @router.get("/")
-async def list_all_feature_flags():
+async def list_all_feature_flags() -> None:
     """List all available feature flags and their configurations"""
     all_features = FeatureFlags.get_all_features()
     result = {}

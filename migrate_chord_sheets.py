@@ -1,3 +1,4 @@
+from typing import List, Dict, Optional, Union
 #!/usr/bin/env python3
 """
 Database migration script to add jam_chord_sheets table.
@@ -14,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from core.database import engine, Base
 from models.database import JamChordSheet
 
-async def migrate_database():
+async def migrate_database() -> None:
     """Add the jam_chord_sheets table to the database."""
     try:
         print("🔄 Starting database migration...")

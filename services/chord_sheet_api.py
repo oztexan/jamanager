@@ -27,7 +27,7 @@ class ChordSheetInfoResponse(BaseModel):
     url: str
 
 @router.post("/api/search-chord-sheets", response_model=ChordSheetSearchResponse)
-async def search_chord_sheets(request: ChordSheetSearchRequest):
+async def search_chord_sheets(request: ChordSheetSearchRequest) -> None:
     """
     Search for chord sheets on Ultimate Guitar for a given song and artist.
     """
@@ -56,7 +56,7 @@ async def search_chord_sheets(request: ChordSheetSearchRequest):
         raise HTTPException(status_code=500, detail=f"Error searching for chord sheets: {str(e)}")
 
 @router.post("/api/get-best-chord-sheet", response_model=Dict[str, Any])
-async def get_best_chord_sheet(request: ChordSheetSearchRequest):
+async def get_best_chord_sheet(request: ChordSheetSearchRequest) -> None:
     """
     Get the best (highest rated) chord sheet URL for a song.
     """
@@ -80,7 +80,7 @@ async def get_best_chord_sheet(request: ChordSheetSearchRequest):
         raise HTTPException(status_code=500, detail=f"Error getting best chord sheet: {str(e)}")
 
 @router.post("/api/get-chord-sheet-info", response_model=ChordSheetInfoResponse)
-async def get_chord_sheet_info(request: ChordSheetInfoRequest):
+async def get_chord_sheet_info(request: ChordSheetInfoRequest) -> None:
     """
     Get detailed information about a specific chord sheet.
     """
@@ -101,7 +101,7 @@ async def get_chord_sheet_info(request: ChordSheetInfoRequest):
         raise HTTPException(status_code=500, detail=f"Error getting chord sheet info: {str(e)}")
 
 @router.get("/api/test-chord-search")
-async def test_chord_search():
+async def test_chord_search() -> None:
     """
     Test endpoint to verify the chord sheet service is working.
     """

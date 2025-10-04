@@ -19,7 +19,7 @@ app = FastAPI(title="Chord Sheet API Test", version="1.0.0")
 app.include_router(router)
 
 @app.get("/")
-async def root():
+async def root() -> None:
     return {"message": "Chord Sheet API Test Server", "endpoints": [
         "/api/chord-sheets/search?song_title=Song&artist=Artist",
         "/api/chord-sheets/best?song_title=Song&artist=Artist",

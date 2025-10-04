@@ -32,7 +32,7 @@ async def get_user_permissions_endpoint(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/feature-flags")
-async def get_feature_flags():
+async def get_feature_flags() -> None:
     """Get all feature flags"""
     try:
         # This would typically come from a feature flag service
@@ -50,7 +50,7 @@ async def get_feature_flags():
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/access-code/verify")
-async def verify_access_code(request: Request):
+async def verify_access_code(request: Request) -> None:
     """Verify jam manager access code"""
     try:
         data = await request.json()
@@ -78,7 +78,7 @@ async def verify_access_code(request: Request):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/access-code/logout")
-async def logout_access_code(request: Request):
+async def logout_access_code(request: Request) -> None:
     """Logout jam manager session"""
     try:
         # Get session ID from header instead of JSON body

@@ -5,7 +5,7 @@ Script to fix UUID conversions in main.py for SQLite compatibility
 
 import re
 
-def fix_uuid_conversions():
+def fix_uuid_conversions() -> None:
     """Remove UUID conversions from main.py"""
     
     with open('jamanager/main.py', 'r') as f:

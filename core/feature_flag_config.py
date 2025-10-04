@@ -40,11 +40,11 @@ class FeatureFlagConfig:
 class FeatureFlagManager:
     """Manages feature flag configurations at different scopes"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.configs: Dict[str, List[FeatureFlagConfig]] = {}
         self.load_environment_configs()
     
-    def load_environment_configs(self):
+    def load_environment_configs(self) -> None:
         """Load feature flags from environment variables"""
         # Example: FEATURE_FLAGS='{"vote_anonymous": true, "suggest_songs": false}'
         env_flags = os.getenv('FEATURE_FLAGS')
@@ -138,7 +138,7 @@ class FeatureFlagManager:
         
         return False
     
-    def _cleanup_expired_configs(self, feature_name: str):
+    def _cleanup_expired_configs(self, feature_name: str) -> None:
         """Remove expired configurations"""
         if feature_name in self.configs:
             now = datetime.now()

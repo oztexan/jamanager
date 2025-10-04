@@ -7,7 +7,7 @@ import sqlite3
 import os
 from datetime import datetime
 
-def migrate_database():
+def migrate_database() -> None:
     """Add chord sheet validation fields to the database."""
     
     db_path = "jamanager.db"

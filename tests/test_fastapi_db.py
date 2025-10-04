@@ -7,7 +7,7 @@ import asyncio
 from core.database import get_database, AsyncSessionLocal
 from models.database import Song
 
-async def test_fastapi_db():
+async def test_fastapi_db() -> None:
     """Test FastAPI database connection"""
     
     try:

@@ -21,7 +21,7 @@ AsyncSessionLocal = async_sessionmaker(
     expire_on_commit=False
 )
 
-async def get_database():
+async def get_database() -> None:
     """Dependency to get database session"""
     async with AsyncSessionLocal() as session:
         try:
@@ -29,11 +29,11 @@ async def get_database():
         finally:
             await session.close()
 
-def get_database_url():
+def get_database_url() -> None:
     """Get the database URL for direct connections"""
     return DATABASE_URL
 
-async def init_database():
+async def init_database() -> None:
     """Initialize database tables"""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

@@ -7,7 +7,7 @@ import sqlite3
 import os
 from datetime import datetime
 
-def migrate_database():
+def migrate_database() -> None:
     """Create jam_chord_sheets table with all fields including validation."""
     
     db_path = "jamanager.db"

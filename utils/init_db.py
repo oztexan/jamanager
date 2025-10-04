@@ -9,7 +9,7 @@ from datetime import datetime
 from jamanager.database import init_database, AsyncSessionLocal
 from jamanager.models import Song, Jam, JamSong, Attendee, Vote, PerformanceRegistration, Venue
 
-async def create_sample_data():
+async def create_sample_data() -> None:
     """Create sample data for testing"""
     async with AsyncSessionLocal() as session:
         # Create sample venues
@@ -90,7 +90,7 @@ async def create_sample_data():
         print(f"Created jam: {jam.name} (slug: {jam.slug}) at {venues[0].name}")
         print(f"Created {len(songs)} songs")
 
-async def main():
+async def main() -> None:
     """Main initialization function"""
     print("🚀 Initializing Jamanager database...")
     

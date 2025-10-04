@@ -8,7 +8,7 @@ import aiosqlite
 import os
 from datetime import date
 
-async def init_sqlite_database():
+async def init_sqlite_database() -> None:
     """Initialize SQLite database with schema and sample data"""
     
     db_path = "jamanager.db"
@@ -39,7 +39,7 @@ async def init_sqlite_database():
         import traceback
         traceback.print_exc()
 
-async def create_sample_data(db):
+async def create_sample_data(db) -> None:
     """Create sample data for testing"""
     
     # Create sample venues
