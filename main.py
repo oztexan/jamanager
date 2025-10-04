@@ -1,6 +1,23 @@
 """
 Main FastAPI application for Jamanager.
-This file handles app initialization and includes all the modular routers.
+
+This module serves as the entry point for the Jamanager application, handling:
+- FastAPI app initialization and configuration
+- CORS middleware setup
+- Router registration for all API endpoints
+- Static file serving
+- WebSocket connection management
+- Database initialization
+
+The application provides a real-time jam session management system with:
+- Song queue management and voting
+- WebSocket-based real-time updates
+- User authentication and authorization
+- Chord sheet integration with Ultimate Guitar
+- Venue and jam session management
+
+Author: Jamanager Development Team
+Version: 1.0.0
 """
 import os
 import logging
@@ -69,5 +86,23 @@ JamConfig.ensure_upload_dir()
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database on startup"""
-    await init_database()
+    """
+    Initialize application on startup.
+    
+    This function is called when the FastAPI application starts up and handles:
+    - Database initialization and schema creation
+    - Logging configuration
+    - Application health checks
+    
+    Raises:
+        Exception: If database initialization fails
+    """
+    try:
+        logger.info("Starting Jamanager application...")
+        logger.info("Initializing database...")
+        await init_database()
+        logger.info("Database initialization completed successfully")
+        logger.info("Jamanager application started successfully")
+    except Exception as e:
+        logger.error(f"Failed to start Jamanager application: {e}")
+        raise
