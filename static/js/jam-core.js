@@ -3,7 +3,6 @@
  * Handles basic jam data loading and UI state management
  */
 
-console.log('jam-core.js loaded successfully');
 
 class JamCore {
     constructor() {
@@ -25,35 +24,28 @@ class JamCore {
      * Load jam data from API
      */
     async loadJamData() {
-        console.log('JamCore: loadJamData called, jamSlug:', this.jamSlug);
         if (this.isLoading) return;
         
         this.isLoading = true;
         this.showLoadingState();
 
         try {
-            console.log('JamCore: Fetching jam data from API...');
             const response = await fetch(`/api/jams/by-slug/${this.jamSlug}`);
-            console.log('JamCore: API response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             this.jamData = await response.json();
-            console.log('JamCore: Jam data loaded:', this.jamData);
             this.jamId = this.jamData.id;
             
             this.updateJamInfo();
             this.setBackgroundImage(this.jamData.background_image);
             
             // Notify other modules that jam data is loaded
-            console.log('JamCore: Notifying other modules...');
             if (window.jamAttendee) {
-                console.log('JamCore: Notifying jamAttendee module');
                 window.jamAttendee.onJamDataLoaded(this.jamData);
             }
             if (window.jamSongs) {
-                console.log('JamCore: Notifying jamSongs module');
                 window.jamSongs.onJamDataLoaded(this.jamData);
             }
             
@@ -157,7 +149,6 @@ class JamCore {
                 duration: 3000
             });
         } else {
-            console.log('Success:', message);
         }
     }
 

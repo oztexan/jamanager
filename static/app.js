@@ -49,9 +49,7 @@ class JamanagerApp {
         // Ensure all modals are hidden on page load
         document.querySelectorAll('.modal').forEach(modal => {
             modal.classList.add('hidden');
-            console.log('Hidden modal:', modal.id);
         });
-        console.log('All modals should be hidden now');
     }
 
     setupEventListeners() {
@@ -127,14 +125,12 @@ class JamanagerApp {
     }
 
     async createJam() {
-        console.log('createJam called');
         const name = document.getElementById('jamName').value.trim();
         const venueId = document.getElementById('jamVenue').value;
         const jamDate = document.getElementById('jamDate').value;
         const description = document.getElementById('jamDescription').value.trim();
         const backgroundImage = document.getElementById('jamBackgroundImage').files[0];
 
-        console.log('Jam data:', { name, venueId, jamDate, description, backgroundImage });
 
         if (!name) {
             this.showError('createJamError', 'Jam name is required');
@@ -152,7 +148,6 @@ class JamanagerApp {
         }
 
         try {
-            console.log('Sending request to /api/jams');
             
             // Create FormData for file upload
             const formData = new FormData();
@@ -170,10 +165,8 @@ class JamanagerApp {
                 body: formData
             });
 
-            console.log('Response status:', response.status);
             if (response.ok) {
                 const jam = await response.json();
-                console.log('Jam created successfully:', jam);
                 this.showSuccess('createJamSuccess', `Jam "${name}" created successfully!`);
                 setTimeout(() => {
                     this.hideCreateJamModal();
@@ -384,11 +377,9 @@ class JamanagerApp {
 
     async loadTodaysJams() {
         try {
-            console.log('🔄 Loading today\'s jams...');
             const response = await fetch('/api/jams');
             if (response.ok) {
                 const jams = await response.json();
-                console.log('📊 API returned jams:', jams.length);
                 this.displayTodaysJams(jams);
             } else {
                 console.error('❌ API error:', response.status, response.statusText);
@@ -606,7 +597,6 @@ class JamanagerApp {
     }
 
     displayTodaysJams(jams) {
-        console.log('🎵 displayTodaysJams called with:', jams.length, 'jams');
         
         // Set today's date in Sydney timezone
         const today = new Date();
@@ -617,14 +607,11 @@ class JamanagerApp {
             year: 'numeric'
         });
         
-        console.log('📅 Today formatted:', todayFormatted);
-        console.log('📅 Sydney date:', sydneyDate.toDateString());
         
         // Update the date display
         const todayDateElement = document.getElementById('todayDate');
         if (todayDateElement) {
             todayDateElement.textContent = todayFormatted;
-            console.log('✅ Date element updated');
         } else {
             console.error('❌ todayDate element not found');
         }
@@ -632,35 +619,27 @@ class JamanagerApp {
         // Filter jams for today
         const todayJams = jams.filter(jam => {
             if (!jam.jam_date) {
-                console.log('❌ Jam has no date:', jam.name);
                 return false;
             }
             const jamDate = new Date(jam.jam_date);
-            console.log('📅 Jam date:', jam.name, jam.jam_date, jamDate.toDateString());
             return jamDate.toDateString() === sydneyDate.toDateString();
         });
         
-        console.log('🎵 Today jams found:', todayJams.length);
         
         const list = document.getElementById('jamsTodayList');
         const noJamsMessage = document.getElementById('noJamsToday');
         
-        console.log('📋 List element:', list);
-        console.log('💬 No jams message element:', noJamsMessage);
         
         if (todayJams.length === 0) {
-            console.log('📭 No jams today, showing empty message');
             list.innerHTML = '';
             noJamsMessage.style.display = 'block';
             return;
         }
         
-        console.log('🎵 Showing jams, hiding empty message');
         noJamsMessage.style.display = 'none';
         list.innerHTML = '';
         
         todayJams.forEach(jam => {
-            console.log('🎵 Creating tile for:', jam.name);
             const tile = document.createElement('div');
             tile.className = 'jam-tile';
             tile.onclick = () => this.joinJam(jam.slug);
@@ -675,7 +654,6 @@ class JamanagerApp {
             list.appendChild(tile);
         });
         
-        console.log('✅ Jams display complete');
     }
 
     // Utility Functions
