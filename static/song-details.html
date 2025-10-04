@@ -439,12 +439,12 @@
             
             <div class="form-group">
                 <label for="songTitleInput">Title:</label>
-                <input type="text" id="songTitleInput" class="form-control" placeholder="Song title">
+                <input type="text" id="songTitleInput" class="form-control" placeholder="Song title" aria-label="Input" tabindex="0">
             </div>
             
             <div class="form-group">
                 <label for="songArtistInput">Artist:</label>
-                <input type="text" id="songArtistInput" class="form-control" placeholder="Artist name">
+                <input type="text" id="songArtistInput" class="form-control" placeholder="Artist name" aria-label="Input" tabindex="0">
             </div>
             
             <div class="detail-row">
@@ -467,7 +467,7 @@
                 
                 <!-- Automatic Lookup -->
                 <div class="chord-sheet-lookup">
-                    <button type="button" id="findChordSheetBtn" class="btn btn-outline" onclick="findChordSheet()">
+                    <button type="button" id="findChordSheetBtn" class="btn btn-outline" onclick="findChordSheet()" aria-label="Button" tabindex="0">
                         <span id="findChordSheetBtnText">Find Chord Sheet Automatically</span>
                         <span id="findChordSheetSpinner" class="spinner hidden">⏳</span>
                     </button>
@@ -479,8 +479,8 @@
             </div>
             
             <div style="margin-top: 30px;">
-                <button class="btn btn-secondary" onclick="goBack()">Close</button>
-                <button class="btn btn-primary" onclick="saveAll()">Save</button>
+                <button class="btn btn-secondary" onclick="goBack()" aria-label="Button" tabindex="0">Close</button>
+                <button class="btn btn-primary" onclick="saveAll()" aria-label="Button" tabindex="0">Save</button>
             </div>
         </div>
     </div>
@@ -786,8 +786,8 @@
                                         <div class="chord-sheet-rating">⭐ ${sheet.rating.toFixed(2)} (${sheet.votes} votes)</div>
                                     </div>
                                     <div class="chord-sheet-actions">
-                                        <button class="btn btn-sm btn-outline" onclick="selectChordSheet('${sheet.url}')">Select</button>
-                                        <button class="btn btn-sm btn-outline" onclick="window.open('${sheet.url}', '_blank')">🔗</button>
+                                        <button class="btn btn-sm btn-outline" onclick="selectChordSheet('${sheet.url}')" aria-label="Button" tabindex="0">Select</button>
+                                        <button class="btn btn-sm btn-outline" onclick="window.open('${sheet.url}', '_blank')" aria-label="Button" tabindex="0">🔗</button>
                                     </div>
                                 `;
                                 links.appendChild(linkDiv);

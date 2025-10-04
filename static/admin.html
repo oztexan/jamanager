@@ -432,8 +432,8 @@
                 <p>Override feature flags for specific users.</p>
                 <div class="form-group">
                     <label for="user-id">User ID:</label>
-                    <input type="text" id="user-id" placeholder="Enter user ID">
-                    <button class="btn btn-primary" onclick="loadUserFlags()">Load User Flags</button>
+                    <input type="text" id="user-id" placeholder="Enter user ID" aria-label="Input" tabindex="0">
+                    <button class="btn btn-primary" onclick="loadUserFlags()" aria-label="Button" tabindex="0">Load User Flags</button>
                 </div>
                 <div id="users-content" class="loading">Enter a user ID to load their flags</div>
             </div>
@@ -443,8 +443,8 @@
                 <p>Configure feature flags for specific jam sessions.</p>
                 <div class="form-group">
                     <label for="jam-id">Jam ID:</label>
-                    <input type="text" id="jam-id" placeholder="Enter jam ID">
-                    <button class="btn btn-primary" onclick="loadJamFlags()">Load Jam Flags</button>
+                    <input type="text" id="jam-id" placeholder="Enter jam ID" aria-label="Input" tabindex="0">
+                    <button class="btn btn-primary" onclick="loadJamFlags()" aria-label="Button" tabindex="0">Load Jam Flags</button>
                 </div>
                 <div id="jams-content" class="loading">Enter a jam ID to load its flags</div>
             </div>
