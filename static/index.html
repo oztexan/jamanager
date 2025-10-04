@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jamanager - FastAPI</title>
+    
+    <!-- Dev Environment Indicator -->
+    <style>
+        .dev-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #ff6b6b;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .dev-indicator.main-version {
+            background: #ff6b6b;
+        }
+    </style>
     <style>
         * {
             margin: 0;
@@ -679,6 +699,12 @@
     </style>
 </head>
 <body>
+    <!-- Dev Environment Indicator -->
+    <div class="dev-indicator main-version">
+        📁 MAIN PROJECT<br>
+        Original Version
+    </div>
+    
     <!-- Notification Container -->
     <div id="notificationContainer" class="notification-container"></div>
     
