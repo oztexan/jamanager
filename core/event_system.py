@@ -63,7 +63,10 @@ class EventHandler:
         # Apply middleware
         for middleware in self._middleware:
             try:
-                event = middleware(event)
+                if asyncio.iscoroutinefunction(middleware):
+                    event = await middleware(event)
+                else:
+                    event = middleware(event)
             except Exception as e:
                 logger.error(f"Error in event middleware: {e}")
         

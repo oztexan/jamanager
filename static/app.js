@@ -493,6 +493,9 @@ class JamanagerApp {
                 // Set localStorage to indicate jam manager access
                 localStorage.setItem('jamManagerAccess', 'true');
                 
+                // Dispatch event to notify other parts of the app
+                window.dispatchEvent(new CustomEvent('jamManagerAccessChanged'));
+                
                 // Show success notification and close dialog immediately
                 if (window.notificationSystem) {
                     window.notificationSystem.show('Access granted! You now have jam manager privileges.', 'success');

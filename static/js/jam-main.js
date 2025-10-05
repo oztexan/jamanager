@@ -42,14 +42,69 @@ class JamUI {
                 this.websocket.init(this.jamCore.getJamId());
             }
 
+            // Setup breadcrumb navigation
+            this.setupBreadcrumbs();
+
             // Setup global event listeners
             this.setupEventListeners();
+            
+            // Setup breadcrumb updates when access status changes
+            this.setupBreadcrumbUpdates();
 
 
         } catch (error) {
             console.error('Error initializing Jam UI:', error);
             this.showError('Failed to initialize jam page. Please refresh and try again.');
         }
+    }
+
+    /**
+     * Setup breadcrumb navigation
+     */
+    setupBreadcrumbs() {
+        console.log('Setting up breadcrumbs...');
+        console.log('Breadcrumb manager available:', !!window.breadcrumbManager);
+        console.log('Jam data available:', !!this.jamCore.getJamData());
+        console.log('Is jam manager:', window.breadcrumbManager ? window.breadcrumbManager.isJamManager() : 'N/A');
+        
+        if (window.breadcrumbManager && this.jamCore.getJamData()) {
+            const jamData = this.jamCore.getJamData();
+            
+            // Set breadcrumbs regardless of jam manager status
+            window.breadcrumbManager.setBreadcrumbs([
+                { label: 'Home', url: '/' },
+                { label: 'Jams', url: '/jams' },
+                { label: jamData.name || 'Jam Session', url: '', isActive: true }
+            ]);
+            
+            // Show breadcrumbs if user is a jam manager
+            if (window.breadcrumbManager.isJamManager()) {
+                console.log('Showing breadcrumbs for jam manager');
+                window.breadcrumbManager.show();
+            } else {
+                console.log('Hiding breadcrumbs - not a jam manager');
+                window.breadcrumbManager.hide();
+            }
+        } else {
+            console.log('Cannot setup breadcrumbs - missing requirements');
+        }
+    }
+
+    /**
+     * Setup breadcrumb updates when access status changes
+     */
+    setupBreadcrumbUpdates() {
+        // Listen for storage changes (when user enters access code on another tab)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'jamManagerAccess') {
+                this.setupBreadcrumbs();
+            }
+        });
+        
+        // Also listen for custom events that might indicate access status changes
+        window.addEventListener('jamManagerAccessChanged', () => {
+            this.setupBreadcrumbs();
+        });
     }
 
     /**

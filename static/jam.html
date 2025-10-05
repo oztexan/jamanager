@@ -9,6 +9,49 @@
     <link rel="stylesheet" href="/static/css/components.css">
     <link rel="stylesheet" href="/static/css/jam.css?v=20251004t">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    
+    <style>
+        /* Breadcrumb Navigation Styles */
+        .breadcrumb-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .breadcrumb-item {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        
+        .breadcrumb-item:hover {
+            color: #5a67d8;
+            text-decoration: underline;
+        }
+        
+        .breadcrumb-item.active {
+            color: #4a5568;
+            font-weight: 600;
+        }
+        
+        .breadcrumb-separator {
+            color: #a0aec0;
+            margin: 0 8px;
+            font-weight: 400;
+        }
+        
+        .breadcrumb-nav a {
+            text-decoration: none;
+        }
+        
+        .breadcrumb-nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <!-- Notification Container -->
@@ -20,6 +63,9 @@
     
     <!-- Main Container -->
     <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <div id="breadcrumb-container"></div>
+        
         <!-- Header Section -->
         <header class="jam-header card">
             <div class="jam-info">
@@ -212,6 +258,7 @@
 
     <!-- Scripts -->
     <script src="/static/js/dev-indicator.js"></script>
+    <script src="/static/breadcrumbs.js"></script>
     <script src="/static/js/notification-system.js?v=20251004"></script>
     <script src="/static/js/jam-core.js?v=20251004"></script>
     <script src="/static/js/jam-attendee.js?v=20251004e"></script>
