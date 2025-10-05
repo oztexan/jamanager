@@ -9,12 +9,13 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, Request, UploadFile, File, Form
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, func
+from sqlalchemy import select, update, func, and_
 
 from core.database import get_database
 from core.slug_utils import generate_jam_slug, make_slug_unique
 from core.image_utils import ImageUploader
 from core.auth_middleware import can_vote, can_register_to_perform, can_play_songs
+from core.cache import cached, invalidate_cache
 from models.database import (
     Song, Jam, JamSong, Attendee, Vote, PerformanceRegistration, Venue,
     SongInDB, JamInDB, SongUpdate, VenueInDB, VenueCreate, VenueUpdate, JamInDBWithVenue
@@ -103,6 +104,9 @@ async def create_jam(
                 await db.commit()
                 await db.refresh(new_jam)
         
+        # Sprint 3: Invalidate cache after creating new jam
+        invalidate_cache("jams")
+        
         return {
             "id": str(new_jam.id),
             "name": new_jam.name,
@@ -125,37 +129,51 @@ async def create_jam(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.get("")
+@cached(ttl=60, key_prefix="jams")  # Cache for 1 minute
 async def get_all_jams(db: AsyncSession = Depends(get_database)):
-    """Get all jams"""
+    """Get all jams - Sprint 3 Optimized Version"""
     try:
-        result = await db.execute(select(Jam).order_by(Jam.created_at.desc()))
-        jams = result.scalars().all()
-        
-        jam_list = []
-        for jam in jams:
-            # Get song count for each jam
-            song_count_result = await db.execute(
-                select(func.count(JamSong.id)).where(JamSong.jam_id == jam.id)
+        # Sprint 3: Single optimized query with joins and aggregation
+        # This eliminates the N+1 query problem by using JOINs and GROUP BY
+        result = await db.execute(
+            select(
+                Jam.id,
+                Jam.name,
+                Jam.slug,
+                Jam.description,
+                Jam.venue_id,
+                Venue.name.label('venue_name'),
+                Jam.jam_date,
+                Jam.background_image,
+                Jam.status,
+                Jam.created_at,
+                Jam.updated_at,
+                func.count(JamSong.id).label('song_count')
             )
-            song_count = song_count_result.scalar()
-            
-            # Get venue information
-            venue_result = await db.execute(select(Venue).where(Venue.id == jam.venue_id))
-            venue = venue_result.scalar_one_or_none()
-            
+            .join(Venue, Jam.venue_id == Venue.id)
+            .outerjoin(JamSong, Jam.id == JamSong.jam_id)
+            .group_by(Jam.id, Venue.name)
+            .order_by(Jam.created_at.desc())
+        )
+        
+        jam_data = result.all()
+        
+        # Convert to the expected format
+        jam_list = []
+        for row in jam_data:
             jam_list.append({
-                "id": str(jam.id),
-                "name": jam.name,
-                "slug": jam.slug,
-                "description": jam.description,
-                "venue_id": str(jam.venue_id),
-                "venue_name": venue.name if venue else "Unknown Venue",
-                "jam_date": jam.jam_date.isoformat() if jam.jam_date else None,
-                "background_image": jam.background_image,
-                "status": jam.status,
-                "song_count": song_count,
-                "created_at": jam.created_at,
-                "updated_at": jam.updated_at
+                "id": str(row.id),
+                "name": row.name,
+                "slug": row.slug,
+                "description": row.description,
+                "venue_id": str(row.venue_id),
+                "venue_name": row.venue_name,
+                "jam_date": row.jam_date.isoformat() if row.jam_date else None,
+                "background_image": row.background_image,
+                "status": row.status,
+                "song_count": row.song_count,
+                "created_at": row.created_at,
+                "updated_at": row.updated_at
             })
         
         return jam_list
@@ -164,65 +182,123 @@ async def get_all_jams(db: AsyncSession = Depends(get_database)):
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 @router.get("/by-slug/{slug}", response_model=JamInDBWithVenue)
+@cached(ttl=120, key_prefix="jam_slug")  # Cache for 2 minutes
 async def get_jam_by_slug(slug: str, db: AsyncSession = Depends(get_database)):
-    """Get jam by slug with all songs"""
-    # Get jam with venue information
+    """Get jam by slug with all songs - Sprint 3 Optimized Version"""
+    # Sprint 3: Single optimized query with all joins and vote counts
+    # This eliminates the N+1 query problem by using LEFT JOINs and aggregation
     result = await db.execute(
-        select(Jam, Venue)
+        select(
+            Jam.id,
+            Jam.name,
+            Jam.slug,
+            Jam.description,
+            Jam.venue_id,
+            Jam.jam_date,
+            Jam.background_image,
+            Jam.current_song_id,
+            Jam.status,
+            Jam.created_at,
+            Jam.updated_at,
+            Venue.id.label('venue_id_2'),
+            Venue.name.label('venue_name'),
+            Venue.address,
+            Venue.description.label('venue_description'),
+            Venue.created_at.label('venue_created_at'),
+            Venue.updated_at.label('venue_updated_at'),
+            JamSong.id.label('jam_song_id'),
+            JamSong.song_id,
+            JamSong.captains,
+            JamSong.played,
+            JamSong.played_at,
+            JamSong.created_at.label('jam_song_created_at'),
+            JamSong.updated_at.label('jam_song_updated_at'),
+            Song.id.label('song_id_2'),
+            Song.title,
+            Song.artist,
+            Song.chord_sheet_url,
+            Song.chord_sheet_is_valid,
+            Song.chord_sheet_validated_at,
+            Song.times_played,
+            Song.last_played,
+            Song.play_history,
+            Song.created_at.label('song_created_at'),
+            Song.updated_at.label('song_updated_at'),
+            func.count(Vote.id).label('vote_count')
+        )
         .join(Venue, Jam.venue_id == Venue.id)
+        .outerjoin(JamSong, Jam.id == JamSong.jam_id)
+        .outerjoin(Song, JamSong.song_id == Song.id)
+        .outerjoin(Vote, and_(Vote.jam_id == Jam.id, Vote.song_id == Song.id))
         .where(Jam.slug == slug)
+        .group_by(
+            Jam.id, Venue.id, JamSong.id, Song.id
+        )
+        .order_by(func.count(Vote.id).desc())
     )
-    jam_data = result.first()
+    
+    jam_data = result.all()
     
     if not jam_data:
         raise HTTPException(status_code=404, detail="Jam not found")
     
-    jam, venue = jam_data
-    
-    # Get jam songs with song details
-    jam_songs_result = await db.execute(
-        select(JamSong, Song)
-        .join(Song, JamSong.song_id == Song.id)
-        .where(JamSong.jam_id == jam.id)
+    # Extract jam and venue info from first row
+    first_row = jam_data[0]
+    jam = Jam(
+        id=first_row.id,
+        name=first_row.name,
+        slug=first_row.slug,
+        description=first_row.description,
+        venue_id=first_row.venue_id,
+        jam_date=first_row.jam_date,
+        background_image=first_row.background_image,
+        current_song_id=first_row.current_song_id,
+        status=first_row.status,
+        created_at=first_row.created_at,
+        updated_at=first_row.updated_at
     )
-    jam_songs_data = jam_songs_result.all()
     
-    # Build the songs list with vote counts and other jam-specific data
+    venue = Venue(
+        id=first_row.venue_id_2,
+        name=first_row.venue_name,
+        address=first_row.address,
+        description=first_row.venue_description,
+        created_at=first_row.venue_created_at,
+        updated_at=first_row.venue_updated_at
+    )
+    
+    # Build the songs list with vote counts
     songs = []
-    for jam_song, song in jam_songs_data:
-        # Get vote count for this song in this jam
-        vote_count_result = await db.execute(
-            select(func.count(Vote.id))
-            .where(Vote.jam_id == jam.id, Vote.song_id == song.id)
-        )
-        vote_count = vote_count_result.scalar() or 0
-        
-        # Create the nested structure that the client expects
-        jam_song_dict = {
-            "id": jam_song.id,
-            "jam_id": jam_song.jam_id,
-            "song_id": jam_song.song_id,
-            "captains": jam_song.captains,
-            "played": jam_song.played,
-            "played_at": jam_song.played_at,
-            "created_at": jam_song.created_at,
-            "updated_at": jam_song.updated_at,
-            "song": {
-                "id": song.id,
-                "title": song.title,
-                "artist": song.artist,
-                "chord_sheet_url": song.chord_sheet_url,
-                "vote_count": vote_count,
-                "times_played": song.times_played,
-                "last_played": song.last_played,
-                "created_at": song.created_at,
-                "updated_at": song.updated_at
+    for row in jam_data:
+        if row.jam_song_id:  # Only process rows with jam songs
+            jam_song_dict = {
+                "id": row.jam_song_id,
+                "jam_id": str(jam.id),
+                "song_id": row.song_id,
+                "captains": row.captains,
+                "played": row.played,
+                "played_at": row.played_at,
+                "created_at": row.jam_song_created_at,
+                "updated_at": row.jam_song_updated_at,
+                "song": {
+                    "id": row.song_id_2,
+                    "title": row.title,
+                    "artist": row.artist,
+                    "chord_sheet_url": row.chord_sheet_url,
+                    "chord_sheet_is_valid": row.chord_sheet_is_valid,
+                    "chord_sheet_validated_at": row.chord_sheet_validated_at,
+                    "vote_count": row.vote_count or 0,
+                    "times_played": row.times_played,
+                    "last_played": row.last_played,
+                    "play_history": row.play_history,
+                    "created_at": row.song_created_at,
+                    "updated_at": row.song_updated_at
+                }
             }
-        }
-        songs.append(jam_song_dict)
+            songs.append(jam_song_dict)
     
-    # Sort songs by vote count (highest first)
-    songs.sort(key=lambda x: x["song"]["vote_count"], reverse=True)
+    # Sort songs by vote count (highest first) - already sorted by query
+    # songs.sort(key=lambda x: x["song"]["vote_count"], reverse=True)
     
     # Create the response
     jam_in_db = JamInDBWithVenue.from_orm(jam)
