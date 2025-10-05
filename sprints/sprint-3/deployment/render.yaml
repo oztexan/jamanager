@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: jamanager-australia
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/system/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JAM_MANAGER_ACCESS_CODE
+        generateValue: true
+      - key: DATABASE_POOL_SIZE
+        value: 20
+      - key: CACHE_ENABLED
+        value: true
+      - key: CACHE_DEFAULT_TTL
+        value: 300
+      - key: WEBSOCKET_ENABLED
+        value: true
+      - key: LOG_LEVEL
+        value: INFO
+
+databases:
+  - name: jamanager-postgres
+    plan: free
+    databaseName: jamanager
+    user: jamanager_user
