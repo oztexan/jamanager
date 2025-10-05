@@ -16,6 +16,7 @@ from core.slug_utils import generate_jam_slug, make_slug_unique
 from core.image_utils import ImageUploader
 from core.auth_middleware import can_vote, can_register_to_perform, can_play_songs
 from core.cache import cached, invalidate_cache
+from core.event_system import event_handler, EventTypes, EventDataBuilder
 from models.database import (
     Song, Jam, JamSong, Attendee, Vote, PerformanceRegistration, Venue,
     SongInDB, JamInDB, SongUpdate, VenueInDB, VenueCreate, VenueUpdate, JamInDBWithVenue
@@ -1032,6 +1033,13 @@ async def vote_for_song_simple(
             await db.delete(existing_vote)
             await db.commit()
             
+            # Emit vote removed event
+            await event_handler.emit(
+                EventTypes.VOTE_REMOVED,
+                EventDataBuilder.vote_event(song_id, jam_id, attendee_id),
+                source="vote_api"
+            )
+            
             # Broadcast vote update via WebSocket
             from api.endpoints.websocket import connection_manager
             print(f"🔴 Broadcasting vote removal for song {song_id} in jam {jam_id}")
@@ -1052,6 +1060,13 @@ async def vote_for_song_simple(
             )
             db.add(vote)
             await db.commit()
+            
+            # Emit vote added event
+            await event_handler.emit(
+                EventTypes.VOTE_ADDED,
+                EventDataBuilder.vote_event(song_id, jam_id, attendee_id),
+                source="vote_api"
+            )
             
             # Broadcast vote update via WebSocket
             from api.endpoints.websocket import connection_manager

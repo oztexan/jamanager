@@ -62,8 +62,14 @@ from core.feature_flag_api_simple import router as feature_flag_router
 from services.chord_sheet_api import router as chord_sheet_router
 from services.connection_manager import ConnectionManager
 
+# Sprint 3 Architecture Improvements
+from core.config import get_config, initialize_connection_pool
+from core.connection_pool import initialize_connection_pool as init_pool
+from core.background_jobs import start_background_jobs, shutdown_background_jobs
+from core.event_system import event_handler, EventTypes
+
 # Import endpoint routers
-from api.endpoints import static, songs, venues, jams, websocket, auth, jam_chord_sheets
+from api.endpoints import static, songs, venues, jams, websocket, auth, jam_chord_sheets, system
 
 # Create FastAPI app
 app = FastAPI(title="Jamanager API", version="1.0.0")
@@ -130,6 +136,7 @@ app.include_router(jams.router)
 app.include_router(jam_chord_sheets.router, prefix="/api/jams", tags=["jam-chord-sheets"])
 app.include_router(websocket.router)
 app.include_router(auth.router)
+app.include_router(system.router)  # Sprint 3: System management endpoints
 
 # Connection manager for WebSocket connections
 connection_manager = ConnectionManager()
@@ -164,10 +171,65 @@ async def startup_event():
     """
     try:
         logger.info("Starting Jamanager application...")
+        
+        # Sprint 3: Initialize configuration and connection pool
+        logger.info("Initializing Sprint 3 architecture components...")
+        init_pool()
+        logger.info("Connection pool initialized")
+        
+        # Initialize database
         logger.info("Initializing database...")
         await init_database()
         logger.info("Database initialization completed successfully")
+        
+        # Sprint 3: Start background jobs
+        logger.info("Starting background job system...")
+        await start_background_jobs()
+        logger.info("Background job system started")
+        
+        # Sprint 3: Emit system startup event
+        await event_handler.emit(
+            EventTypes.SYSTEM_STARTUP,
+            {"message": "Jamanager application started successfully"},
+            source="main_app"
+        )
+        
         logger.info("Jamanager application started successfully")
     except Exception as e:
         logger.error(f"Failed to start Jamanager application: {e}")
         raise
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """
+    Cleanup application on shutdown.
+    
+    This function is called when the FastAPI application shuts down and handles:
+    - Background job system shutdown
+    - Connection pool cleanup
+    - Event system cleanup
+    """
+    try:
+        logger.info("Shutting down Jamanager application...")
+        
+        # Sprint 3: Emit system shutdown event
+        await event_handler.emit(
+            EventTypes.SYSTEM_SHUTDOWN,
+            {"message": "Jamanager application shutting down"},
+            source="main_app"
+        )
+        
+        # Sprint 3: Shutdown background jobs
+        logger.info("Shutting down background job system...")
+        await shutdown_background_jobs()
+        logger.info("Background job system shutdown completed")
+        
+        # Sprint 3: Cleanup connection pool
+        logger.info("Cleaning up connection pool...")
+        from core.connection_pool import cleanup_connection_pool
+        await cleanup_connection_pool()
+        logger.info("Connection pool cleanup completed")
+        
+        logger.info("Jamanager application shutdown completed")
+    except Exception as e:
+        logger.error(f"Error during application shutdown: {e}")
