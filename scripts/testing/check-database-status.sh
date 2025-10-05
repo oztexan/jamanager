@@ -5,13 +5,29 @@ echo "=== Database Status Check ==="
 echo ""
 
 # Check main project database
-MAIN_DB="/Users/chrisrobertson/dev/jamanager/jamanager.db"
+MAIN_DB="/Users/chrisrobertson/dev/jamanager/data/development/jamanager.db"
 echo "Main Project DB: $MAIN_DB"
 if [ -f "$MAIN_DB" ]; then
     echo "  Status: ✅ Exists"
     echo "  Size: $(stat -f%z "$MAIN_DB" 2>/dev/null || stat -c%s "$MAIN_DB" 2>/dev/null) bytes"
 else
     echo "  Status: ❌ Not found"
+fi
+
+echo ""
+
+# Check backup databases
+BACKUP_DB="/Users/chrisrobertson/dev/jamanager/data/backups/"
+echo "Backup Databases: $BACKUP_DB"
+if [ -d "$BACKUP_DB" ]; then
+    backup_count=$(find "$BACKUP_DB" -name "*.db" | wc -l)
+    echo "  Status: ✅ Directory exists"
+    echo "  Backup files: $backup_count"
+    if [ $backup_count -gt 0 ]; then
+        echo "  Latest backup: $(ls -t "$BACKUP_DB"*.db 2>/dev/null | head -1 | xargs basename 2>/dev/null || echo "None")"
+    fi
+else
+    echo "  Status: ❌ Directory not found"
 fi
 
 echo ""
@@ -65,17 +81,20 @@ if curl -s http://localhost:8000 >/dev/null 2>&1; then
     else
         echo "  Jams API: ❌ Not responding"
     fi
+    
+    if curl -s http://localhost:8000/api/dev-info | grep -q "git_branch"; then
+        echo "  Dev Info API: ✅ Working"
+    else
+        echo "  Dev Info API: ❌ Not responding"
+    fi
 else
     echo "Application Status: ❌ Not running"
 fi
 
 echo ""
 echo "=== Recommendations ==="
-echo "1. Use the main project database as the master source"
+echo "1. Use the main project database as the master source: data/development/jamanager.db"
 echo "2. Copy master database to workspaces as needed"
 echo "3. Keep merge workspace database in sync with master"
 echo "4. Use database-manager.sh for proper database management"
-
-
-
-
+echo "5. Regular backups are stored in: data/backups/"

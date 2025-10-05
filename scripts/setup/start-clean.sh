@@ -23,11 +23,11 @@ eval "$(pyenv init -)"
 cd /Users/chrisrobertson/dev/jamanager
 
 # Check if database exists
-if [ -f "jamanager.db" ]; then
+if [ -f "data/development/jamanager.db" ]; then
     echo "✅ Database found"
 else
     echo "Creating database..."
-    python init_dev_database.py
+    python sprints/sprint-1/scripts/init_dev_database.py
 fi
 
 # Start the application
@@ -37,7 +37,3 @@ echo ""
 
 # Start uvicorn
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-
-
-

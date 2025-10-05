@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/config.sh"
 
 # Database management functions
-MASTER_DB="$MAIN_REPO/jamanager.db"
+MASTER_DB="$MAIN_REPO/data/development/jamanager.db"
 SHARED_DB="$WORKZONE_DIR/shared-database.db"
 
 # Create shared database directory
@@ -86,7 +86,7 @@ init_shared_database() {
     sync_master_to_shared
     
     # Initialize with dev data if needed
-    if [ -f "$MAIN_REPO/init_dev_database.py" ]; then
+    if [ -f "$MAIN_REPO/sprints/sprint-1/scripts/init_dev_database.py" ]; then
         log_info "Running database initialization..."
         cd "$MAIN_REPO"
         source "$SCRIPT_DIR/config.sh"
@@ -94,7 +94,7 @@ init_shared_database() {
         
         # Update database path for initialization
         export DATABASE_URL="sqlite+aiosqlite:///$SHARED_DB"
-        python init_dev_database.py
+        python sprints/sprint-1/scripts/init_dev_database.py
         
         log_success "Shared database initialized with development data"
     fi
