@@ -15,6 +15,7 @@ class JamSongs {
         this.performanceLimit = 3; // Default limit
         this.jamCore = null;
         this.attendee = null;
+        this.votingInProgress = new Set(); // Track songs currently being voted on
         
         // Sorting and filtering state
         this.sortCriteria = 'performance'; // 'name', 'artist', 'votes', 'performance'
@@ -434,36 +435,28 @@ class JamSongs {
      * Handle vote action
      */
     async handleVote(songId) {
-        // Toggle visual state immediately
-        const heartElement = document.querySelector(`[data-song-id="${songId}"][data-action="vote"]`);
-        if (heartElement) {
-            heartElement.classList.toggle('voted');
+        // Prevent rapid successive clicks on the same song
+        if (this.votingInProgress.has(songId)) {
+            return;
         }
-
-        // Update local vote state
-        this.userVotes[songId] = !this.userVotes[songId];
-
+        
+        // Get heart element for later use
+        const heartElement = document.querySelector(`[data-song-id="${songId}"][data-action="vote"]`);
+        
         // Get current attendee from the attendee module
         const currentAttendee = this.attendee ? this.attendee.getCurrentAttendee() : null;
         if (!currentAttendee || !currentAttendee.id) {
             this.showMessage('Please register to vote.', 'info');
-            // Revert visual state and local state
-            if (heartElement) {
-                heartElement.classList.toggle('voted');
-            }
-            this.userVotes[songId] = !this.userVotes[songId];
             return;
         }
 
         if (!this.jamCore || !this.jamCore.getJamId()) {
             this.showMessage('Jam not loaded yet. Please try again.', 'error');
-            // Revert visual state and local state
-            if (heartElement) {
-                heartElement.classList.toggle('voted');
-            }
-            this.userVotes[songId] = !this.userVotes[songId];
             return;
         }
+
+        // Mark this song as having a vote in progress
+        this.votingInProgress.add(songId);
 
         try {
             const response = await fetch(`/api/jams/${this.jamCore.getJamId()}/vote`, {
@@ -481,22 +474,33 @@ class JamSongs {
             }
 
             const result = await response.json();
-            this.showMessage(result.message, 'success');
+            // Vote notification removed - heart visual state is sufficient feedback
             
-            // Reload jam data to update votes
-            if (this.jamCore) {
-                await this.jamCore.loadJamData();
+            // Use the API response to determine the new vote state
+            const newVoteState = result.voted; // true if voted, false if not voted
+            
+            // Update local vote state
+            this.userVotes[songId] = newVoteState;
+            
+            // Update heart visual state based on API response
+            if (heartElement) {
+                if (newVoteState) {
+                    heartElement.classList.add('voted');
+                } else {
+                    heartElement.classList.remove('voted');
+                }
             }
+            
+            // Update vote counts without reloading the entire jam data
+            // This preserves the local vote state while updating the counts
+            this.updateVoteCounts();
             
         } catch (error) {
             console.error('Error voting:', error);
             this.showMessage(error.message || 'An error occurred while voting.', 'error');
-            
-            // Revert visual state and local state on error
-            if (heartElement) {
-                heartElement.classList.toggle('voted');
-            }
-            this.userVotes[songId] = !this.userVotes[songId];
+        } finally {
+            // Remove from voting in progress set
+            this.votingInProgress.delete(songId);
         }
     }
 
@@ -505,6 +509,38 @@ class JamSongs {
      */
     isVoted(songId) {
         return this.userVotes[songId] || false;
+    }
+
+    /**
+     * Update vote counts without reloading entire jam data
+     * This preserves local vote state while updating counts
+     */
+    async updateVoteCounts() {
+        if (!this.jamCore || !this.jamCore.getJamId()) {
+            return;
+        }
+
+        try {
+            // Get fresh jam data to update vote counts
+            const response = await fetch(`/api/jams/by-slug/${this.jamCore.jamSlug}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const jamData = await response.json();
+            
+            // Update vote counts for each song without affecting local vote state
+            jamData.songs.forEach(jamSong => {
+                const songId = jamSong.song.id;
+                const voteCountElement = document.getElementById(`voteCount-${songId}`);
+                if (voteCountElement) {
+                    voteCountElement.textContent = jamSong.song.vote_count || 0;
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error updating vote counts:', error);
+        }
     }
 
     /**
