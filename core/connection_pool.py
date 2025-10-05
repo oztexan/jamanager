@@ -168,14 +168,25 @@ class ConnectionPoolManager:
         pool = self._engine.pool
         stats = self._connection_stats.copy()
         
-        # Add pool-specific stats
-        stats.update({
-            "pool_size": pool.size(),
-            "checked_in_connections": pool.checkedin(),
-            "checked_out_connections": pool.checkedout(),
-            "overflow_connections": pool.overflow(),
-            "invalid_connections": pool.invalid()
-        })
+        # Add pool-specific stats (handle different pool types)
+        try:
+            stats.update({
+                "pool_size": pool.size() if hasattr(pool, 'size') else 1,
+                "checked_in_connections": pool.checkedin() if hasattr(pool, 'checkedin') else 0,
+                "checked_out_connections": pool.checkedout() if hasattr(pool, 'checkedout') else 0,
+                "overflow_connections": pool.overflow() if hasattr(pool, 'overflow') else 0,
+                "invalid_connections": pool.invalid() if hasattr(pool, 'invalid') else 0
+            })
+        except Exception as e:
+            # Fallback for pools that don't support these methods
+            stats.update({
+                "pool_size": 1,
+                "checked_in_connections": 0,
+                "checked_out_connections": 0,
+                "overflow_connections": 0,
+                "invalid_connections": 0,
+                "pool_type": type(pool).__name__
+            })
         
         return stats
     

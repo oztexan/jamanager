@@ -229,11 +229,11 @@ def validate_config() -> bool:
         errors.append("Database URL is required")
     
     if not config.security.secret_key or config.security.secret_key == "dev-secret-key-change-in-production":
-        if config.is_production():
+        if config.environment.lower() == "production":
             errors.append("Secret key must be set in production")
     
     if not config.security.access_code or config.security.access_code == "dev-access-code":
-        if config.is_production():
+        if config.environment.lower() == "production":
             errors.append("Access code must be set in production")
     
     # Validate numeric fields

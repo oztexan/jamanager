@@ -5,6 +5,7 @@ Provides endpoints for monitoring and managing system components.
 
 import logging
 from typing import Dict, Any
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 
@@ -12,7 +13,7 @@ from core.config import get_config, config_manager
 from core.connection_pool import get_connection_stats, health_check as db_health_check
 from core.background_jobs import get_job_stats, get_default_queue
 from core.event_system import event_handler, EventTypes
-from core.cache import _cache
+from core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +28,9 @@ async def system_health() -> Dict[str, Any]:
         
         # Check cache health
         cache_health = {
-            "status": "healthy" if _cache else "error",
-            "cache_size": len(_cache.cache) if _cache else 0,
-            "max_size": _cache.max_size if _cache else 0
+            "status": "healthy" if cache else "error",
+            "cache_size": cache.size() if cache else 0,
+            "default_ttl": cache.default_ttl if cache else 0
         }
         
         # Check job queue health
@@ -56,7 +57,7 @@ async def system_health() -> Dict[str, Any]:
         
         return {
             "status": overall_status,
-            "timestamp": event_handler.get_event_history(limit=1)[0].timestamp.isoformat() if event_handler.get_event_history(limit=1) else None,
+            "timestamp": datetime.now().isoformat(),
             "components": {
                 "database": db_health,
                 "cache": cache_health,
@@ -255,15 +256,13 @@ async def cancel_job(job_id: str, queue_name: str = "default") -> Dict[str, Any]
 async def get_cache_info() -> Dict[str, Any]:
     """Get cache information and statistics."""
     try:
-        if not _cache:
+        if not cache:
             return {"status": "disabled", "message": "Cache is not enabled"}
         
         return {
             "status": "enabled",
-            "cache_size": len(_cache.cache),
-            "max_size": _cache.max_size,
-            "ttl_map_size": len(_cache.ttl_map),
-            "lru_size": len(_cache.lru)
+            "cache_size": cache.size(),
+            "default_ttl": cache.default_ttl
         }
         
     except Exception as e:
@@ -280,8 +279,8 @@ async def clear_cache() -> Dict[str, Any]:
         if config.environment.lower() != "development":
             raise HTTPException(status_code=403, detail="Cache clearing only allowed in development")
         
-        if _cache:
-            _cache.clear()
+        if cache:
+            cache.clear()
             
             # Emit cache cleared event
             await event_handler.emit(

@@ -63,8 +63,8 @@ from services.chord_sheet_api import router as chord_sheet_router
 from services.connection_manager import ConnectionManager
 
 # Sprint 3 Architecture Improvements
-from core.config import get_config, initialize_connection_pool
-from core.connection_pool import initialize_connection_pool as init_pool
+from core.config import get_config
+from core.connection_pool import initialize_connection_pool
 from core.background_jobs import start_background_jobs, shutdown_background_jobs
 from core.event_system import event_handler, EventTypes
 
@@ -174,7 +174,7 @@ async def startup_event():
         
         # Sprint 3: Initialize configuration and connection pool
         logger.info("Initializing Sprint 3 architecture components...")
-        init_pool()
+        initialize_connection_pool()
         logger.info("Connection pool initialized")
         
         # Initialize database
