@@ -22,14 +22,13 @@ class DevIndicator {
 
     createIndicator() {
         this.indicator = document.createElement('div');
-        this.indicator.className = 'dev-indicator sprint-1-version';
+        this.indicator.className = 'dev-indicator';
         this.indicator.innerHTML = `
-            🚀 SPRINT 1 - DEVELOPER EXPERIENCE & DOCUMENTATION<br>
-            Port 3000 | Documentation ✅ | Dev Tools ✅<br>
+            <span class="sprint-info">Loading sprint info...</span><br>
             <span class="git-info">Loading git info...</span>
         `;
         
-        // Fetch git information
+        // Fetch git information and update sprint info
         this.loadGitInfo();
     }
 
@@ -80,6 +79,9 @@ class DevIndicator {
             .dev-indicator.sprint-6-version {
                 background: #8e44ad;
             }
+            .dev-indicator.sprint-dev-version {
+                background: #34495e;
+            }
             .dev-indicator .git-info {
                 font-size: 10px;
                 opacity: 0.9;
@@ -127,23 +129,30 @@ class DevIndicator {
         }
     }
 
-    // Method to load git information
+    // Method to load git information and update sprint info
     async loadGitInfo() {
         try {
             const response = await fetch('/api/dev-info');
             if (response.ok) {
                 const data = await response.json();
+                
+                // Update git info
                 const gitInfoElement = this.indicator.querySelector('.git-info');
                 if (gitInfoElement) {
                     gitInfoElement.innerHTML = `
                         🌿 ${data.git_branch} | ${data.git_commit}
                     `;
                 }
+                
+                // Determine sprint info based on branch
+                this.updateSprintFromBranch(data.git_branch);
+                
             } else {
                 const gitInfoElement = this.indicator.querySelector('.git-info');
                 if (gitInfoElement) {
                     gitInfoElement.innerHTML = '🌿 git info unavailable';
                 }
+                this.updateSprintFromBranch('unknown');
             }
         } catch (error) {
             console.error('Error loading git info:', error);
@@ -151,7 +160,37 @@ class DevIndicator {
             if (gitInfoElement) {
                 gitInfoElement.innerHTML = '🌿 git info unavailable';
             }
+            this.updateSprintFromBranch('unknown');
         }
+    }
+    
+    // Method to update sprint info based on git branch
+    updateSprintFromBranch(branch) {
+        const sprintInfoElement = this.indicator.querySelector('.sprint-info');
+        if (!sprintInfoElement) return;
+        
+        let sprintInfo = '';
+        let className = 'dev-indicator';
+        
+        if (branch.includes('sprint-1') || branch === 'main') {
+            sprintInfo = '🚀 SPRINT 1 - DEVELOPER EXPERIENCE & DOCUMENTATION<br>Port 3000 | Documentation ✅ | Dev Tools ✅';
+            className += ' sprint-1-version';
+        } else if (branch.includes('sprint-2')) {
+            sprintInfo = '🚀 SPRINT 2 - CODE QUALITY & TESTING<br>Port 3000 | Type Hints ✅ | Error Handling ✅';
+            className += ' sprint-2-version';
+        } else if (branch.includes('sprint-3')) {
+            sprintInfo = '🚀 SPRINT 3 - PERFORMANCE & ARCHITECTURE<br>Port 3000 | Performance ✅ | Architecture ✅';
+            className += ' sprint-3-version';
+        } else if (branch.includes('sprint-4')) {
+            sprintInfo = '🚀 SPRINT 4 - ADVANCED FEATURES<br>Port 3000 | Advanced Features ✅';
+            className += ' sprint-4-version';
+        } else {
+            sprintInfo = `🚀 DEVELOPMENT - ${branch.toUpperCase()}<br>Port 3000 | Development Mode`;
+            className += ' sprint-dev-version';
+        }
+        
+        this.indicator.className = className;
+        sprintInfoElement.innerHTML = sprintInfo;
     }
 }
 

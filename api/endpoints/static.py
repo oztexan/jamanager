@@ -4,6 +4,7 @@ Static file serving endpoints for the Jamanager application.
 import os
 import logging
 import subprocess
+from typing import Dict, Any
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
@@ -12,8 +13,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.get("/")
-async def read_index():
-    """Serve the main HTML file"""
+async def read_index() -> FileResponse:
+    """
+    Serve the main HTML file.
+    
+    Returns:
+        FileResponse: The index.html file
+    """
     # Use absolute path to static directory
     static_dir = os.path.join(os.path.dirname(__file__), "..", "..", "static")
     index_path = os.path.join(static_dir, "index.html")
@@ -102,8 +108,13 @@ async def favicon():
     return FileResponse(favicon_path)
 
 @router.get("/api/dev-info")
-async def get_dev_info():
-    """Get development environment information including git branch"""
+async def get_dev_info() -> Dict[str, Any]:
+    """
+    Get development environment information including git branch.
+    
+    Returns:
+        Dict[str, Any]: Dictionary containing git branch, commit, and environment info
+    """
     try:
         # Get git branch
         result = subprocess.run(

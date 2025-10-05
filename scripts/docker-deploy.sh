@@ -195,13 +195,12 @@ services:
     ports:
       - "80:8000"
     environment:
-      - DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
+      - DATABASE_URL=sqlite+aiosqlite:///./data/development/jamanager.db
       - JAM_MANAGER_ACCESS_CODE=${JAM_MANAGER_ACCESS_CODE}
       - PORT=8000
     volumes:
       - ./static/uploads:/app/static/uploads
       - ./data:/app/data
-      - ./jamanager.db:/app/jamanager.db
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]

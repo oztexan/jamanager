@@ -160,7 +160,7 @@ User=$USER
 Group=$USER
 WorkingDirectory=$APP_DIR
 Environment=PATH=$APP_DIR/venv/bin
-Environment=DATABASE_URL=sqlite+aiosqlite:///./jamanager.db
+Environment=DATABASE_URL=sqlite+aiosqlite:///./data/development/jamanager.db
 Environment=JAM_MANAGER_ACCESS_CODE=\${JAM_MANAGER_ACCESS_CODE:-jam2024}
 ExecStart=$APP_DIR/venv/bin/uvicorn jamanager.main:app --host 0.0.0.0 --port 8000
 Restart=always
