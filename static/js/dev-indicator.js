@@ -25,7 +25,8 @@ class DevIndicator {
         this.indicator.className = 'dev-indicator';
         this.indicator.innerHTML = `
             <span class="sprint-info">Loading sprint info...</span><br>
-            <span class="git-info">Loading git info...</span>
+            <span class="git-info">Loading git info...</span><br>
+            <span class="db-info">Loading database info...</span>
         `;
         
         // Fetch git information and update sprint info
@@ -82,7 +83,8 @@ class DevIndicator {
             .dev-indicator.sprint-dev-version {
                 background: #34495e;
             }
-            .dev-indicator .git-info {
+            .dev-indicator .git-info,
+            .dev-indicator .db-info {
                 font-size: 10px;
                 opacity: 0.9;
                 font-weight: normal;
@@ -108,7 +110,8 @@ class DevIndicator {
         this.indicator.innerHTML = `
             🚀 SPRINT ${sprintNumber} - ${sprintName.toUpperCase()}<br>
             Port 3000 | ${features}<br>
-            <span class="git-info">Loading git info...</span>
+            <span class="git-info">Loading git info...</span><br>
+            <span class="db-info">Loading database info...</span>
         `;
         
         // Reload git information
@@ -144,6 +147,16 @@ class DevIndicator {
                     `;
                 }
                 
+                // Update database info
+                const dbInfoElement = this.indicator.querySelector('.db-info');
+                if (dbInfoElement) {
+                    const dbIcon = data.database_type === 'PostgreSQL' ? '🐘' : 
+                                  data.database_type === 'SQLite' ? '🗃️' : '❓';
+                    dbInfoElement.innerHTML = `
+                        ${dbIcon} ${data.database_type}
+                    `;
+                }
+                
                 // Determine sprint info based on branch
                 this.updateSprintFromBranch(data.git_branch);
                 
@@ -152,6 +165,10 @@ class DevIndicator {
                 if (gitInfoElement) {
                     gitInfoElement.innerHTML = '🌿 git info unavailable';
                 }
+                const dbInfoElement = this.indicator.querySelector('.db-info');
+                if (dbInfoElement) {
+                    dbInfoElement.innerHTML = '❓ database info unavailable';
+                }
                 this.updateSprintFromBranch('unknown');
             }
         } catch (error) {
@@ -159,6 +176,10 @@ class DevIndicator {
             const gitInfoElement = this.indicator.querySelector('.git-info');
             if (gitInfoElement) {
                 gitInfoElement.innerHTML = '🌿 git info unavailable';
+            }
+            const dbInfoElement = this.indicator.querySelector('.db-info');
+            if (dbInfoElement) {
+                dbInfoElement.innerHTML = '❓ database info unavailable';
             }
             this.updateSprintFromBranch('unknown');
         }

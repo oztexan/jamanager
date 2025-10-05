@@ -134,15 +134,26 @@ async def get_dev_info() -> Dict[str, Any]:
         )
         git_commit = result.stdout.strip() if result.returncode == 0 else "unknown"
         
+        # Get database type from environment
+        database_url = os.getenv("DATABASE_URL", "")
+        if database_url.startswith("postgresql"):
+            database_type = "PostgreSQL"
+        elif database_url.startswith("sqlite"):
+            database_type = "SQLite"
+        else:
+            database_type = "Unknown"
+        
         return {
             "git_branch": git_branch,
             "git_commit": git_commit,
-            "environment": "development"
+            "environment": "development",
+            "database_type": database_type
         }
     except Exception as e:
         logger.error(f"Error getting git info: {e}")
         return {
             "git_branch": "unknown",
             "git_commit": "unknown", 
-            "environment": "development"
+            "environment": "development",
+            "database_type": "Unknown"
         }

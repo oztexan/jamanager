@@ -17,6 +17,12 @@ import logging
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+# Change to project root directory
+os.chdir(project_root)
+
+# Set environment variables for the migration
+os.environ.setdefault('DATABASE_URL', 'sqlite:///data/development/jamanager.db')
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
